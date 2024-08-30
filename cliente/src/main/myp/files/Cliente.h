@@ -8,11 +8,12 @@
 #include <unistd.h>
 
 class Cliente{
-  
+  bool mantenerConexion;
   int clientSocket;
   int conexion;
   int puerto;
   char buffer[512];
+  sockaddr_in serverAddress;
 
  public:
   Cliente();
@@ -21,6 +22,9 @@ class Cliente{
   void cerrarSocket();
 
  private:
+  void setDireccion();
+  void conecta();
+  void comunicar();
   int lanzaError(std::string, std::string, int);
 };
 
