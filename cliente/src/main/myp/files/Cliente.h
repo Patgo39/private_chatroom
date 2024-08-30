@@ -1,3 +1,6 @@
+#ifndef CLIENTE_H
+#define CLIENTE_H
+
 #include <iostream>
 #include <string>
 #include <netinet/in.h>
@@ -12,12 +15,13 @@ class Cliente{
   char buffer[512];
 
  public:
-  Cliente(int);
+  Cliente();
   ~Cliente();
-  void solicitarConexion();
+  void inicia();
   void cerrarSocket();
-  void enviaDatos();
 
  private:
   int lanzaError(std::string, std::string, int);
 };
+
+#endif

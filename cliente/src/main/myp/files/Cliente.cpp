@@ -1,17 +1,18 @@
 #include "Cliente.h"
 
-Cliente::Cliente(int _puerto){
-  puerto = _puerto;
+Cliente::Cliente(){
+  puerto = _1234;
   buffer[0] = 0;
-  
-  clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-  int valorLanzaError;
-  
-  valorLanzaError = lanzaError("Error estableciendo la conexión.", "Conexión del cliente establecida.", clientSocket);
-  if(valorLanzaError == -1) exit(1);
 }
 
-void Cliente::solicitarConexion(){
+void Cliente::inicia(){
+  
+  clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+  
+  int  valorLanzaError = lanzaError("Error estableciendo la conexión.", "Conexión del cliente establecida.", clientSocket);
+  
+  if(valorLanzaError < 0) exit(1);
+
   
   sockaddr_in serverAddress;
   serverAddress.sin_family = AF_INET;
@@ -33,6 +34,6 @@ int Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
   return 0;
 }
 
-void Cliente::enviaDatos(){
-  
+void Cliente::cerrarSocket(){
+  close(clientSocket);
 }
