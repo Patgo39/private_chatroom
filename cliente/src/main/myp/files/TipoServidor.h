@@ -1,11 +1,14 @@
-/*La enumeración TipoServidor contempla todas las respuestas a las peticiones de
- *los usuarios. El valor asociado a cada tipo es un múltipo de 5.
- *Por cada petición de parte del usuario cuya enumeración es múltipo de 10, su
- *respuesta será dicho valor más 5.
+/* La enumeración TipoServidor contempla todas las respuestas a las peticiones
+ * de los usuarios.
  */
 #ifndef TIPOSERVIDOR_H
 #define TIPOSERVIDOR_H
 
+
+/* El valor asociado a cada tipo es un múltipo de 5.
+ * Por cada petición de parte del usuario cuya enumeración es múltipo de 10, su
+ * respuesta será dicho valor, más 5.
+ */
 enum class TipoServidor{
   //El cliente recibe una respuesta del servidor.
   RESPONSE = -5,

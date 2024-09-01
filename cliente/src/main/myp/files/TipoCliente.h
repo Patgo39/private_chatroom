@@ -1,11 +1,13 @@
-/*Tipo Cliente es una enumeración que contempla todas las solicitudes que un
- *usuario puede hacer al servidor. Cada tipo está asociado a un número negativo
- *con el fin de evitar posible conflictos con el código.
- *Los números asociados son multipos de 10.
+/* TipoCliente es una enumeración que contempla todas las solicitudes que un
+ * usuario puede hacer al servidor.
  */
 #ifndef TIPOCLIENTE_H
 #define TIPOCLIENTE_H
 
+/* Cada tipo está asociado a un número negativo con el fin de evitar posibles
+ * conflictos con el código.
+ * Los números asociados son multipos de 10.
+ */
 enum class TipoCliente{
   //Se identifica el ussuario.
   IDENTIFY = -10,
