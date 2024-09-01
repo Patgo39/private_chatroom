@@ -1,0 +1,17 @@
+#ifndef TYPE_H
+#define TYPE_H
+
+#include <string>
+
+enum class Tipos{
+  IDENTIFY,
+    RESPONSE,
+    NEW_USER,
+    STATUS,
+    USERS,
+    USER_LIST,
+    NEW_STATUS,
+    
+};
+
+#endif 
