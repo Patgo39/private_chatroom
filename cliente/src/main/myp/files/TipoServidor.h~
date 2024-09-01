@@ -1,0 +1,11 @@
+#ifndef TIPORECIBE_H
+#define TIPORECIBE_H
+
+enum class TipoRecibe{
+  //El cliente recibe una respuesta del servidor.
+  RESPONSE = -5,
+    //Un nuevo usuario se conectó.
+    NEW_USER = -15,
+};
+
+#endif
