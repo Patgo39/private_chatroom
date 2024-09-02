@@ -2,7 +2,8 @@ project('Proyecto1', 'cpp', version : '1.3.2',
 default_options : ['warning_level=2', 'cpp_std=c++14'])
 
 #Archivos .cpp y .h
-src_files = files('src/main/myp/files/Servidor.cpp')
+src_files = files('src/main/myp/files/Servidor.cpp',
+		  'src/main/myp/files/Usuario.cpp')
 inc_dir = include_directories('src/main/myp/files')
 
 #Biblioteca de json

@@ -46,14 +46,23 @@ void Cliente::conecta(){
 }
 
 void Cliente::comunicar(){
+  int cont = 0;
   while(mantenerConexion){
-    std::cout<<"Mensaje: ";
-    std::cin.getline(buffer, 100, '\n');
+    if(cont == 0){
+      std::cout<<"Introduzca su nombre: ";
+      std::cin >> std::ws;
+      std::cin.getline(buffer, 512, '\n');
+    }else{
+      std::cout<<"Mensaje: ";
+      std::cin.getline(buffer, 512, '\n');
+    }
 
     send(clientSocket, &buffer, sizeOfBuffer, 0);
     std::string st = std::string(buffer).substr(0, tamBuffer);
     if(st == "EXIT")
       mantenerConexion = false;
+
+    if(cont < 1) cont++;
   }
 }
 

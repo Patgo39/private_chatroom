@@ -6,6 +6,7 @@ Servidor::Servidor(){
   buffer[0] = 0;
   tamBuffer = std::end(buffer)-std::begin(buffer);
   sizeOfBuffer = sizeof(buffer);
+  aceptaConexiones = true;
 }
 
 void Servidor::inicia(){
@@ -47,7 +48,7 @@ void Servidor::escucha(){
 }
 
 void Servidor::aceptaClientes(){
-  while(true){
+  while(aceptaConexiones){
     sockaddr_in clientAddr;
     socklen_t clientAddrLen= sizeof(clientAddr);
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
@@ -64,22 +65,45 @@ void Servidor::aceptaClientes(){
 }
 
 void Servidor::manejaCliente(int clientSocket, bool hayConexion){
-  while(hayConexion){
+  Usuario us;
+  int cont = 0;
+  do{
+    mtx.lock();
     recv(clientSocket, buffer, sizeof(buffer), 0);
-
-    std::string st = std::string(buffer).substr(0,100);
+    if(cont == 0){
+      mtx.lock();
+      std::string s = std::string(buffer).substr(0,100);
+      us = Usuario(s, clientSocket);
+      lista.push_back(us);
+      std::cout<<"Bienvenido "<<s<<std::endl;
+      cont++;
+      
+    }else{
+      std::string st = std::string(buffer).substr(0,100);
       if(st == "EXIT"){
 	std::cout<<"Adios cliente :)"<<std::endl;
 	hayConexion = false;
+	desconectaUsuario(us);
       }
-      std::cout<<buffer<<std::endl;
+      std::cout<<us.getNombre()<<": "<<buffer<<std::endl;
       buffer[0] = 0;
+    }
+    mtx.unlock();
+  }while(hayConexion);
+}
 
+void Servidor::desconectaUsuario(Usuario us){
+  int pos = getUsuario(us.getNombre());
+  
+  lista.erase(lista.begin() + pos);
+  if(lista.size() == 0){
+    aceptaConexiones = false;
   }
 }
 
 void Servidor::desconecta(){
   close(serverSocket);
+  std::cout<<"\nServidor desconectado"<<std::endl;
 }
 
 int Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
@@ -90,4 +114,15 @@ int Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
   
   std::cout<<mensaje2<<std::endl;
   return 0;
+}
+
+int Servidor::getUsuario(std::string nombre){
+  int cont = 0;
+  for(Usuario us: lista){
+    if(us.getNombre() == nombre){
+      return cont;
+    }
+    cont++;
+  }
+  return -1;
 }
