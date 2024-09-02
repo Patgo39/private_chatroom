@@ -15,12 +15,13 @@ void Cliente::inicia(){
   int  valorLanzaError = lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket);
   
   if(valorLanzaError < 0){
-    cerrarSocket();
+    desconecta();
     exit(1);
   } 
 
   setDireccion();
   conecta();
+  desconecta();
 }
 
 void Cliente::setDireccion(){
@@ -29,33 +30,19 @@ void Cliente::setDireccion(){
   serverAddress.sin_addr.s_addr = INADDR_ANY;
 }
 
-int Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
-  if(valor < 0){
-    std::cout<<mensaje1<<std::endl;
-    return -1;
-  }
-  
-  std::cout<<mensaje2<<std::endl;
-  return 0;
-}
-
 void Cliente::conecta(){
   conexion = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
   
   int err = lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion);
 
   if(err < 0){
-    cerrarSocket();
+    desconecta();
     exit(1);
   }
 
   mantenerConexion = true;
 
   comunicar();
-}
-
-void Cliente::cerrarSocket(){
-  close(clientSocket);
 }
 
 void Cliente::comunicar(){
@@ -68,6 +55,18 @@ void Cliente::comunicar(){
     if(st == "EXIT")
       mantenerConexion = false;
   }
+}
 
-  cerrarSocket();
+void Cliente::desconecta(){
+  close(clientSocket);
+}
+
+int Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
+  if(valor < 0){
+    std::cout<<mensaje1<<std::endl;
+    return -1;
+  }
+  
+  std::cout<<mensaje2<<std::endl;
+  return 0;
 }

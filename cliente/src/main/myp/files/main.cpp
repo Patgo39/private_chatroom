@@ -6,8 +6,10 @@
  */
 
 #include <iostream>
+#include "Cliente.h"
 
 int main(){
-  std::cout<<"Este es el main del cliente"<<std::endl;
+  Cliente cl;
+  cl.inicia();
   return 0;
 }

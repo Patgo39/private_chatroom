@@ -6,8 +6,10 @@
  */
 
 #include <iostream>
+#include "Servidor.h"
 
 int main(){
-  std::cout<<"Este es el main del servidor"<<std::endl;
+  Servidor sv;
+  sv.inicia();
   return 0;
 }

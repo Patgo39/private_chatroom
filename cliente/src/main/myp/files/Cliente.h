@@ -19,14 +19,14 @@ class Cliente{
 
  public:
   Cliente();
-  ~Cliente();
+  ~Cliente() = default;
   void inicia();
  private:
   void setDireccion();
   void conecta();
   void comunicar();
+  void desconecta();
   int lanzaError(std::string, std::string, int);
-  void cerrarSocket();
 };
 
 #endif
