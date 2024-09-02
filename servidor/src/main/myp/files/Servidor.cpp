@@ -42,21 +42,25 @@ void Servidor::vincula(){
 
 void Servidor::escucha(){
   listen(serverSocket, 10);
-  aceptaClientes();
+  std::thread tAcepta(&Servidor::aceptaClientes, this);
+  tAcepta.join();
 }
 
 void Servidor::aceptaClientes(){
-  sockaddr_in clientAddr;
-  socklen_t clientAddrLen= sizeof(clientAddr);
-  int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
-
-  int valorLanzaError = lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket);
-
-  if(valorLanzaError < 0){
-    desconecta();
-    exit(1);
+  while(true){
+    sockaddr_in clientAddr;
+    socklen_t clientAddrLen= sizeof(clientAddr);
+    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+    
+    int valorLanzaError = lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket);
+    
+    if(valorLanzaError < 0){
+      desconecta();
+      exit(1);
+    }
+    std::thread tclient(&Servidor::manejaCliente, this, clientSocket, true);
+    tclient.detach();
   }
-  manejaCliente(clientSocket, true);
 }
 
 void Servidor::manejaCliente(int clientSocket, bool hayConexion){
