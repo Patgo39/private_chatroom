@@ -14,6 +14,7 @@ class Cliente{
   int clientSocket;
   int conexion;
   int puerto;
+  
   sockaddr_in serverAddress;
 
  public:

@@ -40,7 +40,7 @@ void Cliente::conecta(){
   t1.join();
   t2.join();
 
-  desconecta();
+  //desconecta();
 }
 
 void Cliente::mandaMensaje(){
@@ -51,21 +51,24 @@ void Cliente::mandaMensaje(){
     std::cout<<"Mensaje: ";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
-
+    
     send(clientSocket, &buffer, sizeof(buffer), 0);
     std::string st = std::string(buffer).substr(0, 512);
     if(st == "EXIT"){
       desconecta();
       exit(1);
     }
+    buffer[0] = 0;
   }
 }
 
 void Cliente::recibeMensaje(){
-  char buff[512] = {};
+  char buff[512];
+  
   while(true){
+    buff[0] = 0;
     recv(clientSocket, buff, sizeof(buff), 0);
-    std::cout<<buff<<std::endl;
+    std::cout<<"\n"<<buff<<std::endl;
   }
 }
 

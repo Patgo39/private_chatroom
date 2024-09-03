@@ -41,6 +41,8 @@ void Servidor::conectaClientes(){
     std::thread tclient(&Servidor::manejaCliente, this, clientSocket);
     tclient.detach();
   }
+
+  desconecta();
 }
 
 void Servidor::manejaCliente(int clientSocket){
@@ -55,13 +57,11 @@ void Servidor::manejaCliente(int clientSocket){
     if(cont == 0){
       us = Usuario(st, clientSocket);
       mapa[clientSocket] = us;
+      std::cout<<"Long mapa: "<<mapa.size()<<std::endl;
       cont++;
     }
 
-    mtx.lock();
-    std::cout<<us.getNombre()<<": "<<st<<std::endl;
     mandaMensaje(us, buffer);
-    mtx.unlock();
     
     if(st == "EXIT"){
       mtx.lock();
@@ -69,8 +69,8 @@ void Servidor::manejaCliente(int clientSocket){
       desconectaUsuario(us.getSocket());
       mtx.unlock();
     }
-    
     buffer[0] = 0;
+    
   }
 }
 
@@ -100,9 +100,16 @@ void Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor,
 
 void Servidor::mandaMensaje(Usuario us, char buffer[]){
   mtx.lock();
+  
+  std::string cadena = us.getNombre() + ": ";
+  std::string st = std::string(buffer).substr(0, 512);
+
+  cadena += st;
+  
+  std::cout<< cadena <<std::endl;
   for(auto elemento:mapa){
     if(elemento.first != us.getSocket()){
-      send(elemento.first, &buffer, 512, 0);
+      send(elemento.first, cadena.c_str(), cadena.length(), 0);
     }
   }
   mtx.unlock();
