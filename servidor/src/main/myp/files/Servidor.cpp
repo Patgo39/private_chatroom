@@ -1,104 +1,84 @@
 #include "Servidor.h"
 
 Servidor::Servidor(){
-  std::cout<<"Escriba el núemro del puerto: ";
+  std::cout<<"Escriba el número del puerto: ";
   std::cin>>puerto;
-  buffer[0] = 0;
-  tamBuffer = std::end(buffer)-std::begin(buffer);
-  sizeOfBuffer = sizeof(buffer);
 }
 
 void Servidor::inicia(){
   serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-  int valorLanzaError = lanzaError("\nError estableciendo la conexión.", "\nConexión del servidor establecida.", serverSocket);
-
-  if(valorLanzaError < 0){
-    desconecta();
-    exit(1);
-  }
+  lanzaError("\nError estableciendo la conexión.", "\nConexión del servidor establecida.", serverSocket, true);
   
-  setDireccion();
   vincula();
-  escucha();
+  conectaClientes();
   desconecta();
 }
 
-void Servidor::setDireccion(){
+void Servidor::vincula(){
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(puerto);
   serverAddress.sin_addr.s_addr = INADDR_ANY;
-}
-
-void Servidor::vincula(){
+  
   conexion = bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-  int valorLanzaError = lanzaError("Error al vincular el socket.", "Vinculación del servidor establecida.", conexion);
-
-  if(valorLanzaError < 0){
-    desconecta();
-    exit(1);
-  }
+  
+  lanzaError("Error al vincular el socket.", "Vinculación del servidor establecida.", conexion, true);
 }
 
-void Servidor::escucha(){
+void Servidor::conectaClientes(){
   listen(serverSocket, 10);
-  std::thread tAcepta(&Servidor::aceptaClientes, this);
-  tAcepta.join();
-}
-
-void Servidor::aceptaClientes(){
+  
+  int clientSocket;
+  sockaddr_in clientAddr;
+  socklen_t clientAddrLen;
+  
   while(true){
-    std::cout<<"Longitud: "<<lista.size()<<std::endl;
-    sockaddr_in clientAddr;
-    socklen_t clientAddrLen= sizeof(clientAddr);
-    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+    clientAddrLen= sizeof(clientAddr);
+    clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
     
-    int valorLanzaError = lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket);
-    
-    if(valorLanzaError < 0){
-      desconecta();
-      exit(1);
-    }
-    //std::lock_guard<std::mutex> lock(mtx);
-    recv(clientSocket, buffer, sizeof(buffer), 0);
-    
-    mtx.lock();
-    std::string s = std::string(buffer).substr(0,100);
-    Usuario us(s, clientSocket);
-    lista.push_back(us);
-    mtx.unlock();
-    
-    std::cout<<"Bienvenido "<<s<<std::endl;
+    lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket, true);
       
-    std::thread tclient(&Servidor::manejaCliente, this, clientSocket, true, us);
+    std::thread tclient(&Servidor::manejaCliente, this, clientSocket);
     tclient.detach();
   }
 }
 
-void Servidor::manejaCliente(int clientSocket, bool hayConexion, Usuario us){
-  do{
-    //mtx.lock();
-    recv(clientSocket, buffer, sizeof(buffer), 0);
-    std::string st = std::string(buffer).substr(0,100);
+void Servidor::manejaCliente(int clientSocket){
+  char buffer[512];
+  int cont = 0;
+  Usuario us;
+  
+  while(recv(clientSocket, buffer, sizeof(buffer), 0) != 0){
+    
+    std::string st = std::string(buffer).substr(0, 512);
+
+    if(cont == 0){
+      us = Usuario(st, clientSocket);
+      mapa[clientSocket] = us;
+      cont++;
+    }
+
+    mtx.lock();
     std::cout<<us.getNombre()<<": "<<st<<std::endl;
-    mandaMensajeGeneral(us, st);
+    mandaMensaje(us, buffer);
+    mtx.unlock();
     
     if(st == "EXIT"){
+      mtx.lock();
       std::cout<<"Adios cliente :)"<<std::endl;
-      hayConexion = false;
-      //std::lock_guard<std::mutex> lock(mtx);
-      desconectaUsuario(us);
+      desconectaUsuario(us.getSocket());
+      mtx.unlock();
     }
     
     buffer[0] = 0;
-    //mtx.unlock();
-  }while(hayConexion);
+  }
 }
 
-void Servidor::desconectaUsuario(Usuario us){
-  int pos = getUsuario(us.getNombre());
-  
-  lista.erase(lista.begin() + pos);
+void Servidor::desconectaUsuario(int socket){
+  mapa.erase(socket);
+  if(mapa.size() == 0){
+    desconecta();
+  }
 }
 
 void Servidor::desconecta(){
@@ -106,34 +86,24 @@ void Servidor::desconecta(){
   std::cout<<"\nServidor desconectado"<<std::endl;
 }
 
-int Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
+void Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor, bool termina){
   if(valor < 0){
     std::cout<<mensaje1<<std::endl;
-    return -1;
+    if(termina){
+      desconecta();
+      exit(1);
+    }
   }
   
   std::cout<<mensaje2<<std::endl;
-  return 0;
 }
 
-int Servidor::getUsuario(std::string nombre){
-  int cont = 0;
-  for(Usuario us: lista){
-    if(us.getNombre() == nombre){
-      return cont;
-    }
-    cont++;
-  }
-  return -1;
-}
-
-void Servidor::mandaMensajeGeneral(Usuario us, std::string s){
-  if(lista.size() == 1)
-    return;
-  for(Usuario u:lista){
-    if(!u.esIgual(us)){
-      std::cout<<u.getNombre()<<std::endl;
-      send(u.getSocket(),s.c_str(), s.size(), 0);
+void Servidor::mandaMensaje(Usuario us, char buffer[]){
+  mtx.lock();
+  for(auto elemento:mapa){
+    if(elemento.first != us.getSocket()){
+      send(elemento.first, &buffer, 512, 0);
     }
   }
+  mtx.unlock();
 }

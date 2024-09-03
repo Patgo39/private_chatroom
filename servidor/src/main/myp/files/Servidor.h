@@ -11,16 +11,14 @@
 #include <mutex>
 #include <vector>
 #include "Usuario.h"
+#include <map>
 
 class Servidor{
   int puerto;
   int serverSocket;
   int conexion;
-  std::vector<Usuario> lista;
+  std::map<int, Usuario> mapa;
   sockaddr_in serverAddress;
-  char buffer[512];
-  int tamBuffer;
-  int sizeOfBuffer;
   std::mutex mtx;
 
  public:
@@ -28,16 +26,14 @@ class Servidor{
   ~Servidor() = default;
   void inicia();
  private:
-  void setDireccion();
   int getUsuario(std::string);
   void vincula();
-  void escucha();
-  void aceptaClientes();
-  void mandaMensajeGeneral(Usuario, std::string);
-  void manejaCliente(int, bool, Usuario);
-  void desconectaUsuario(Usuario);
+  void conectaClientes();
+  void mandaMensaje(Usuario, char[]);
+  void manejaCliente(int);
+  void desconectaUsuario(int);
   void desconecta();
-  int lanzaError(std::string, std::string, int);
+  void lanzaError(std::string, std::string, int, bool);
   
 };
 
