@@ -6,16 +6,14 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <limits>
+//#include <limits>
+#include <thread>
 
 class Cliente{
-  bool mantenerConexion;
+  std::string nombre;
   int clientSocket;
   int conexion;
   int puerto;
-  char buffer[512];
-  int tamBuffer;
-  int sizeOfBuffer;
   sockaddr_in serverAddress;
 
  public:
@@ -23,11 +21,11 @@ class Cliente{
   ~Cliente() = default;
   void inicia();
  private:
-  void setDireccion();
   void conecta();
-  void comunicar();
+  void recibeMensaje();
+  void mandaMensaje();
   void desconecta();
-  int lanzaError(std::string, std::string, int);
+  void lanzaError(std::string, std::string, int, bool);
 };
 
 #endif

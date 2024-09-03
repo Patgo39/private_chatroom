@@ -6,7 +6,6 @@ Servidor::Servidor(){
   buffer[0] = 0;
   tamBuffer = std::end(buffer)-std::begin(buffer);
   sizeOfBuffer = sizeof(buffer);
-  aceptaConexiones = true;
 }
 
 void Servidor::inicia(){
@@ -48,7 +47,8 @@ void Servidor::escucha(){
 }
 
 void Servidor::aceptaClientes(){
-  while(aceptaConexiones){
+  while(true){
+    std::cout<<"Longitud: "<<lista.size()<<std::endl;
     sockaddr_in clientAddr;
     socklen_t clientAddrLen= sizeof(clientAddr);
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
@@ -59,36 +59,39 @@ void Servidor::aceptaClientes(){
       desconecta();
       exit(1);
     }
-    std::thread tclient(&Servidor::manejaCliente, this, clientSocket, true);
+    //std::lock_guard<std::mutex> lock(mtx);
+    recv(clientSocket, buffer, sizeof(buffer), 0);
+    
+    mtx.lock();
+    std::string s = std::string(buffer).substr(0,100);
+    Usuario us(s, clientSocket);
+    lista.push_back(us);
+    mtx.unlock();
+    
+    std::cout<<"Bienvenido "<<s<<std::endl;
+      
+    std::thread tclient(&Servidor::manejaCliente, this, clientSocket, true, us);
     tclient.detach();
   }
 }
 
-void Servidor::manejaCliente(int clientSocket, bool hayConexion){
-  Usuario us;
-  int cont = 0;
+void Servidor::manejaCliente(int clientSocket, bool hayConexion, Usuario us){
   do{
-    mtx.lock();
+    //mtx.lock();
     recv(clientSocket, buffer, sizeof(buffer), 0);
-    if(cont == 0){
-      mtx.lock();
-      std::string s = std::string(buffer).substr(0,100);
-      us = Usuario(s, clientSocket);
-      lista.push_back(us);
-      std::cout<<"Bienvenido "<<s<<std::endl;
-      cont++;
-      
-    }else{
-      std::string st = std::string(buffer).substr(0,100);
-      if(st == "EXIT"){
-	std::cout<<"Adios cliente :)"<<std::endl;
-	hayConexion = false;
-	desconectaUsuario(us);
-      }
-      std::cout<<us.getNombre()<<": "<<buffer<<std::endl;
-      buffer[0] = 0;
+    std::string st = std::string(buffer).substr(0,100);
+    std::cout<<us.getNombre()<<": "<<st<<std::endl;
+    mandaMensajeGeneral(us, st);
+    
+    if(st == "EXIT"){
+      std::cout<<"Adios cliente :)"<<std::endl;
+      hayConexion = false;
+      //std::lock_guard<std::mutex> lock(mtx);
+      desconectaUsuario(us);
     }
-    mtx.unlock();
+    
+    buffer[0] = 0;
+    //mtx.unlock();
   }while(hayConexion);
 }
 
@@ -96,9 +99,6 @@ void Servidor::desconectaUsuario(Usuario us){
   int pos = getUsuario(us.getNombre());
   
   lista.erase(lista.begin() + pos);
-  if(lista.size() == 0){
-    aceptaConexiones = false;
-  }
 }
 
 void Servidor::desconecta(){
@@ -125,4 +125,15 @@ int Servidor::getUsuario(std::string nombre){
     cont++;
   }
   return -1;
+}
+
+void Servidor::mandaMensajeGeneral(Usuario us, std::string s){
+  if(lista.size() == 1)
+    return;
+  for(Usuario u:lista){
+    if(!u.esIgual(us)){
+      std::cout<<u.getNombre()<<std::endl;
+      send(u.getSocket(),s.c_str(), s.size(), 0);
+    }
+  }
 }

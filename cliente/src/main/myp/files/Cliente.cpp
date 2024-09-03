@@ -1,68 +1,71 @@
 #include "Cliente.h"
 
 Cliente::Cliente(){
-  std::cout<<"Escriba el núemro del puerto: ";
+  std::cout<<"Escriba el número del puerto: ";
   std::cin>>puerto;
-  buffer[0] = 0;
-  tamBuffer = std::end(buffer)-std::begin(buffer);
-  sizeOfBuffer = sizeof(buffer);
+  
+  std::cout<<"\nEscriba su nombre: ";
+  std::cin>>nombre;
+  if(nombre.length() > 8){
+    std::cout<<"El nombre no debe tener más de 8 caracteres."<<std::endl;
+    exit(1);
+  }
 }
 
 void Cliente::inicia(){
   //Se crea el socket.
   clientSocket = socket(AF_INET, SOCK_STREAM, 0);
   
-  int  valorLanzaError = lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket);
+  lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket, true);
   
-  if(valorLanzaError < 0){
-    desconecta();
-    exit(1);
-  } 
-
-  setDireccion();
   conecta();
   desconecta();
 }
 
-void Cliente::setDireccion(){
+
+void Cliente::conecta(){
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(puerto);
   serverAddress.sin_addr.s_addr = INADDR_ANY;
-}
-
-void Cliente::conecta(){
+  
   conexion = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
   
-  int err = lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion);
+  lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion, true);
+  
+  send(clientSocket, nombre.c_str(), nombre.length() + 1, 0);
+  
+  std::thread t1(&Cliente::mandaMensaje, this);
+  std::thread t2(&Cliente::recibeMensaje, this);
 
-  if(err < 0){
-    desconecta();
-    exit(1);
-  }
+  t1.join();
+  t2.join();
 
-  mantenerConexion = true;
-
-  comunicar();
+  desconecta();
 }
 
-void Cliente::comunicar(){
-  int cont = 0;
-  while(mantenerConexion){
-    if(cont == 0){
-      std::cout<<"Introduzca su nombre: ";
-      std::cin >> std::ws;
-      std::cin.getline(buffer, 512, '\n');
-    }else{
-      std::cout<<"Mensaje: ";
-      std::cin.getline(buffer, 512, '\n');
+void Cliente::mandaMensaje(){
+  char buffer[512] = {};
+  
+  while(true){
+    buffer[0] = 0;
+    std::cout<<"Mensaje: ";
+    std::cin>>std::ws;
+    std::cin.getline(buffer, 512, '\n');
+
+    send(clientSocket, &buffer, sizeof(buffer), 0);
+    std::string st = std::string(buffer).substr(0, 512);
+    if(st == "EXIT"){
+      desconecta();
+      exit(1);
     }
+  }
+}
 
-    send(clientSocket, &buffer, sizeOfBuffer, 0);
-    std::string st = std::string(buffer).substr(0, tamBuffer);
-    if(st == "EXIT")
-      mantenerConexion = false;
-
-    if(cont < 1) cont++;
+void Cliente::recibeMensaje(){
+  char buff[512] = {};
+  while(true){
+    recv(clientSocket, buff, sizeof(buff), 0);
+    std::cout<<buff<<std::endl;
   }
 }
 
@@ -70,12 +73,14 @@ void Cliente::desconecta(){
   close(clientSocket);
 }
 
-int Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor){
+void Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor, bool termina){
   if(valor < 0){
     std::cout<<mensaje1<<std::endl;
-    return -1;
+    if(termina){
+      desconecta();
+      exit(1);
+    }
   }
   
   std::cout<<mensaje2<<std::endl;
-  return 0;
 }

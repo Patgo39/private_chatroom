@@ -21,7 +21,6 @@ class Servidor{
   char buffer[512];
   int tamBuffer;
   int sizeOfBuffer;
-  bool aceptaConexiones;
   std::mutex mtx;
 
  public:
@@ -34,7 +33,8 @@ class Servidor{
   void vincula();
   void escucha();
   void aceptaClientes();
-  void manejaCliente(int, bool);
+  void mandaMensajeGeneral(Usuario, std::string);
+  void manejaCliente(int, bool, Usuario);
   void desconectaUsuario(Usuario);
   void desconecta();
   int lanzaError(std::string, std::string, int);
