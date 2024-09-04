@@ -48,6 +48,7 @@ void Cliente::mandaMensaje(){
   
   while(true){
     buffer[0] = 0;
+    std::lock_guard<std::mutex> lock(inmtx);
     std::cout<<"Mensaje: ";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
@@ -59,6 +60,7 @@ void Cliente::mandaMensaje(){
       exit(1);
     }
     buffer[0] = 0;
+    
   }
 }
 
@@ -68,7 +70,13 @@ void Cliente::recibeMensaje(){
   while(true){
     buff[0] = 0;
     recv(clientSocket, buff, sizeof(buff), 0);
-    std::cout<<"\n"<<buff<<std::endl;
+    
+    std::lock_guard<std::mutex> lock(outmtx);
+    std::cout << "\r" << std::string(50, ' ') << "\r";
+    std::cout << buff << std::endl;
+
+    std::cout<<"Mensaje: ";
+    std::cout.flush();
   }
 }
 
