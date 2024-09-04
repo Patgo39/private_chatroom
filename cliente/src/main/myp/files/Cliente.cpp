@@ -14,81 +14,86 @@ Cliente::Cliente(){
 
 void Cliente::inicia(){
   //Se crea el socket.
-  clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+  int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
   
-  lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket, true);
+  lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket, true, clientSocket);
   
-  conecta();
-  desconecta();
+  conecta(clientSocket);
+  desconecta(clientSocket);
 }
 
 
-void Cliente::conecta(){
+void Cliente::conecta(int clientSocket){
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(puerto);
   serverAddress.sin_addr.s_addr = INADDR_ANY;
   
   conexion = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
   
-  lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion, true);
+  lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion, true, clientSocket);
   
   send(clientSocket, nombre.c_str(), nombre.length() + 1, 0);
   
-  std::thread t1(&Cliente::mandaMensaje, this);
-  std::thread t2(&Cliente::recibeMensaje, this);
+  std::thread t1(&Cliente::mandaMensaje, this, clientSocket);
+  std::thread t2(&Cliente::recibeMensaje, this, clientSocket);
 
-  t1.join();
-  t2.join();
+  tSend = move(t1);
+  tRec = move(t2);
+
+  if(tSend.joinable())
+    tSend.join();
+  if(tRec.joinable())
+    tRec.join();
 
   //desconecta();
 }
 
-void Cliente::mandaMensaje(){
-  char buffer[512] = {};
+void Cliente::mandaMensaje(int clientSocket){
   
   while(true){
-    buffer[0] = 0;
-    std::lock_guard<std::mutex> lock(inmtx);
-    std::cout<<"Mensaje: ";
+     char buffer[512];
+    std::cout<<"Tú: ";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
     
-    send(clientSocket, &buffer, sizeof(buffer), 0);
-    std::string st = std::string(buffer).substr(0, 512);
-    if(st == "EXIT"){
-      desconecta();
+    
+    if(strcmp(buffer, "EXIT") == 0){
+      send(clientSocket, &buffer, sizeof(buffer), 0);
+      desconecta(clientSocket);
       exit(1);
     }
-    buffer[0] = 0;
-    
+    send(clientSocket, &buffer, sizeof(buffer), 0);
   }
 }
 
-void Cliente::recibeMensaje(){
-  char buff[512];
+void Cliente::recibeMensaje(int clientSocket){
   
   while(true){
-    buff[0] = 0;
-    recv(clientSocket, buff, sizeof(buff), 0);
     
-    std::lock_guard<std::mutex> lock(outmtx);
+    char buff[512];
+    
+    int recibido = recv(clientSocket, buff, sizeof(buff), 0);
+    if(recibido <= 0)
+      continue;
+    buff[recibido] = '\0';
     std::cout << "\r" << std::string(50, ' ') << "\r";
     std::cout << buff << std::endl;
-
-    std::cout<<"Mensaje: ";
-    std::cout.flush();
+    
+    std::cout<<"Tú: ";
+    std::fflush(stdout);
+    
   }
 }
 
-void Cliente::desconecta(){
+void Cliente::desconecta(int clientSocket){
   close(clientSocket);
 }
 
-void Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor, bool termina){
+void Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor, bool termina, int clientSocket){
   if(valor < 0){
     std::cout<<mensaje1<<std::endl;
     if(termina){
-      desconecta();
+      desconecta(clientSocket);
       exit(1);
     }
   }

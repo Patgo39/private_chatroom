@@ -6,32 +6,31 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
+#include <cstring>
 
 
 class Cliente{
   std::string nombre;
-  int clientSocket;
   int conexion;
   int puerto;
-  std::mutex inmtx;
-  std::mutex outmtx;
-  //std::condition_variable cv;
-  //bool entradaActiva;
   sockaddr_in serverAddress;
+  std::thread tSend, tRec;
 
  public:
   Cliente();
   ~Cliente() = default;
   void inicia();
  private:
-  void conecta();
-  void recibeMensaje();
-  void mandaMensaje();
-  void desconecta();
-  void lanzaError(std::string, std::string, int, bool);
+  void conecta(int);
+  void recibeMensaje(int);
+  void mandaMensaje(int);
+  void desconecta(int);
+  void lanzaError(std::string, std::string, int, bool, int);
 };
 
 #endif
+
+

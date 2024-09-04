@@ -57,7 +57,6 @@ void Servidor::manejaCliente(int clientSocket){
     if(cont == 0){
       us = Usuario(st, clientSocket);
       mapa[clientSocket] = us;
-      std::cout<<"Long mapa: "<<mapa.size()<<std::endl;
       cont++;
     }
 
@@ -65,7 +64,6 @@ void Servidor::manejaCliente(int clientSocket){
     
     if(st == "EXIT"){
       mtx.lock();
-      std::cout<<"Adios cliente :)"<<std::endl;
       desconectaUsuario(us.getSocket());
       mtx.unlock();
     }
@@ -75,7 +73,9 @@ void Servidor::manejaCliente(int clientSocket){
 }
 
 void Servidor::desconectaUsuario(int socket){
+  Usuario us = mapa[socket];
   mapa.erase(socket);
+  std::cout<<us.getNombre()<<" se desconectó."<<std::endl;
   if(mapa.size() == 0){
     desconecta();
   }
@@ -106,9 +106,10 @@ void Servidor::mandaMensaje(Usuario us, char buffer[]){
 
   cadena += st;
   
-  std::cout<< cadena <<std::endl;
-  for(auto elemento:mapa){
+  
+  for(auto& elemento:mapa){
     if(elemento.first != us.getSocket()){
+      std::cout<< cadena.c_str() <<std::endl;
       send(elemento.first, cadena.c_str(), cadena.length(), 0);
     }
   }
