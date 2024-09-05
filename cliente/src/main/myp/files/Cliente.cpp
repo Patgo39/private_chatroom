@@ -37,15 +37,8 @@ void Cliente::conecta(int clientSocket){
   std::thread t1(&Cliente::mandaMensaje, this, clientSocket);
   std::thread t2(&Cliente::recibeMensaje, this, clientSocket);
 
-  tSend = move(t1);
-  tRec = move(t2);
-
-  if(tSend.joinable())
-    tSend.join();
-  if(tRec.joinable())
-    tRec.join();
-
-  //desconecta();
+  t1.join();
+  t2.join();
 }
 
 void Cliente::mandaMensaje(int clientSocket){

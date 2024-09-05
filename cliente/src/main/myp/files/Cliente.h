@@ -6,9 +6,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <mutex>
 #include <thread>
-#include <condition_variable>
 #include <cstring>
 
 
@@ -17,7 +15,6 @@ class Cliente{
   int conexion;
   int puerto;
   sockaddr_in serverAddress;
-  std::thread tSend, tRec;
 
  public:
   Cliente();
