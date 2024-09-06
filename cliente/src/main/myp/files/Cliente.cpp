@@ -44,7 +44,7 @@ void Cliente::conecta(int clientSocket){
 void Cliente::mandaMensaje(int clientSocket){
   
   while(true){
-     char buffer[512];
+    char buffer[512];
     std::cout<<"Tú: ";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
@@ -69,8 +69,8 @@ void Cliente::recibeMensaje(int clientSocket){
     if(recibido <= 0)
       continue;
     buff[recibido] = '\0';
-    std::cout << "\r" << std::string(50, ' ') << "\r";
-    std::cout << buff << std::endl;
+    std::cout<<"\r"<<std::string(50, ' ')<<"\r";
+    std::cout<<buff<<std::endl;
     
     std::cout<<"Tú: ";
     std::fflush(stdout);

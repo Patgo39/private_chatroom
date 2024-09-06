@@ -1,6 +1,18 @@
 #include "MensajeJson.h"
 
-static Json::Value PeticionesJson::convierteAJson(char buffer[]){
+void MensajeJson::manejaMensajeCliente(char buffer[]){
+  std::vector<std::string> buff = convierteAVector(buffer);
+
+  if(buff[0] == "request"){
+    
+  }
+}
+
+void MensajeJson::manejaMensajeServidor(char buffer[]){
+  Json::Value buff = convierteAJson(buffer);
+}
+
+Json::Value MensajeJson::convierteAJson(char buffer[]){
   Json::Value bufferJson;
   Json::CharReaderBuilder builder;
   JSONCPP_STRING errs;
@@ -11,27 +23,23 @@ static Json::Value PeticionesJson::convierteAJson(char buffer[]){
   return bufferJson;
 }
 
-static const std::string PeticionesJson::convierteACadena(Json::Value objetoJson){
+std::string MensajeJson::convierteACadena(Json::Value objetoJson){
   Json::StreamWriterBuilder builder;
   const std::string output = Json::writeString(builder, objetoJson);
 
   return output;
 }
 
-static Json::Value PeticionesJson:writeIdentificadorUsuario(std::string nombre){
-  Json::Value identificador;
-  identificador["type"] = "IDENTIFY";
-  identificador["username"] = nombre;
+std::vector<std::string> MensajeJson::convierteAVector(char buffer[]){
+  std::string cadena(buffer);
+  std::vector<std::string> vec;
+  std::string temp;
+  std::stringstream ss(cadena);
 
-  return identificador;
-}
-
-static Json::Value writeCambiaEstado(std::string estado){
-  Json::Value identificador;
-  identificador["type"] = "STATUS";
-  identificador["status"] = estado;
-
-  return identificador;
+  while(getline(ss, temp, ' ')){
+    vec.push_back(temp);
+  }
+  return vec;
 }
 
 
