@@ -12,6 +12,8 @@
 #include <vector>
 #include "Usuario.h"
 #include <map>
+#include "ManejaPeticionCliente.h"
+#include "TipoCliente.h"
 
 class Servidor{
   int puerto;
@@ -34,7 +36,7 @@ class Servidor{
   void desconectaUsuario(int);
   void desconecta();
   void lanzaError(std::string, std::string, int, bool);
-  
+  std::string manejaPeticion(char[], bool&, std::string&);
 };
 
 #endif

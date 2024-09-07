@@ -19,7 +19,7 @@ class TipoCliente{
     //Manda texto privado a un usuario,
     TEXT = 15,
     //Manda un mensaje publico.
-    PUBLIC_TEX = 16,
+    PUBLIC_TEXT = 16,
     //Crea una nueva sala.
     NEW_ROOM = 17,
     //Invita a uno o más usuarios a una sala.
@@ -36,6 +36,7 @@ class TipoCliente{
     DISCONNECT = 23
   };
   static std::string getString(TipoCliente::Tipo);
+  static int getTipo(std::string);
 };
 
 #endif 

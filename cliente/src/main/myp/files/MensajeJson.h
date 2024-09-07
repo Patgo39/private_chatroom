@@ -9,7 +9,6 @@
 #include "ResultadoServidor.h"
 #include <vector>
 #include <sstream>
-#include <unordered_map>
 
 /*
  *Comandos del usuario:
@@ -25,37 +24,48 @@
  */
 
 class MensajeJson{
-  /*enum Banderas {
-    S = 0,
-    U = -1,
-    T = -2,
-    NR = -3,
-    I = -4,
-    JR = -5,
-    RU = -6,
-    LR = -7,
-    D = -8
-  };
-  const std::unordered_map<std::string, Banderas> listaBanderas ={
-    {"-s", S},
-    {"-u", U},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-  };*/
+
 public:
-  static void identificaUsuario(std::string);
-  static void manejaMensajeCliente(char[]);
-  static void manejaMensajeServidor(char[]);
+  static std::string identificaUsuario(std::string);
+  static std::string  manejaMensajeCliente(char[]);
+  static int manejaRespuestaServidor(char[]);
 private:
   static Json::Value convierteAJson(char[]);
   static std::string convierteACadena(Json::Value);
   static std::vector<std::string> convierteAVector(char[]);
   
+  static int respuestaIdentificaUsuario(Json::Value);
+  
+  static std::string cambiaStatus(std::vector<std::string>);
+  static void respuestaCambiaUsuario(Json::Value);
+
+  /* static std::string listaUsuarios(std::vector<std::string>);
+  static void respuestaListaUsuarios(Json::Value);
+
+  static std::string mandaTextoPrivado(std::vector<std::string>);
+  static void respuestaMandaTextoPrivado(Json::Value);
+
+  static std::string mandaTextoPublico(std::vector<std::string>);
+
+  static std::string creaSala(std::vector<std::string>);
+  static void respuestaCreaSala(Json::Value);
+
+  static std::string invita(std::vector<std::string>);
+  static void respuestaCreaSala(Json::Value);
+
+  static std::string unirASala(std::vector<std::string>);
+  static void respuestaUnirASala(Json::Value);
+
+  static std::string listaUsuariosSala(std::vector<std::string>);
+  static void respuestaListaUsuariosSala(Json::Value);
+
+  static std::string textoSala(std::vector<std::string>);
+  static void respuestaTextoSala(Json::Value);
+
+  static std::string abandonaSala(std::vector<std::string>);
+  static void respuestaAbandonaSala(Json::Value);
+
+  static std::string desconectaUsuario(std::vector<std::string>);*/
 };
   
 #endif

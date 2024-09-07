@@ -3,7 +3,12 @@ default_options : ['warning_level=2', 'cpp_std=c++14'])
 
 #Archivos .cpp y .h
 src_files = files('src/main/myp/files/Servidor.cpp',
-		  'src/main/myp/files/Usuario.cpp')
+		  'src/main/myp/files/Usuario.cpp',
+		  'src/main/myp/files/ManejaPeticionCliente.cpp',
+		  'src/main/myp/files/TipoCliente.cpp',
+		  'src/main/myp/files/TipoServidor.cpp',
+		  'src/main/myp/files/ResultadoServidor.cpp')
+		  
 inc_dir = include_directories('src/main/myp/files')
 
 #Biblioteca de json

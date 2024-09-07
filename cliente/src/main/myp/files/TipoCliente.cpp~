@@ -6,7 +6,7 @@ std::string TipoCliente::getString(TipoCliente::Tipo tipo){
   case STATUS: return "STATUS"; break;
   case USERS: return "USERS"; break;
   case TEXT: return "TEXT"; break;
-  case PUBLIC_TEXT: return "PUBLIC_TEXT"; break;
+  case PUBLIC_TEX: return "PUBLIC_TEX"; break;
   case NEW_ROOM: return "NEW_ROOM"; break;
   case INVITE: return "INVITE"; break;
   case JOIN_ROOM: return "JOIN_ROOM"; break;

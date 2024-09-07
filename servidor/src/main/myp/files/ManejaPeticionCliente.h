@@ -1,0 +1,22 @@
+#ifndef MANEJAPETICIONCLIENTE_H
+#define MANEJAPETICIONCLIENTE_H
+
+#include <iostream>
+#include <json/json.h>
+#include <string>
+#include "TipoCliente.h"
+#include "TipoServidor.h"
+#include "ResultadoServidor.h"
+#include <map>
+#include "Usuario.h"
+
+class ManejaPeticionCliente{
+public:
+  static int manejaPeticion(char[]);
+  static std::string manejaIdentificacion(char[], std::map<int, Usuario> mapa, bool&, std::string&);
+private:
+  static Json::Value convierteAJson(char[]);
+  static std::string convierteACadena(Json::Value);
+  static Json::Value regresaRespuesta(TipoCliente::Tipo, ResultadoServidor::Resultado, std::string);
+};
+#endif

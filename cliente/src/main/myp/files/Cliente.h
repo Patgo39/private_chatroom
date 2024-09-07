@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <thread>
 #include <cstring>
-
+#include "MensajeJson.h"
 
 class Cliente{
   std::string nombre;

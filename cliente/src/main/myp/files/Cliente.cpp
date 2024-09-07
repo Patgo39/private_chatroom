@@ -31,8 +31,21 @@ void Cliente::conecta(int clientSocket){
   conexion = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
   
   lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion, true, clientSocket);
+
+
+  std::string identificador = MensajeJson::identificaUsuario(nombre);
+  std::cout<<identificador<<std::endl;
+  send(clientSocket, identificador.c_str(), identificador.length() + 1, 0);
   
-  send(clientSocket, nombre.c_str(), nombre.length() + 1, 0);
+  char buff[512] = {};
+  recv(clientSocket, buff, sizeof(buff), 0);
+  std::cout<<buff<<std::endl;
+  
+  if((MensajeJson::manejaRespuestaServidor(buff)) < 0){
+    std::cout<<"Ese nombre ya está usado."<<std::endl;
+    desconecta(clientSocket);
+    exit(1);
+  }
   
   std::thread t1(&Cliente::mandaMensaje, this, clientSocket);
   std::thread t2(&Cliente::recibeMensaje, this, clientSocket);
