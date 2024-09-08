@@ -25,7 +25,6 @@ class Cliente{
   void recibeMensaje(int);
   void mandaMensaje(int);
   void desconecta(int);
-  void lanzaError(std::string, std::string, int, bool, int);
 };
 
 #endif

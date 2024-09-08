@@ -7,24 +7,22 @@ std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){
   return output;
 }
 
-Json::Value ManejaPeticionCliente::convierteAJson(char buffer[]){
+Json::Value ManejaPeticionCliente::convierteAJson(std::string buffer){
   Json::Value bufferJson;
-  Json::CharReaderBuilder builder;
-  JSONCPP_STRING errs;
-  std::istringstream s(buffer);
-
-  parseFromStream(builder, s, &bufferJson, &errs);
+  Json::Reader reader;
+  reader.parse(buffer, bufferJson);
 
   return bufferJson;
 }
 
-int ManejaPeticionCliente::manejaPeticion(char buffer[]){
+int ManejaPeticionCliente::manejaPeticion(std::string buffer){
   Json::Value peticion = convierteAJson(buffer);
   int tipo = TipoCliente::getTipo(peticion["type"].asString());
   return tipo;
 }
 
-std::string ManejaPeticionCliente::manejaIdentificacion(char buffer[], std::map<int,Usuario> mapa, bool &valido, std::string &nombre){
+std::string ManejaPeticionCliente::manejaIdentificacion(std::string buffer, std::map<int,Usuario> mapa, bool &valido, std::string &nombre){
+  
   Json::Value identificacion = convierteAJson(buffer);
   nombre = identificacion["username"].asString();
   Json::Value respuesta;

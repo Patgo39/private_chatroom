@@ -12,10 +12,10 @@
 
 class ManejaPeticionCliente{
 public:
-  static int manejaPeticion(char[]);
-  static std::string manejaIdentificacion(char[], std::map<int, Usuario> mapa, bool&, std::string&);
+  static int manejaPeticion(std::string);
+  static std::string manejaIdentificacion(std::string, std::map<int, Usuario> mapa, bool&, std::string&);
 private:
-  static Json::Value convierteAJson(char[]);
+  static Json::Value convierteAJson(std::string);
   static std::string convierteACadena(Json::Value);
   static Json::Value regresaRespuesta(TipoCliente::Tipo, ResultadoServidor::Resultado, std::string);
 };

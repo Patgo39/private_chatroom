@@ -16,7 +16,11 @@ void Cliente::inicia(){
   //Se crea el socket.
   int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
   
-  lanzaError("\nError estableciendo la conexión.", "\nConexión del cliente establecida.", clientSocket, true, clientSocket);
+  if(clientSocket < 0){
+    std::cout<<"\nError estableciendo la conexión."<<std::endl;
+    desconecta(clientSocket);
+    exit(1);
+  }
   
   conecta(clientSocket);
   desconecta(clientSocket);
@@ -29,20 +33,24 @@ void Cliente::conecta(int clientSocket){
   serverAddress.sin_addr.s_addr = INADDR_ANY;
   
   conexion = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-  
-  lanzaError("No se pudo conectar al servidor.", "Conexión con el servidor establecida.", conexion, true, clientSocket);
+
+  if(conexion < 0){
+    std::cout<<"No se pudo conectar al servidor."<<std::endl;
+    desconecta(clientSocket);
+    exit(1);
+  }else{
+    std::cout<<"Conexión con el servidor establecida."<<std::endl;
+  }
 
 
   std::string identificador = MensajeJson::identificaUsuario(nombre);
-  std::cout<<identificador<<std::endl;
   send(clientSocket, identificador.c_str(), identificador.length() + 1, 0);
   
   char buff[512] = {};
   recv(clientSocket, buff, sizeof(buff), 0);
-  std::cout<<buff<<std::endl;
   
   if((MensajeJson::manejaRespuestaServidor(buff)) < 0){
-    std::cout<<"Ese nombre ya está usado."<<std::endl;
+    std::cout<<"Nombre no disponible, introduzca otro."<<std::endl;
     desconecta(clientSocket);
     exit(1);
   }
@@ -95,14 +103,4 @@ void Cliente::desconecta(int clientSocket){
   close(clientSocket);
 }
 
-void Cliente::lanzaError(std::string mensaje1, std::string mensaje2, int valor, bool termina, int clientSocket){
-  if(valor < 0){
-    std::cout<<mensaje1<<std::endl;
-    if(termina){
-      desconecta(clientSocket);
-      exit(1);
-    }
-  }
-  
-  std::cout<<mensaje2<<std::endl;
-}
+

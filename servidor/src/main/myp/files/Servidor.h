@@ -29,14 +29,17 @@ class Servidor{
   void inicia();
  private:
   int getUsuario(std::string);
+  bool identificarUsuario(int);
   void vincula();
   void conectaClientes();
-  void mandaMensaje(Usuario, char[]);
+  void mandaMensajeGeneral(Usuario, std::string);
+  void mandaMensajeIndividual(int, std::string);
+  std::string recibeMensaje(int);
   void manejaCliente(int);
   void desconectaUsuario(int);
   void desconecta();
   void lanzaError(std::string, std::string, int, bool);
-  std::string manejaPeticion(char[], bool&, std::string&);
+  std::string manejaPeticion(std::string, bool&);
 };
 
 #endif

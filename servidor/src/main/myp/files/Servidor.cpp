@@ -37,20 +37,7 @@ void Servidor::conectaClientes(){
     clientAddrLen= sizeof(clientAddr);
     clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
     
-    char buff[512] = {};
-    std::string nombre;
-    bool valido = true;
-    recv(clientSocket, buff, sizeof(buff), 0);
-    std::string respuesta = manejaPeticion(buff, valido, nombre);
-    
-    send(clientSocket, respuesta.c_str(), respuesta.length(), 0);
-    if(!valido) continue;
-    
-    lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket, true);
-
-      Usuario us(nombre, clientSocket);
-      mapa[clientSocket] = us;
-   
+    if(!identificarUsuario(clientSocket)) continue;
       
     std::thread tclient(&Servidor::manejaCliente, this, clientSocket);
     tclient.detach();
@@ -60,22 +47,21 @@ void Servidor::conectaClientes(){
 }
 
 void Servidor::manejaCliente(int clientSocket){
-  char buffer[512];
-  int cont = 0;
-  Usuario us;
+  std::string buffer;
+  Usuario us = mapa[clientSocket];
   
-  while(recv(clientSocket, buffer, sizeof(buffer), 0) != 0){
+  while(true){
     
-    std::string st = std::string(buffer).substr(0, 512);
+    buffer = recibeMensaje(clientSocket);
 
-    mandaMensaje(us, buffer);
+    mandaMensajeGeneral(us, buffer);
     
-    if(st == "EXIT"){
+    if(buffer == "EXIT"){
       mtx.lock();
       desconectaUsuario(us.getSocket());
       mtx.unlock();
     }
-    buffer[0] = 0;
+    buffer.clear();
     
   }
 }
@@ -106,31 +92,26 @@ void Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor,
   std::cout<<mensaje2<<std::endl;
 }
 
-void Servidor::mandaMensaje(Usuario us, char buffer[]){
+void Servidor::mandaMensajeGeneral(Usuario us, std::string cadena){
   mtx.lock();
-  
-  std::string cadena = us.getNombre() + ": ";
-  std::string st = std::string(buffer).substr(0, 512);
-
-  cadena += st;
-  
   
   for(auto& elemento:mapa){
     if(elemento.first != us.getSocket()){
-      std::cout<< cadena.c_str() <<std::endl;
       send(elemento.first, cadena.c_str(), cadena.length(), 0);
     }
   }
   mtx.unlock();
 }
 
-std::string Servidor::manejaPeticion(char buffer[], bool &valido, std::string &nombre){
+void Servidor::mandaMensajeIndividual(int clientSocket, std::string buffer){
+  send(clientSocket, buffer.c_str(), buffer.length(), 0);
+}
+
+std::string Servidor::manejaPeticion(std::string buffer, bool &valido){
   int tipoCliente = ManejaPeticionCliente::manejaPeticion(buffer);
   std::string respuesta;
   
   switch(tipoCliente){
-  case TipoCliente::Tipo::IDENTIFY:
-    return ManejaPeticionCliente::manejaIdentificacion(buffer, mapa, valido, nombre);
   case TipoCliente::Tipo::STATUS:
   case TipoCliente::Tipo::USERS:
   case TipoCliente::Tipo::TEXT:
@@ -144,4 +125,33 @@ std::string Servidor::manejaPeticion(char buffer[], bool &valido, std::string &n
   case TipoCliente::Tipo::DISCONNECT:
     break;
   }
+}
+
+bool Servidor::identificarUsuario(int clientSocket){
+  std::string buff;
+  std::string nombre;
+  bool valido = true;
+  
+  buff = recibeMensaje(clientSocket);
+    
+  std::string respuesta = ManejaPeticionCliente::manejaIdentificacion(buff, mapa, valido, nombre);
+  
+  mandaMensajeIndividual(clientSocket, respuesta);
+    if(!valido) return false;
+    
+    
+    lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket, true);
+    
+    mtx.lock();
+    Usuario us(nombre, clientSocket);
+    mapa[clientSocket] = us;
+    mtx.unlock();
+    
+    return true;
+}
+
+std::string Servidor::recibeMensaje(int clientSocket){
+  char buffer[512] = {};
+  recv(clientSocket, buffer, sizeof(buffer), 0);
+  return std::string(buffer);
 }
