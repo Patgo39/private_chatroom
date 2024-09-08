@@ -35,7 +35,7 @@ std::string ManejaPeticionCliente::manejaTextoPublico(std::string solicitud, std
   respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::PUBLIC_TEXT_FROM);
   respuesta["username"] = nombre;
   respuesta["text"] = solic["text"].asString();
-
+  
   return convierteACadena(respuesta);
 }
 

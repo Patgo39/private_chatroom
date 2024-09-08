@@ -4,7 +4,10 @@ Servidor::Servidor(){
   std::cout<<"Escriba el número del puerto: ";
   std::cin>>puerto;
 }
-
+/**
+ * Inicia todo el funcionamiento del servidor desde crear un socket hasta
+ * lidiar con multiples clientes y recibir y procesar sus solicitudes.
+ */
 void Servidor::inicia(){
   serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -15,6 +18,11 @@ void Servidor::inicia(){
   desconecta();
 }
 
+/**
+ * Vincula el socket del servidor definiendo la dirección y teniendo en cuenta
+ * el puerto.
+ * Lanza un error si no se logra vincular el socket.
+ */
 void Servidor::vincula(){
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(puerto);
@@ -25,6 +33,15 @@ void Servidor::vincula(){
   lanzaError("Error al vincular el socket.", "Vinculación del servidor establecida.", conexion, true);
 }
 
+/**
+ * Comienza a esuchcar las peticiones de conexión de parte de los clientes y
+ * entra a un bucle para aceptar todas las solicitudes que reciba.
+ * dentro del bucle identifica al usuario conectado y en caso de no haber un
+ * error, el servidor lo agrega al mapa de clientes y dispara un hilo de
+ * ejecución para manejar la comunicación con el cliente.
+ * En caso de error, el servidor ignora al cliente y termina con la vuelta del
+ * ciclo.
+ */
 void Servidor::conectaClientes(){
   
   listen(serverSocket, 10);
@@ -36,6 +53,8 @@ void Servidor::conectaClientes(){
     
     clientAddrLen= sizeof(clientAddr);
     clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+
+    lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket, true);
     
     if(!identificarUsuario(clientSocket)) continue;
       
@@ -46,6 +65,11 @@ void Servidor::conectaClientes(){
   desconecta();
 }
 
+/**
+ * Recibe y procesa las peticiones del cliente.
+ * 
+ * @param clientSocket el socket del cliente.
+ */
 void Servidor::manejaCliente(int clientSocket){
   std::string buffer;
   Usuario us = mapa[clientSocket];
@@ -54,7 +78,7 @@ void Servidor::manejaCliente(int clientSocket){
     
     buffer = recibeMensaje(clientSocket);
 
-    mandaMensajeGeneral(us, buffer);
+    manejaPeticion(buffer, clientSocket);
     
     if(buffer == "EXIT"){
       mtx.lock();
@@ -66,15 +90,25 @@ void Servidor::manejaCliente(int clientSocket){
   }
 }
 
-void Servidor::desconectaUsuario(int socket){
-  Usuario us = mapa[socket];
-  mapa.erase(socket);
+/**
+ * El método es llamado cuando el usuario solicitó desconectarse.
+ * Se borra al usuario del mapa de clientes y avisa a los demás usuarios que
+ * se desconectó.
+ * 
+ * @param clientSocket el socket del cliente.
+ */
+void Servidor::desconectaUsuario(int clientSocket){
+  Usuario us = mapa[clientSocket];
+  mapa.erase(clientSocket);
   std::cout<<us.getNombre()<<" se desconectó."<<std::endl;
   if(mapa.size() == 0){
     desconecta();
   }
 }
 
+/**
+ * Desconecta el socket del servidor para terminar con el programa.
+ */
 void Servidor::desconecta(){
   close(serverSocket);
   std::cout<<"\nServidor desconectado"<<std::endl;
@@ -92,66 +126,100 @@ void Servidor::lanzaError(std::string mensaje1, std::string mensaje2, int valor,
   std::cout<<mensaje2<<std::endl;
 }
 
-void Servidor::mandaMensajeGeneral(Usuario us, std::string cadena){
+/**
+ * Manda un mensaje a todos los usuarios, menos al que envió dicho mensaje.
+ *
+ * @param clientSocket. El socket del usuario que envió el mensaje. 
+ * @param mensaje. El mensaje que se enviará a los demás usuarios.
+ */
+void Servidor::mandaMensajeGeneral(int clientSocket, std::string mensaje){
   mtx.lock();
   
   for(auto& elemento:mapa){
-    if(elemento.first != us.getSocket()){
-      send(elemento.first, cadena.c_str(), cadena.length(), 0);
+    if(elemento.first != clientSocket){
+      send(elemento.first, mensaje.c_str(), mensaje.length(), 0);
     }
   }
   mtx.unlock();
 }
 
-void Servidor::mandaMensajeIndividual(int clientSocket, std::string buffer){
-  send(clientSocket, buffer.c_str(), buffer.length(), 0);
-}
-
-std::string Servidor::manejaPeticion(std::string buffer, bool &valido){
-  int tipoCliente = ManejaPeticionCliente::manejaPeticion(buffer);
-  std::string respuesta;
-  
-  switch(tipoCliente){
-  case TipoCliente::Tipo::STATUS:
-  case TipoCliente::Tipo::USERS:
-  case TipoCliente::Tipo::TEXT:
-  case TipoCliente::Tipo::PUBLIC_TEXT:
-  case TipoCliente::Tipo::NEW_ROOM:
-  case TipoCliente::Tipo::INVITE:
-  case TipoCliente::Tipo::JOIN_ROOM:
-  case TipoCliente::Tipo::ROOM_USERS:
-  case TipoCliente::Tipo::ROOM_TEXT:
-  case TipoCliente::Tipo::LEAVE_ROOM:
-  case TipoCliente::Tipo::DISCONNECT:
-    break;
-  }
-}
-
-bool Servidor::identificarUsuario(int clientSocket){
-  std::string buff;
-  std::string nombre;
-  bool valido = true;
-  
-  buff = recibeMensaje(clientSocket);
-    
-  std::string respuesta = ManejaPeticionCliente::manejaIdentificacion(buff, mapa, valido, nombre);
-  
-  mandaMensajeIndividual(clientSocket, respuesta);
-    if(!valido) return false;
-    
-    
-    lanzaError("Error al aceptar al cliente.", "Conexión con el cliente establecida.", clientSocket, true);
-    
-    mtx.lock();
-    Usuario us(nombre, clientSocket);
-    mapa[clientSocket] = us;
-    mtx.unlock();
-    
-    return true;
+/**
+ * Envía un mensaje especificamente al usuario que es especificado.
+ *
+ * @param clientSocket el socket del cliente.
+ * @param mensaje el mensaje que se enviará al cliente.
+ */
+void Servidor::mandaMensajeIndividual(int clientSocket, std::string mensaje){
+  send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
 }
 
 std::string Servidor::recibeMensaje(int clientSocket){
   char buffer[512] = {};
   recv(clientSocket, buffer, sizeof(buffer), 0);
   return std::string(buffer);
+}
+
+/**
+ * Maneja la petición del usuario. Se contempla cada caso posible y regresa una
+ * cadena del Json de la respuesta del servidor para la solicitud.
+ * 
+ * @param solicitud la cadena del Json de la solicitud del usuario.
+ * @param clientSocket el socket del cliente.
+ * @return respuesta la respuesta a la solicitud del usuario.
+ */
+void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
+  int tipoCliente = ManejaPeticionCliente::manejaPeticion(solicitud);
+  std::string respuesta;
+  
+  switch(tipoCliente){
+  case TipoCliente::Tipo::STATUS:
+    break;
+  case TipoCliente::Tipo::USERS:
+    break;
+  case TipoCliente::Tipo::TEXT:
+    break;
+  case TipoCliente::Tipo::PUBLIC_TEXT:
+    respuesta = ManejaPeticionCliente::manejaTextoPublico(solicitud, mapa[clientSocket].getNombre());
+    std::cout<<respuesta;
+    mandaMensajeGeneral(clientSocket, respuesta);
+    break;
+  case TipoCliente::Tipo::NEW_ROOM:
+    break;
+  case TipoCliente::Tipo::INVITE:
+    break;
+  case TipoCliente::Tipo::JOIN_ROOM:
+    break;
+  case TipoCliente::Tipo::ROOM_USERS:
+    break;
+  case TipoCliente::Tipo::ROOM_TEXT:
+    break;
+  case TipoCliente::Tipo::LEAVE_ROOM:
+    break;
+  case TipoCliente::Tipo::DISCONNECT:
+    break;
+  }
+}
+
+/**
+ * Identifica al usuario
+ */
+bool Servidor::identificarUsuario(int clientSocket){
+  std::string buff;
+  std::string nombre;
+  bool valido = true;
+  std::string notificacion;
+  buff = recibeMensaje(clientSocket);
+    
+  std::string respuesta = ManejaPeticionCliente::manejaIdentificacion(buff, mapa, valido, nombre, notificacion);
+  
+  mandaMensajeIndividual(clientSocket, respuesta);
+  if(!valido) return false;
+  mandaMensajeGeneral(clientSocket, notificacion);
+  
+  mtx.lock();
+  Usuario us(nombre, clientSocket);
+  mapa[clientSocket] = us;
+  mtx.unlock();
+  
+  return true;
 }

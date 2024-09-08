@@ -38,22 +38,20 @@ void Cliente::conecta(int clientSocket){
     std::cout<<"No se pudo conectar al servidor."<<std::endl;
     desconecta(clientSocket);
     exit(1);
-  }else{
-    std::cout<<"Conexión con el servidor establecida."<<std::endl;
   }
 
 
-  std::string identificador = MensajeJson::identificaUsuario(nombre);
+  std::string identificador = MensajeJson::peticionIdentificaUsuario(nombre);
   send(clientSocket, identificador.c_str(), identificador.length() + 1, 0);
   
   char buff[512] = {};
   recv(clientSocket, buff, sizeof(buff), 0);
   
   if((MensajeJson::manejaRespuestaServidor(buff)) < 0){
-    std::cout<<"Nombre no disponible, introduzca otro."<<std::endl;
     desconecta(clientSocket);
     exit(1);
   }
+
   
   std::thread t1(&Cliente::mandaMensaje, this, clientSocket);
   std::thread t2(&Cliente::recibeMensaje, this, clientSocket);
@@ -76,22 +74,28 @@ void Cliente::mandaMensaje(int clientSocket){
       desconecta(clientSocket);
       exit(1);
     }
-    send(clientSocket, &buffer, sizeof(buffer), 0);
+    
+    std::string mensaje;
+    mensaje = MensajeJson::manejaMensajeCliente(buffer);
+    send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
   }
 }
 
 void Cliente::recibeMensaje(int clientSocket){
-  
   while(true){
     
     char buff[512];
-    
+
     int recibido = recv(clientSocket, buff, sizeof(buff), 0);
     if(recibido <= 0)
       continue;
+
     buff[recibido] = '\0';
     std::cout<<"\r"<<std::string(50, ' ')<<"\r";
-    std::cout<<buff<<std::endl;
+    
+    if(MensajeJson::manejaRespuestaServidor(buff) == 0){
+      MensajeJson::manejaAvisoServidor(buff);
+    }
     
     std::cout<<"Tú: ";
     std::fflush(stdout);

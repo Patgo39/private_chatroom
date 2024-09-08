@@ -13,7 +13,8 @@
 class ManejaPeticionCliente{
 public:
   static int manejaPeticion(std::string);
-  static std::string manejaIdentificacion(std::string, std::map<int, Usuario> mapa, bool&, std::string&);
+  static std::string manejaIdentificacion(std::string, std::map<int, Usuario> mapa, bool&, std::string&, std::string&);
+  static std::string manejaTextoPublico(std::string, std::string);
 private:
   static Json::Value convierteAJson(std::string);
   static std::string convierteACadena(Json::Value);

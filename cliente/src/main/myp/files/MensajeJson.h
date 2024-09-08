@@ -26,46 +26,44 @@
 class MensajeJson{
 
 public:
-  static std::string identificaUsuario(std::string);
-  static std::string  manejaMensajeCliente(char[]);
+  //Crea el Json para identificarse con el servidor.
+  static std::string peticionIdentificaUsuario(std::string);
+  //Crea el Json para la petición del cliente al servidor.
+  static std::string manejaMensajeCliente(char[]);
+  //Maneja la respuesta del servidor a la petición del cliente.
   static int manejaRespuestaServidor(char[]);
+  //Maneja los avisos del Servidor.
+  static void manejaAvisoServidor(char []);
+  
 private:
+  //Convierte un arreglo de caracteres a Json.
   static Json::Value convierteAJson(char[]);
+  //Convierte un Json a cadena.
   static std::string convierteACadena(Json::Value);
+  //Convierte un arreglo de caracteres a vector.
   static std::vector<std::string> convierteAVector(char[]);
+
+  //PETICIONES
+  //Crea la petición Json para cambiar el estatus del usuario.
+  static std::string peticionCambiaStatus(std::vector<std::string>);
+  //Crea el Json para mandar un mensaje general.
+  static std::string peticionMandaTextoPublico(char[]);
+  //Crea el Json para que el cliente se desconecte.
+  static std::string peticionDesconectar();
   
+  //AVISOS
+  //Imprime cuando un nuevo usuario se conecta.
+  static void avisoNuevoUsuario(Json::Value);
+  //Imprime el mensaje del usuario.
+  static void avisoTextoPublico(Json::Value);
+  //Imprime cuando un usuario se desconeta.
+  static void avisoUsuarioDesconectado(Json::Value);
+
+  //RESPUESTAS
+  //Respuesta del servidor de la petición del usuario para identificarse.
   static int respuestaIdentificaUsuario(Json::Value);
-  
-  static std::string cambiaStatus(std::vector<std::string>);
-  static void respuestaCambiaUsuario(Json::Value);
-
-  /* static std::string listaUsuarios(std::vector<std::string>);
-  static void respuestaListaUsuarios(Json::Value);
-
-  static std::string mandaTextoPrivado(std::vector<std::string>);
-  static void respuestaMandaTextoPrivado(Json::Value);
-
-  static std::string mandaTextoPublico(std::vector<std::string>);
-
-  static std::string creaSala(std::vector<std::string>);
-  static void respuestaCreaSala(Json::Value);
-
-  static std::string invita(std::vector<std::string>);
-  static void respuestaCreaSala(Json::Value);
-
-  static std::string unirASala(std::vector<std::string>);
-  static void respuestaUnirASala(Json::Value);
-
-  static std::string listaUsuariosSala(std::vector<std::string>);
-  static void respuestaListaUsuariosSala(Json::Value);
-
-  static std::string textoSala(std::vector<std::string>);
-  static void respuestaTextoSala(Json::Value);
-
-  static std::string abandonaSala(std::vector<std::string>);
-  static void respuestaAbandonaSala(Json::Value);
-
-  static std::string desconectaUsuario(std::vector<std::string>);*/
+  //Respuesta del servidor de la petición del usuario para cambiar su estatus.
+  static void respuestaCambiaStatus(Json::Value);
 };
   
 #endif
