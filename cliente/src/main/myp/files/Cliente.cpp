@@ -64,7 +64,7 @@ void Cliente::mandaMensaje(int clientSocket){
   bool sigueConectado = true;
   while(true){
     char buffer[512];
-    std::cout<<"Tú: ";
+    std::cout<<"\033[38;5;111mTú: \033[0m";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
     
@@ -96,7 +96,7 @@ void Cliente::recibeMensaje(int clientSocket){
       MensajeJson::manejaAvisoServidor(buff);
     }
     
-    std::cout<<"Tú: ";
+    std::cout<<"\033[38;5;111mTú: \033[0m";
     std::fflush(stdout);
     
   }

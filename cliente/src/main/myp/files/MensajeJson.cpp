@@ -1,6 +1,11 @@
 #include "MensajeJson.h"
 
+std::string MensajeJson::finColor = "\033[0m";
+std::map<std::string, int> MensajeJson::coloresUsuarios;
+int MensajeJson::contador = 3;
+
 std::string MensajeJson::peticionIdentificaUsuario(std::string nombre){
+  
   Json::Value identificador;
   identificador["type"] = TipoCliente::getString(TipoCliente::Tipo::IDENTIFY);
   identificador["username"] = nombre;
@@ -120,8 +125,9 @@ int MensajeJson::respuestaIdentificaUsuario(Json::Value respuesta){
 }
 
 void MensajeJson::avisoNuevoUsuario(Json::Value aviso){
-  
-  std::cout<<aviso["username"].asString()<<" se unió a la conversación."<<std::endl;
+  std::string nombre = aviso["username"].asString();
+  coloresUsuarios[nombre] = getIndice();
+  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<" se unió a la conversación."<<finColor<<std::endl;
 }
 
 std::string MensajeJson::peticionMandaTextoPublico(char buffer[]){
@@ -140,9 +146,35 @@ std::string MensajeJson::peticionDesconectar(){
 }
 
 void MensajeJson::avisoTextoPublico(Json::Value mensaje){
-  std::cout<<mensaje["username"].asString()<<": "<<mensaje["text"].asString()<<std::endl;
+  std::string nombre = mensaje["username"].asString();
+  if(!existeUsuario(nombre)){
+    coloresUsuarios[nombre] = getIndice();
+  }
+  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<": "<<finColor<<mensaje["text"].asString()<<std::endl;
 }
 
 void MensajeJson::avisoUsuarioDesconectado(Json::Value aviso){
-  std::cout<<aviso["username"].asString()<<" se desconectó."<<std::endl;
+  std::string nombre = aviso["username"].asString();
+  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<" se desconectó."<<finColor<<std::endl;
+}
+
+std::string MensajeJson::getColor(int n){
+  return "\033[38;5;" + std::to_string(n) + "m";
+}
+
+int MensajeJson::getIndice(){
+  int x = contador;
+  contador++;
+  if(contador >= 256)
+    contador = 3;
+  return x;
+}
+
+bool MensajeJson::existeUsuario(std::string nombre){
+  auto it = coloresUsuarios.find(nombre);
+    if (it != coloresUsuarios.end()) {
+      return true;
+    } else {
+      return false;
+    }
 }

@@ -1,0 +1,16 @@
+#ifndef ESTADOCLIENTE_H
+#define ESTADOCLIENTE_H
+
+#include <iostream>
+#include <string>
+class EstadoCliente{
+ public:
+  enum Estado{
+    ACTIVE = 31;
+    BUSY = 32;
+    AWAY = 33;
+  };
+  static std::string getString(EstadoCliente::Estado);
+};
+
+#endif

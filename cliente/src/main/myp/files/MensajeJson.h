@@ -9,6 +9,8 @@
 #include "ResultadoServidor.h"
 #include <vector>
 #include <sstream>
+#include <map>
+#include <random>
 
 /*
  *Comandos del usuario:
@@ -23,8 +25,10 @@
  * REQUEST -d //DISCONNECT Desconecta al usuario
  */
 
-class MensajeJson{
-
+class MensajeJson{ 
+  static std::map<std::string, int> coloresUsuarios;
+  static int contador;
+  static std::string finColor;
 public:
   //Crea el Json para identificarse con el servidor.
   static std::string peticionIdentificaUsuario(std::string);
@@ -36,6 +40,14 @@ public:
   static void manejaAvisoServidor(char []);
   
 private:
+  //Regresa un color.
+  static std::string getColor(int i);
+  //Regresa un indice para el color.
+  static int getIndice();
+  //Revisa si un usuario ya está en el mapa de colores.
+  static bool existeUsuario(std::string);
+  //Regresa un número aleatorio de minimo 1 y máximo 256.
+  static int getAleatorio();
   //Convierte un arreglo de caracteres a Json.
   static Json::Value convierteAJson(char[]);
   //Convierte un Json a cadena.
