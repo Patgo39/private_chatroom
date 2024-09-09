@@ -35,8 +35,16 @@ std::string ManejaPeticionCliente::manejaTextoPublico(std::string solicitud, std
   respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::PUBLIC_TEXT_FROM);
   respuesta["username"] = nombre;
   respuesta["text"] = solic["text"].asString();
-
+  
   return convierteACadena(respuesta);
+}
+
+std::string ManejaPeticionCliente::manejaDesconexion(std::string nombre){
+  Json::Value aviso;
+  aviso["type"] = TipoServidor::getString(TipoServidor::Tipo::DISCONNECTED);
+  aviso["username"] = nombre;
+
+  return convierteACadena(aviso);
 }
 
 std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){

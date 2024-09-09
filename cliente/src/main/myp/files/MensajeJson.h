@@ -12,15 +12,15 @@
 
 /*
  *Comandos del usuario:
- * request -s "new_status"  // STATUS Cambia el estado del usuario
- * request -u // USERS Obtiene la lista de usuarios.
- * request -t "Nombre del usuario" texto ...  //TEXT Envía un texto privado.
- * request -nr "Nombre de la sala" //NEW_ROOM Crea una sala
- * request -i  "nombre de la sala" "usuario1" "usuario2" "usuario3" ... //INVITE Invita usuarios a una sala.
- * request -jr "Nombre de la sala"   //JOIN_ROOM El usuario se une a una sala.
- * request -ru  //ROOM_USERS Pide la lista de usuarios de la sala
- * request -lr "Nombre de la sala" //LEAVE_ROOM el usuario abandona la sala
- * request -d //DISCONNCT Desconecta al usuario
+ * REQUEST -s "new_status"  // STATUS Cambia el estado del usuario
+ * REQUEST -u // USERS Obtiene la lista de usuarios.
+ * REQUEST -t "Nombre del usuario" texto ...  //TEXT Envía un texto privado.
+ * REQUEST -nr "Nombre de la sala" //NEW_ROOM Crea una sala
+ * REQUEST -i  "nombre de la sala" "usuario1" "usuario2" "usuario3" ... //INVITE Invita usuarios a una sala.
+ * REQUEST -jr "Nombre de la sala"   //JOIN_ROOM El usuario se une a una sala.
+ * REQUEST -ru  //ROOM_USERS Pide la lista de usuarios de la sala
+ * REQUEST -lr "Nombre de la sala" //LEAVE_ROOM el usuario abandona la sala
+ * REQUEST -d //DISCONNECT Desconecta al usuario
  */
 
 class MensajeJson{
@@ -29,7 +29,7 @@ public:
   //Crea el Json para identificarse con el servidor.
   static std::string peticionIdentificaUsuario(std::string);
   //Crea el Json para la petición del cliente al servidor.
-  static std::string manejaMensajeCliente(char[]);
+  static std::string manejaMensajeCliente(char[], bool&);
   //Maneja la respuesta del servidor a la petición del cliente.
   static int manejaRespuestaServidor(char[]);
   //Maneja los avisos del Servidor.

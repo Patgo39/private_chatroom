@@ -80,11 +80,6 @@ void Servidor::manejaCliente(int clientSocket){
 
     manejaPeticion(buffer, clientSocket);
     
-    if(buffer == "EXIT"){
-      mtx.lock();
-      desconectaUsuario(us.getSocket());
-      mtx.unlock();
-    }
     buffer.clear();
     
   }
@@ -180,7 +175,6 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     break;
   case TipoCliente::Tipo::PUBLIC_TEXT:
     respuesta = ManejaPeticionCliente::manejaTextoPublico(solicitud, mapa[clientSocket].getNombre());
-    std::cout<<respuesta;
     mandaMensajeGeneral(clientSocket, respuesta);
     break;
   case TipoCliente::Tipo::NEW_ROOM:
@@ -196,6 +190,11 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   case TipoCliente::Tipo::LEAVE_ROOM:
     break;
   case TipoCliente::Tipo::DISCONNECT:
+    respuesta = ManejaPeticionCliente::manejaDesconexion(mapa[clientSocket].getNombre());
+    mtx.lock();
+    desconectaUsuario(clientSocket);
+    mtx.unlock();
+    mandaMensajeGeneral(clientSocket, respuesta);
     break;
   }
 }

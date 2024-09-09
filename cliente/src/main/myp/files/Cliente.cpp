@@ -61,23 +61,22 @@ void Cliente::conecta(int clientSocket){
 }
 
 void Cliente::mandaMensaje(int clientSocket){
-  
+  bool sigueConectado = true;
   while(true){
     char buffer[512];
     std::cout<<"Tú: ";
     std::cin>>std::ws;
     std::cin.getline(buffer, 512, '\n');
     
+    std::string mensaje;
     
-    if(strcmp(buffer, "EXIT") == 0){
-      send(clientSocket, &buffer, sizeof(buffer), 0);
+    mensaje = MensajeJson::manejaMensajeCliente(buffer, sigueConectado);
+    send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+
+    if(!sigueConectado){
       desconecta(clientSocket);
       exit(1);
     }
-    
-    std::string mensaje;
-    mensaje = MensajeJson::manejaMensajeCliente(buffer);
-    send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
   }
 }
 

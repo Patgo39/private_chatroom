@@ -7,10 +7,10 @@ std::string MensajeJson::peticionIdentificaUsuario(std::string nombre){
   return convierteACadena(identificador);
 }
 
-std::string MensajeJson::manejaMensajeCliente(char buffer[]){
+std::string MensajeJson::manejaMensajeCliente(char buffer[], bool &sigueConectado){
   std::vector<std::string> buff = convierteAVector(buffer);
 
-  if(buff[0] == "request"){
+  if(buff[0] == "REQUEST"){
     //No se puede hacer switch para string.
     if(buff[1] == "-s"){
 
@@ -29,7 +29,8 @@ std::string MensajeJson::manejaMensajeCliente(char buffer[]){
     }else if(buff[1] == "-lr"){
       
     }else if(buff[1] == "-d"){
-      
+      sigueConectado = false;
+      return peticionDesconectar();
     }else{
       
       return peticionMandaTextoPublico(buffer);
@@ -74,7 +75,7 @@ void MensajeJson::manejaAvisoServidor(char buffer[]){
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::LEFT_ROOM)){
       
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::DISCONNECTED)){
-      
+    avisoUsuarioDesconectado(buff);
   }
 }
 
@@ -131,6 +132,17 @@ std::string MensajeJson::peticionMandaTextoPublico(char buffer[]){
   return convierteACadena(mensaje);
 }
 
+std::string MensajeJson::peticionDesconectar(){
+  Json::Value peticion;
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::DISCONNECT);
+
+  return convierteACadena(peticion);
+}
+
 void MensajeJson::avisoTextoPublico(Json::Value mensaje){
   std::cout<<mensaje["username"].asString()<<": "<<mensaje["text"].asString()<<std::endl;
+}
+
+void MensajeJson::avisoUsuarioDesconectado(Json::Value aviso){
+  std::cout<<aviso["username"].asString()<<" se desconectó."<<std::endl;
 }
