@@ -194,6 +194,16 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     break;
     
   case TipoCliente::Tipo::TEXT:
+    {
+      int socketDestinatario = -1;
+      respuesta = ManejaPeticionCliente::manejaMensajePrivado(solicitud, mapa, clientSocket, socketDestinatario);
+      
+      if(socketDestinatario == -1){
+	mandaMensajeIndividual(clientSocket, respuesta);
+      }else{
+	mandaMensajeIndividual(socketDestinatario, respuesta);
+      }
+    }
     break;
   case TipoCliente::Tipo::PUBLIC_TEXT:
     

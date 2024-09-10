@@ -90,6 +90,25 @@ std::string ManejaPeticionCliente::manejaListaGeneral(std::map<int, Usuario>& ma
   return convierteACadena(respuesta);
 }
 
+std::string ManejaPeticionCliente::manejaMensajePrivado(std::string peticion, std::map<int, Usuario> &mapa, int clientSocket, int &socketDestinatario){
+  Json::Value respuesta;
+  Json::Value pet = convierteAJson(peticion);
+  std::string nombre = pet["username"].asString();
+  std::string texto = pet["text"].asString();
+
+  for(auto& elemento: mapa){
+    if(nombre == elemento.second.getNombre()){
+      respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::TEXT_FROM);
+      respuesta["username"] = mapa[clientSocket].getNombre();
+      respuesta["text"] = texto;
+      socketDestinatario = elemento.first;
+      return convierteACadena(respuesta);
+    }
+  }
+
+  respuesta = regresaRespuesta(TipoCliente::Tipo::TEXT, ResultadoServidor::Resultado::NO_SUCH_USER, nombre);
+  return convierteACadena(respuesta);
+}
 
 std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){
   Json::StreamWriterBuilder builder;

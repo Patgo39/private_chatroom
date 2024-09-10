@@ -64,6 +64,8 @@ private:
   static std::string peticionCambiaEstado(std::vector<std::string>, std::string&);
   //Crea el Json para solicitar la lista de usuarios del chat general.
   static std::string peticionListaGeneral();
+  //Crea el Json para mandar un mensaje privado.
+  static std::string peticionMensajePrivado(std::vector<std::string>&);
   
   //AVISOS
   //Imprime cuando un nuevo usuario se conecta.
@@ -76,12 +78,16 @@ private:
   static void avisoNuevoEstado(Json::Value);
   //Imprime la lista general.
   static void avisoListaGeneral(Json::Value);
+  //Imprime el texto privado de un usuario.
+  static void avisoMensajePrivado(Json::Value);
 
   //RESPUESTAS
   //Respuesta del servidor de la petición del usuario para identificarse.
   static int respuestaIdentificaUsuario(Json::Value);
   //Respuesta a una petición invalida.
   static int respuestaPeticionInvalida(Json::Value);
+  //Respuesta del servidor cuando el usuario del mensaje privado no existe.
+  static int respuestaMensajePrivado(Json::Value);
 };
   
 #endif

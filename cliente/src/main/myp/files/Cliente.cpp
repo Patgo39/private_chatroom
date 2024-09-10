@@ -71,9 +71,8 @@ void Cliente::mandaMensaje(int clientSocket){
     std::cin.getline(buffer, 512, '\n');
     
     std::string mensaje;
-    
     mensaje = MensajeJson::manejaMensajeCliente(buffer, sigueConectado, estado);
-    send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+    if(mensaje != "NULL") send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
     
     if(!sigueConectado){
       desconecta(clientSocket);

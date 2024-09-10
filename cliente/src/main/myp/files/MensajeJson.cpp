@@ -17,11 +17,34 @@ std::string MensajeJson::manejaMensajeCliente(char buffer[], bool &sigueConectad
 
   if(buff[0] == "REQUEST"){
     //No se puede hacer switch para string.
+    //Peticion cambio de estado.
     if(buff[1] == "-s"){
+      if(buff.size() != 3){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -s 'NuevoEstado'"<<std::endl;
+	return "NULL";
+      }
       return peticionCambiaEstado(buff, estado);
-    }else if(buff[1] == "-u"){
+      
+    }
+    //Peticion lista de usuarios.
+    else if(buff[1] == "-u"){
+      if(buff.size() != 2){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -u"<<std::endl;
+	return "NULL";
+      }
       return peticionListaGeneral();
-    }else if(buff[1] == "-t"){
+      
+    }
+    //Peticion Mensaje Privado.
+    else if(buff[1] == "-t"){
+      if(buff.size() < 4){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -d"<<std::endl;
+	return "NULL";
+      }
+      return peticionMensajePrivado(buff);
       
     }else if(buff[1] == "-nr"){
       
@@ -33,12 +56,20 @@ std::string MensajeJson::manejaMensajeCliente(char buffer[], bool &sigueConectad
       
     }else if(buff[1] == "-lr"){
       
-    }else if(buff[1] == "-d"){
+    }
+    //Peticion descinectar.
+    else if(buff[1] == "-d"){
+      if(buff.size() != 2){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -d"<<std::endl;
+	return "NULL";
+      }
       sigueConectado = false;
       return peticionDesconectar();
     }else{
       
-      return peticionMandaTextoPublico(buffer);
+      std::cout<<"Formato del comando incorrecto."<<std::endl;
+      return "NULL";
     }
   }
 
@@ -54,6 +85,8 @@ int MensajeJson::manejaRespuestaServidor(char buffer[]){
       return respuestaIdentificaUsuario(buff);
     }else if(buff["operation"] == TipoServidor::getString(TipoServidor::Tipo::INVALID)){
       return respuestaPeticionInvalida(buff);
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::TEXT)){
+      return respuestaMensajePrivado(buff);
     }
     
   }
@@ -70,7 +103,7 @@ void MensajeJson::manejaAvisoServidor(char buffer[]){
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::USER_LIST)){
     avisoListaGeneral(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::TEXT_FROM)){
-      
+    avisoMensajePrivado(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::PUBLIC_TEXT_FROM)){
     avisoTextoPublico(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::JOINED_ROOM)){
@@ -136,6 +169,14 @@ int MensajeJson::respuestaPeticionInvalida(Json::Value respuesta){
   return -1;
 }
 
+int MensajeJson::respuestaMensajePrivado(Json::Value respuesta){
+  if(respuesta["result"] == ResultadoServidor::getString(ResultadoServidor::Resultado::NO_SUCH_USER)){
+    std::string nombre = respuesta["extra"].asString();
+    std::cout<<"Usuario '"<<nombre<<"' no encontrado."<<std::endl;
+  }
+  return 1;
+}
+
 void MensajeJson::avisoNuevoUsuario(Json::Value aviso){
   std::string nombre = aviso["username"].asString();
   coloresUsuarios[nombre] = getIndice();
@@ -174,12 +215,29 @@ std::string MensajeJson::peticionListaGeneral(){
   return convierteACadena(peticion);
 }
 
+std::string MensajeJson::peticionMensajePrivado(std::vector<std::string> &vect){
+  std::string mensaje = "";
+  int i = 0;
+  for(std::string s:vect){
+    if(i>=3)
+    mensaje += s + " ";
+    
+    i++;
+  }
+
+  Json::Value peticion;
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::TEXT);
+  peticion["username"] = vect[2];
+  peticion["text"] = mensaje;
+  return convierteACadena(peticion);
+}
+
 void MensajeJson::avisoTextoPublico(Json::Value mensaje){
   std::string nombre = mensaje["username"].asString();
   if(!existeUsuario(nombre)){
     coloresUsuarios[nombre] = getIndice();
   }
-  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<": "<<finColor<<mensaje["text"].asString()<<std::endl;
+  std::cout<<getColor(2)<<"CHAT GENERAL "<<finColor<<getColor(coloresUsuarios[nombre])<<nombre<<": "<<finColor<<mensaje["text"].asString()<<std::endl;
 }
 
 void MensajeJson::avisoUsuarioDesconectado(Json::Value aviso){
@@ -189,12 +247,24 @@ void MensajeJson::avisoUsuarioDesconectado(Json::Value aviso){
 
 void MensajeJson::avisoNuevoEstado(Json::Value aviso){
   std::string nombre = aviso["username"].asString();
+  if(!existeUsuario(nombre)){
+    coloresUsuarios[nombre] = getIndice();
+  }
   std::string estado = aviso["status"].asString();
-  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<finColor<<" nuevo estado: "<<estado<<std::endl;
+  std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<" cambió su estado a "<<estado<<finColor<<std::endl;
 }
 
 void MensajeJson::avisoListaGeneral(Json::Value aviso){
   std::cout<<"La Lista de usuarios es: \n"<<aviso["users"]<<std::endl;
+}
+
+void MensajeJson::avisoMensajePrivado(Json::Value aviso){
+  std::string nombre = aviso["username"].asString();
+  std::string mensaje = aviso["text"].asString();
+  if(!existeUsuario(nombre)){
+    coloresUsuarios[nombre] = getIndice();
+  }
+  std::cout<<getColor(1)<<"MENSAJE PRIVADO "<<finColor<<getColor(coloresUsuarios[nombre])<<nombre<<": "<<finColor<<mensaje<<std::endl;
 }
 
 std::string MensajeJson::getColor(int n){

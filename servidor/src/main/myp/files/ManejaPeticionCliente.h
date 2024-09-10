@@ -18,6 +18,7 @@ public:
   static std::string manejaDesconexion(std::string);
   static std::string manejaCambioEstado(std::string, int, std::map<int, Usuario>&, bool&);
   static std::string manejaListaGeneral(std::map<int, Usuario>&);
+  static std::string manejaMensajePrivado(std::string, std::map<int, Usuario>&, int, int&);
 private:
   static Json::Value convierteAJson(std::string);
   static std::string convierteACadena(Json::Value);
