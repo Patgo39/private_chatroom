@@ -20,7 +20,7 @@ std::string MensajeJson::manejaMensajeCliente(char buffer[], bool &sigueConectad
     if(buff[1] == "-s"){
       return peticionCambiaEstado(buff, estado);
     }else if(buff[1] == "-u"){
-      
+      return peticionListaGeneral();
     }else if(buff[1] == "-t"){
       
     }else if(buff[1] == "-nr"){
@@ -68,7 +68,7 @@ void MensajeJson::manejaAvisoServidor(char buffer[]){
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::NEW_STATUS)){
     avisoNuevoEstado(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::USER_LIST)){
-      
+    avisoListaGeneral(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::TEXT_FROM)){
       
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::PUBLIC_TEXT_FROM)){
@@ -167,6 +167,13 @@ std::string MensajeJson::peticionCambiaEstado(std::vector<std::string> vect, std
   return convierteACadena(peticion);
 }
 
+std::string MensajeJson::peticionListaGeneral(){
+  Json::Value peticion;
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::USERS);
+
+  return convierteACadena(peticion);
+}
+
 void MensajeJson::avisoTextoPublico(Json::Value mensaje){
   std::string nombre = mensaje["username"].asString();
   if(!existeUsuario(nombre)){
@@ -184,6 +191,10 @@ void MensajeJson::avisoNuevoEstado(Json::Value aviso){
   std::string nombre = aviso["username"].asString();
   std::string estado = aviso["status"].asString();
   std::cout<<getColor(coloresUsuarios[nombre])<<nombre<<finColor<<" nuevo estado: "<<estado<<std::endl;
+}
+
+void MensajeJson::avisoListaGeneral(Json::Value aviso){
+  std::cout<<"La Lista de usuarios es: \n"<<aviso["users"]<<std::endl;
 }
 
 std::string MensajeJson::getColor(int n){

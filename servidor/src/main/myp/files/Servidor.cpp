@@ -95,7 +95,7 @@ void Servidor::manejaCliente(int clientSocket){
 void Servidor::desconectaUsuario(int clientSocket){
   Usuario us = mapa[clientSocket];
   mapa.erase(clientSocket);
-  close(clientSocket);
+  //close(clientSocket);
   std::cout<<us.getNombre()<<" se desconectó."<<std::endl;
   if(mapa.size() == 0){
     desconecta();
@@ -169,6 +169,7 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   
   switch(tipoCliente){
   case TipoCliente::Tipo::STATUS:
+    
     {
       bool valido = true;
       respuesta = ManejaPeticionCliente::manejaCambioEstado(solicitud, clientSocket, mapa, valido);
@@ -183,16 +184,23 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
 	mtx.unlock();
 	mandaMensajeGeneral(clientSocket, respuesta);
       }
-      }
+    }
     break;
+    
   case TipoCliente::Tipo::USERS:
+    
+    respuesta = ManejaPeticionCliente::manejaListaGeneral(mapa);
+    mandaMensajeIndividual(clientSocket, respuesta);
     break;
+    
   case TipoCliente::Tipo::TEXT:
     break;
   case TipoCliente::Tipo::PUBLIC_TEXT:
+    
     respuesta = ManejaPeticionCliente::manejaTextoPublico(solicitud, mapa[clientSocket].getNombre());
     mandaMensajeGeneral(clientSocket, respuesta);
     break;
+    
   case TipoCliente::Tipo::NEW_ROOM:
     break;
   case TipoCliente::Tipo::INVITE:

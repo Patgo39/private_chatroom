@@ -62,6 +62,8 @@ private:
   static std::string peticionDesconectar();
   //Crea el Json para que el cliente cambie de estado.
   static std::string peticionCambiaEstado(std::vector<std::string>, std::string&);
+  //Crea el Json para solicitar la lista de usuarios del chat general.
+  static std::string peticionListaGeneral();
   
   //AVISOS
   //Imprime cuando un nuevo usuario se conecta.
@@ -72,6 +74,8 @@ private:
   static void avisoUsuarioDesconectado(Json::Value);
   //Imprime el nuevo estado de un usuario;
   static void avisoNuevoEstado(Json::Value);
+  //Imprime la lista general.
+  static void avisoListaGeneral(Json::Value);
 
   //RESPUESTAS
   //Respuesta del servidor de la petición del usuario para identificarse.

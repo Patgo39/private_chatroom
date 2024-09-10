@@ -76,7 +76,8 @@ void Cliente::mandaMensaje(int clientSocket){
     send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
     
     if(!sigueConectado){
-      break;
+      desconecta(clientSocket);
+      exit(0);
     }
   }
 }

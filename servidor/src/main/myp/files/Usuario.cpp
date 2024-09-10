@@ -3,7 +3,7 @@
 Usuario::Usuario(std::string _nombre, int _usuarioSocket){
   nombre = _nombre;
   usuarioSocket = _usuarioSocket;
-  estado = EstadoCliente::Estado::ACTIVE;
+  estado = EstadoCliente::getString(EstadoCliente::Estado::ACTIVE);
 }
 
 std::string Usuario::getNombre(){

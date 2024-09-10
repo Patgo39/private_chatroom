@@ -56,13 +56,13 @@ std::string ManejaPeticionCliente::manejaCambioEstado(std::string peticion, int 
   respuesta["status"] = estado;
   respuesta["username"] = mapa[clientSocket].getNombre();
   if(estado == EstadoCliente::getString(EstadoCliente::Estado::AWAY)){
-    mapa[clientSocket].setEstado(peticion);
+    mapa[clientSocket].setEstado(estado);
     return convierteACadena(respuesta);
   }else if(estado == EstadoCliente::getString(EstadoCliente::Estado::BUSY)){
-    mapa[clientSocket].setEstado(peticion);
+    mapa[clientSocket].setEstado(estado);
     return convierteACadena(respuesta);
   }else if(estado == EstadoCliente::getString(EstadoCliente::Estado::ACTIVE)){
-    mapa[clientSocket].setEstado(peticion);
+    mapa[clientSocket].setEstado(estado);
       return convierteACadena(respuesta);
   }
   valido = false;
@@ -73,6 +73,23 @@ std::string ManejaPeticionCliente::manejaCambioEstado(std::string peticion, int 
   respuesta["result"] = TipoServidor::getString(TipoServidor::Tipo::INVALID);
   return convierteACadena(respuesta);
 }
+
+std::string ManejaPeticionCliente::manejaListaGeneral(std::map<int, Usuario>& mapa){
+  Json::Value respuesta;
+  Json::Value listaUsuarios;
+  respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::USER_LIST);
+  std::string nombre;
+  std::string status;
+  for(auto& elemento: mapa){
+    nombre = elemento.second.getNombre();
+    status = elemento.second.getEstado();
+    listaUsuarios[nombre] = status;
+  }
+
+  respuesta["users"] = listaUsuarios;
+  return convierteACadena(respuesta);
+}
+
 
 std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){
   Json::StreamWriterBuilder builder;
