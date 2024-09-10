@@ -33,7 +33,7 @@ public:
   //Crea el Json para identificarse con el servidor.
   static std::string peticionIdentificaUsuario(std::string);
   //Crea el Json para la petición del cliente al servidor.
-  static std::string manejaMensajeCliente(char[], bool&);
+  static std::string manejaMensajeCliente(char[], bool&, std::string&);
   //Maneja la respuesta del servidor a la petición del cliente.
   static int manejaRespuestaServidor(char[]);
   //Maneja los avisos del Servidor.
@@ -56,12 +56,12 @@ private:
   static std::vector<std::string> convierteAVector(char[]);
 
   //PETICIONES
-  //Crea la petición Json para cambiar el estatus del usuario.
-  static std::string peticionCambiaStatus(std::vector<std::string>);
   //Crea el Json para mandar un mensaje general.
   static std::string peticionMandaTextoPublico(char[]);
   //Crea el Json para que el cliente se desconecte.
   static std::string peticionDesconectar();
+  //Crea el Json para que el cliente cambie de estado.
+  static std::string peticionCambiaEstado(std::vector<std::string>, std::string&);
   
   //AVISOS
   //Imprime cuando un nuevo usuario se conecta.
@@ -70,12 +70,14 @@ private:
   static void avisoTextoPublico(Json::Value);
   //Imprime cuando un usuario se desconeta.
   static void avisoUsuarioDesconectado(Json::Value);
+  //Imprime el nuevo estado de un usuario;
+  static void avisoNuevoEstado(Json::Value);
 
   //RESPUESTAS
   //Respuesta del servidor de la petición del usuario para identificarse.
   static int respuestaIdentificaUsuario(Json::Value);
-  //Respuesta del servidor de la petición del usuario para cambiar su estatus.
-  static void respuestaCambiaStatus(Json::Value);
+  //Respuesta a una petición invalida.
+  static int respuestaPeticionInvalida(Json::Value);
 };
   
 #endif

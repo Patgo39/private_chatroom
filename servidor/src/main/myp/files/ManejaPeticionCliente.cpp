@@ -6,7 +6,7 @@ int ManejaPeticionCliente::manejaPeticion(std::string buffer){
   return tipo;
 }
 
-std::string ManejaPeticionCliente::manejaIdentificacion(std::string buffer, std::map<int,Usuario> mapa, bool &valido, std::string &nombre, std::string &notificacion){
+std::string ManejaPeticionCliente::manejaIdentificacion(std::string buffer, std::map<int,Usuario> &mapa, bool &valido, std::string &nombre, std::string &notificacion){
   
   Json::Value identificacion = convierteAJson(buffer);
   Json::Value notif;
@@ -47,10 +47,37 @@ std::string ManejaPeticionCliente::manejaDesconexion(std::string nombre){
   return convierteACadena(aviso);
 }
 
+std::string ManejaPeticionCliente::manejaCambioEstado(std::string peticion, int clientSocket, std::map<int, Usuario> &mapa, bool &valido){
+  Json::Value pet = convierteAJson(peticion);
+  Json::Value respuesta;
+  std::string estado = pet["status"].asString();
+  
+  respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::NEW_STATUS);
+  respuesta["status"] = estado;
+  respuesta["username"] = mapa[clientSocket].getNombre();
+  if(estado == EstadoCliente::getString(EstadoCliente::Estado::AWAY)){
+    mapa[clientSocket].setEstado(peticion);
+    return convierteACadena(respuesta);
+  }else if(estado == EstadoCliente::getString(EstadoCliente::Estado::BUSY)){
+    mapa[clientSocket].setEstado(peticion);
+    return convierteACadena(respuesta);
+  }else if(estado == EstadoCliente::getString(EstadoCliente::Estado::ACTIVE)){
+    mapa[clientSocket].setEstado(peticion);
+      return convierteACadena(respuesta);
+  }
+  valido = false;
+  respuesta.removeMember("status");
+  respuesta.removeMember("username");
+  respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::RESPONSE);
+  respuesta["operation"] = TipoServidor::getString(TipoServidor::Tipo::INVALID);
+  respuesta["result"] = TipoServidor::getString(TipoServidor::Tipo::INVALID);
+  return convierteACadena(respuesta);
+}
+
 std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){
   Json::StreamWriterBuilder builder;
   const std::string output = Json::writeString(builder, objetoJson);
-
+  
   return output;
 }
 

@@ -10,6 +10,7 @@ Cliente::Cliente(){
     std::cout<<"El nombre no debe tener más de 8 caracteres."<<std::endl;
     exit(1);
   }
+  estado = EstadoCliente::getString(EstadoCliente::Estado::ACTIVE);
 }
 
 void Cliente::inicia(){
@@ -52,12 +53,13 @@ void Cliente::conecta(int clientSocket){
     exit(1);
   }
 
-  
   std::thread t1(&Cliente::mandaMensaje, this, clientSocket);
   std::thread t2(&Cliente::recibeMensaje, this, clientSocket);
 
   t1.join();
   t2.join();
+
+  desconecta(clientSocket);
 }
 
 void Cliente::mandaMensaje(int clientSocket){
@@ -70,12 +72,11 @@ void Cliente::mandaMensaje(int clientSocket){
     
     std::string mensaje;
     
-    mensaje = MensajeJson::manejaMensajeCliente(buffer, sigueConectado);
+    mensaje = MensajeJson::manejaMensajeCliente(buffer, sigueConectado, estado);
     send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
-
+    
     if(!sigueConectado){
-      desconecta(clientSocket);
-      exit(1);
+      break;
     }
   }
 }
@@ -88,12 +89,17 @@ void Cliente::recibeMensaje(int clientSocket){
     int recibido = recv(clientSocket, buff, sizeof(buff), 0);
     if(recibido <= 0)
       continue;
-
+    
     buff[recibido] = '\0';
     std::cout<<"\r"<<std::string(50, ' ')<<"\r";
     
-    if(MensajeJson::manejaRespuestaServidor(buff) == 0){
+    int respuesta = MensajeJson::manejaRespuestaServidor(buff);
+    
+    if(respuesta == 0){
       MensajeJson::manejaAvisoServidor(buff);
+    }else if(respuesta < 0){
+      desconecta(clientSocket);
+      exit(1);
     }
     
     std::cout<<"\033[38;5;111mTú: \033[0m";

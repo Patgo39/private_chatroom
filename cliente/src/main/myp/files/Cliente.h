@@ -9,9 +9,12 @@
 #include <thread>
 #include <cstring>
 #include "MensajeJson.h"
+#include "EstadoCliente.h"
+#include <atomic>
 
 class Cliente{
   std::string nombre;
+  std::string estado;
   int conexion;
   int puerto;
   sockaddr_in serverAddress;

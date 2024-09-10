@@ -31,7 +31,8 @@ class TipoServidor{
     //Indica a los ususarios de la sala que otro usuario se fue.
     LEFT_ROOM = 10,
     //Indica a los usuarios que alguien se desconectó.
-    DISCONNECTED = 11
+    DISCONNECTED = 11,
+    INVALID = 0
   };
   static std::string getString(TipoServidor::Tipo);
 };

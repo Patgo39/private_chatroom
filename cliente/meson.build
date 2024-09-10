@@ -6,7 +6,8 @@ src_files = files('src/main/myp/files/Cliente.cpp',
 		  'src/main/myp/files/MensajeJson.cpp',
 		  'src/main/myp/files/TipoServidor.cpp',
 		  'src/main/myp/files/TipoCliente.cpp',
-		  'src/main/myp/files/ResultadoServidor.cpp')
+		  'src/main/myp/files/ResultadoServidor.cpp',
+		  'src/main/myp/files/EstadoCliente.cpp')
 		  
 inc_dir = include_directories('src/main/myp/files')
 

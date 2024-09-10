@@ -6,5 +6,5 @@ std::string EstadoCliente::getString(EstadoCliente::Estado estado){
   case BUSY: return "BUSY";
   case AWAY: return "AWAY";
   }
-  return "NULL";
+  
 }
