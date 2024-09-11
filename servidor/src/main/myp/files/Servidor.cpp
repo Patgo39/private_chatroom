@@ -212,6 +212,8 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     break;
     
   case TipoCliente::Tipo::NEW_ROOM:
+    Cuarto cuarto;
+    
     break;
   case TipoCliente::Tipo::INVITE:
     break;

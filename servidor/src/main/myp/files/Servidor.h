@@ -21,12 +21,14 @@
 #include <map>
 #include "ManejaPeticionCliente.h"
 #include "TipoCliente.h"
+#include "Cuarto.h"
 
 class Servidor{
   int puerto;
   int serverSocket;
   int conexion;
   std::map<int, Usuario> mapa;
+  std::vector<Cuarto> cuartos;
   sockaddr_in serverAddress;
   std::mutex mtx;
 
