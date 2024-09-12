@@ -32,7 +32,10 @@ class TipoServidor{
     LEFT_ROOM = 10,
     //Indica a los usuarios que alguien se desconectó.
     DISCONNECTED = 11,
-    INVALID = 0
+    //Indica que el Json del cliente es inválido.
+    INVALID = 0,
+    //Indica que el usuario fue invitado.
+    INVITATION = -1
   };
   static std::string getString(TipoServidor::Tipo);
 };

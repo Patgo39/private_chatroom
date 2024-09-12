@@ -14,6 +14,7 @@ std::string TipoServidor::getString(TipoServidor::Tipo tipo){
   case LEFT_ROOM: return "LEFT_ROOM"; 
   case DISCONNECTED: return "DISCONNECTED";
   case INVALID: return "INVALID";
+  case INIVTATION: return "INVITATION";
   };
   return "NULL";
 }

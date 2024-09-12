@@ -13,6 +13,8 @@ class Cuarto{
   std::string nombreCuarto;
   std::map<int, bool>listaUsuarios;
  public:
+  //Constructor por defecto.
+  Cuarto() = default;
   //Crea un cuarto.
   Cuarto(std::string);
   //Destruye un cuarto.

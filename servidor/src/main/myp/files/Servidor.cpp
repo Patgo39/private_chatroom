@@ -166,12 +166,12 @@ std::string Servidor::recibeMensaje(int clientSocket){
 void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   int tipoCliente = ManejaPeticionCliente::manejaPeticion(solicitud);
   std::string respuesta;
-  
+  bool valido;
   switch(tipoCliente){
   case TipoCliente::Tipo::STATUS:
     
     {
-      bool valido = true;
+      valido = true;
       respuesta = ManejaPeticionCliente::manejaCambioEstado(solicitud, clientSocket, mapa, valido);
       
       if(valido){
@@ -212,12 +212,32 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     break;
     
   case TipoCliente::Tipo::NEW_ROOM:
-    Cuarto cuarto;
-    
+    {
+      Cuarto cuarto;
+      respuesta = ManejaPeticionCliente::manejaNuevoCuarto(solicitud, cuarto, cuartos);
+      mandaMensajeIndividual(clientSocket, respuesta);
+    }
     break;
   case TipoCliente::Tipo::INVITE:
+    {
+      std::vector<int> clientesAInvitar;
+      valido = true;
+      respuesta = ManejaPeticionCliente::manejaInvitacion(solicitud, cuartos, valido, mapa, clientesAInvitar, clientSocket);
+      if(!valido){
+	mandaMensajeIndividual(clientSocket, respuesta);
+      }else{
+	for(int socket:clientesAInvitar){
+	  mandaMensajeIndividual(socket, respuesta);
+	}
+      }
+    }
     break;
   case TipoCliente::Tipo::JOIN_ROOM:
+    {
+      std::string avisoDeUsuarioConectado;
+      valido = true;
+      respuesta = ManejaPeticionCliente::manejaUnionACuarto(solicitud, avisoDeUsuarioConectado, cuartos, valido, mapa[clientSocket].getNombre());
+    }
     break;
   case TipoCliente::Tipo::ROOM_USERS:
     break;

@@ -33,7 +33,9 @@ class TipoServidor{
   //Indica a los usuarios que alguien se desconectó.
   DISCONNECTED = 11,
   //El mensaje del cliente es invalido.
-  INVALID = 0
+  INVALID = 0,
+  //El usuario fue invitado a un cuarto.
+  INIVTATION = -1
   };
   static std::string getString(TipoServidor::Tipo);
 };
