@@ -41,23 +41,58 @@ std::string MensajeJson::manejaMensajeCliente(char buffer[], bool &sigueConectad
     else if(buff[1] == "-t"){
       if(buff.size() < 4){
 	std::cout<<"Formato del comando incorrecto."<<std::endl;
-	std::cout<<"Uso: REQUEST -d"<<std::endl;
+	std::cout<<"Uso: REQUEST -t"<<std::endl;
 	return "NULL";
       }
       return peticionMensajePrivado(buff);
       
     }else if(buff[1] == "-nr"){
-      
+      if(buff.size() < 3){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -nr 'nombre cuarto'"<<std::endl;
+	return "NULL";
+      }
+      return peticionCreaCuarto(buff);
     }else if(buff[1] == "-i"){
+      if(buff.size() < 4){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -i 'nombre cuarto' | 'usuario1 usuario2 ...'"<<std::endl;
+	return "NULL";
+      }
+      return peticionInvitaACuarto(buff);
       
     }else if(buff[1] == "-jr"){
+      if(buff.size() < 3){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -jr 'nombre cuarto'"<<std::endl;
+	return "NULL";
+      }
+      return peticionUnirseCuarto(buff);
       
     }else if(buff[1] == "-ru"){
+      if(buff.size() < 3){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -ru 'nombre cuarto'"<<std::endl;
+	return "NULL";
+      }
+      return peticionListaCuarto(buff);
       
+    }else if(buff[1] == "-rt"){
+      if(buff.size() < 4){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -rt 'nombre cuarto' | 'texto...'"<<std::endl;
+	return "NULL";
+      }
+      return peticionMandaMensajeCuarto(buff);
     }else if(buff[1] == "-lr"){
-      
+      if(buff.size() < 3){
+	std::cout<<"Formato del comando incorrecto."<<std::endl;
+	std::cout<<"Uso: REQUEST -lr 'nombre cuarto'"<<std::endl;
+	return "NULL";
+      }
+      return peticionAbandonaCuarto(buff);
     }
-    //Peticion descinectar.
+    //Peticion desconectar.
     else if(buff[1] == "-d"){
       if(buff.size() != 2){
 	std::cout<<"Formato del comando incorrecto."<<std::endl;
@@ -87,6 +122,25 @@ int MensajeJson::manejaRespuestaServidor(char buffer[]){
       return respuestaPeticionInvalida(buff);
     }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::TEXT)){
       return respuestaMensajePrivado(buff);
+  
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::NEW_ROOM)){
+      return respuestaCrearCuarto(buff);
+      
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::INVITE)){
+      return respuestaInvitaACuarto(buff);
+      
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::JOIN_ROOM)){
+      return respuestaUnirseCuarto(buff);
+      
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::ROOM_USERS)){
+      return respuestaListaCuarto(buff);
+      
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::ROOM_TEXT)){
+      return respuestaMandaMensajeCuarto(buff);
+      
+    }else if(buff["operation"] == TipoCliente::getString(TipoCliente::Tipo::LEAVE_ROOM)){
+      return respuestaAbandonaCuarto(buff);
+      
     }
     
   }
@@ -106,14 +160,16 @@ void MensajeJson::manejaAvisoServidor(char buffer[]){
     avisoMensajePrivado(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::PUBLIC_TEXT_FROM)){
     avisoTextoPublico(buff);
+  }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::INVITATION)){
+    avisoInvitacion(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::JOINED_ROOM)){
-      
+    avisoUneACuarto(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::ROOM_USER_LIST)){
-      
+    avisoListaCuarto(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::ROOM_TEXT_FROM)){
-      
+    avisoTextoCuarto(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::LEFT_ROOM)){
-      
+    avisoAbandonaCuarto(buff);
   }else if(buff["type"] == TipoServidor::getString(TipoServidor::Tipo::DISCONNECTED)){
     avisoUsuarioDesconectado(buff);
   }
@@ -177,6 +233,64 @@ int MensajeJson::respuestaMensajePrivado(Json::Value respuesta){
   return 1;
 }
 
+int MensajeJson::respuestaCrearCuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  
+  if(respuesta["result"].asString() == ResultadoServidor::getString(ResultadoServidor::Resultado::ROOM_ALREADY_EXISTS)){
+    std::cout<<"EL NOMBRE DEL CUARTO "<<nombreCuarto<<" YA FUE OCUPADO"<<std::endl;
+  }else if(respuesta["result"].asString() == ResultadoServidor::getString(ResultadoServidor::Resultado::SUCCESS)){
+    std::cout<<"EL CUARTO "<<nombreCuarto<<" FUE CREADO EXITOSAMENTE"<<std::endl;
+  }
+  
+  return 1;
+}
+
+int MensajeJson::respuestaInvitaACuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string resultado = respuesta["result"].asString();
+
+  return respuestaPeticionCuarto(resultado, nombreCuarto);
+}
+  
+int MensajeJson::respuestaUnirseCuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string resultado = respuesta["result"].asString();
+
+  return respuestaPeticionCuarto(resultado, nombreCuarto);
+}
+
+int MensajeJson::respuestaListaCuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string resultado = respuesta["result"].asString();
+  
+  return respuestaPeticionCuarto(resultado, nombreCuarto);
+}
+
+int MensajeJson::respuestaMandaMensajeCuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string resultado = respuesta["result"].asString();
+
+  return respuestaPeticionCuarto(resultado, nombreCuarto);
+}
+
+int MensajeJson::respuestaAbandonaCuarto(Json::Value respuesta){
+  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string resultado = respuesta["result"].asString();
+
+  return respuestaPeticionCuarto(resultado, nombreCuarto);
+}
+
+int MensajeJson::respuestaPeticionCuarto(std::string resultado, std::string nombreCuarto){
+  
+  if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::NO_SUCH_ROOM)){
+    std::cout<<"PETICIÓN RECHAZADA, EL CUARTO "<<nombreCuarto<<" NO EXISTE."<<std::endl;
+  }else if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::NOT_JOINED)){
+    std::cout<<"PETICIÓN RECHAZADA, AÚN NO SE HA UNIDO AL CUARTO "<<nombreCuarto<<"."<<std::endl;
+  }
+
+  return 1;
+}
+
 void MensajeJson::avisoNuevoUsuario(Json::Value aviso){
   std::string nombre = aviso["username"].asString();
   coloresUsuarios[nombre] = getIndice();
@@ -215,7 +329,7 @@ std::string MensajeJson::peticionListaGeneral(){
   return convierteACadena(peticion);
 }
 
-std::string MensajeJson::peticionMensajePrivado(std::vector<std::string> &vect){
+std::string MensajeJson::peticionMensajePrivado(std::vector<std::string> vect){
   std::string mensaje = "";
   int i = 0;
   for(std::string s:vect){
@@ -229,6 +343,175 @@ std::string MensajeJson::peticionMensajePrivado(std::vector<std::string> &vect){
   peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::TEXT);
   peticion["username"] = vect[2];
   peticion["text"] = mensaje;
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionCreaCuarto(std::vector<std::string> entradaUsuario){
+  std::string nombreCuarto;
+  Json::Value peticion;
+
+  int i = 0;
+  for(std::string s:entradaUsuario){
+    if(i>=3)
+      nombreCuarto += s + " ";
+    i++;
+  }
+
+  if(nombreCuarto.length() >16){
+    std::cout<<"El nombre del cuarto no debe tener más de 16 caracteres."<<std::endl;
+    return "NULL";
+  }
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::NEW_ROOM);
+  peticion["roomname"] = nombreCuarto;
+
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionInvitaACuarto(std::vector<std::string> entradaUsuario){
+  Json::Value peticion;
+  Json::Value arregloUsuarios;
+  std::string nombreCuarto;
+
+  //Cuanta cuando el usuario escribió '|' para dividir el comando.
+  int separador = 0;
+  int i = 0;
+  for(std::string s: entradaUsuario){
+    if(i >= 3){
+      
+      if(s == "|"){
+	separador++;
+      }
+      else{
+	
+	if(separador == 0){
+	  if(nombreCuarto != ""){
+	    nombreCuarto += " ";
+	  }
+	  nombreCuarto += s;
+	  
+	}else{
+	  arregloUsuarios.append(s);
+	}
+      }
+    }
+    i++;
+  }
+
+  if(separador == 0){
+    std::cout<<"Formato del comando incorrecto."<<std::endl;
+    std::cout<<"Uso: REQUEST -i 'nombre cuarto' | 'usuario1 usuario2 ...'"<<std::endl;
+    return "NULL";
+  }
+
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::INVITE);
+  peticion["roomname"] = nombreCuarto;
+  peticion["usernames"] = arregloUsuarios;
+
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionUnirseCuarto(std::vector<std::string> entradaUsuario){
+  Json::Value peticion;
+  std::string nombreCuarto;
+
+  int i = 0;
+  for(std::string s: entradaUsuario){
+    if(i >= 3){
+      if(nombreCuarto != ""){
+	nombreCuarto += " ";
+      }
+      nombreCuarto += s;
+    }
+    i++;
+  }
+
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::JOIN_ROOM);
+  peticion["roomname"] = nombreCuarto;
+
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionListaCuarto(std::vector<std::string> entradaUsuario){
+  Json::Value peticion;
+  std::string nombreCuarto;
+
+  int i = 0;
+  for(std::string s: entradaUsuario){
+    if(i >= 3){
+      if(nombreCuarto != ""){
+	nombreCuarto += " ";
+      }
+      nombreCuarto += s;
+    }
+    i++;
+  }
+
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::ROOM_USERS);
+  peticion["type"] = nombreCuarto;
+
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionMandaMensajeCuarto(std::vector<std::string> entradaUsuario){
+  Json::Value peticion;
+  std::string nombreCuarto;
+  std::string mensaje;
+  
+  int separador = 0;
+  int i = 0;
+  for(std::string s: entradaUsuario){
+    if(i >= 3){
+      
+      if(s == "|"){
+	separador++;
+      }
+      else{
+	
+	if(separador == 0){
+	  if(nombreCuarto != ""){
+	    nombreCuarto += " ";
+	  }
+	  nombreCuarto += s;
+	  
+	}else{
+	  mensaje += s + " ";
+	}
+      }
+    }
+    i++;
+  }
+
+  if(separador == 0){
+    std::cout<<"Formato del comando incorrecto."<<std::endl;
+    std::cout<<"Uso: REQUEST -rt 'nombre cuarto' | 'texto...'"<<std::endl;
+    return "NULL";
+  }
+
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::ROOM_TEXT);
+  peticion["roomname"] = nombreCuarto;
+  peticion["text"] = mensaje;
+
+  return convierteACadena(peticion);
+}
+
+std::string MensajeJson::peticionAbandonaCuarto(std::vector<std::string> entradaUsuario){
+  Json::Value peticion;
+  std::string nombreCuarto;
+
+  int i = 0;
+  for(std::string s: entradaUsuario){
+    if(i >= 3){
+      if(nombreCuarto != ""){
+	nombreCuarto += " ";
+      }
+      nombreCuarto += s;
+    }
+    i++;
+  }
+
+  peticion["type"] = TipoCliente::getString(TipoCliente::Tipo::LEAVE_ROOM);
+  peticion["roomname"] = nombreCuarto;
+
   return convierteACadena(peticion);
 }
 
@@ -265,6 +548,52 @@ void MensajeJson::avisoMensajePrivado(Json::Value aviso){
     coloresUsuarios[nombre] = getIndice();
   }
   std::cout<<getColor(1)<<"MENSAJE PRIVADO "<<finColor<<getColor(coloresUsuarios[nombre])<<nombre<<": "<<finColor<<mensaje<<std::endl;
+}
+
+void MensajeJson::avisoInvitacion(Json::Value aviso){
+  std::string nombreUsuario = aviso["username"].asString();
+  std::string nombreCuarto = aviso["roomname"].asString();
+
+  if(!existeUsuario(nombreUsuario)){
+    coloresUsuarios[nombreUsuario] = getIndice();
+  }
+  std::cout<<getColor(coloresUsuarios[nombreUsuario])<<nombreUsuario<<finColor<<" lo invitó a unirse a "<<nombreCuarto<<std::endl;
+}
+
+void MensajeJson::avisoUneACuarto(Json::Value aviso){
+  std::string nombreUsuario = aviso["username"].asString();
+  std::string nombreCuarto = aviso["roomname"].asString();
+
+  if(!existeUsuario(nombreUsuario)){
+    coloresUsuarios[nombreUsuario] = getIndice();
+  }
+  std::cout<<getColor(coloresUsuarios[nombreUsuario])<<nombreUsuario<<finColor<<" se acaba de unir a "<<nombreCuarto<<std::endl;
+}
+
+void MensajeJson::avisoListaCuarto(Json::Value aviso){
+  std::string nombreCuarto = aviso["roomname"].asString();
+  std::cout<<"La Lista de usuarios de la sala "<<nombreCuarto<<" es: \n"<<aviso["users"]<<std::endl;
+}
+
+void MensajeJson::avisoTextoCuarto(Json::Value aviso){
+  std::string nombreCuarto = aviso["roomname"].asString();
+  std::string nombreUsuario = aviso["username"].asString();
+  std::string texto = aviso["text"].asString();
+  
+  if(!existeUsuario(nombreUsuario)){
+    coloresUsuarios[nombreUsuario] = getIndice();
+  }
+  std::cout<<"MENSAJE DEL CUARTO ->"<<nombreCuarto<<getColor(coloresUsuarios[nombreUsuario])<<" "<<nombreUsuario<<finColor<<": "<<texto<<std::endl;
+}
+
+void MensajeJson::avisoAbandonaCuarto(Json::Value aviso){
+  std::string nombreCuarto = aviso["roomname"].asString();
+  std::string nombreUsuario = aviso["username"].asString();
+  
+  if(!existeUsuario(nombreUsuario)){
+    coloresUsuarios[nombreUsuario] = getIndice();
+  }
+  std::cout<<getColor(coloresUsuarios[nombreUsuario])<<nombreUsuario<<finColor<<" abandonó "<<nombreCuarto<<std::endl;
 }
 
 std::string MensajeJson::getColor(int n){

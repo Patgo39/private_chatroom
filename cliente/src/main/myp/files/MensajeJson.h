@@ -65,7 +65,19 @@ private:
   //Crea el Json para solicitar la lista de usuarios del chat general.
   static std::string peticionListaGeneral();
   //Crea el Json para mandar un mensaje privado.
-  static std::string peticionMensajePrivado(std::vector<std::string>&);
+  static std::string peticionMensajePrivado(std::vector<std::string>);
+  //Crea el Json para crear una sala.
+  static std::string peticionCreaCuarto(std::vector<std::string>);
+  //Crea el Json para invitar usuarios.
+  static std::string peticionInvitaACuarto(std::vector<std::string>);
+  //Crea el json para unirse a una cuarto.
+  static std::string peticionUnirseCuarto(std::vector<std::string>);
+  //Crea el Json para pedir la lista de usuarios.
+  static std::string peticionListaCuarto(std::vector<std::string>);
+  //Crea el Json para mandar mensajes a un cuarto.
+  static std::string peticionMandaMensajeCuarto(std::vector<std::string>);
+  //Crea el Json para abandonar un cuarto.
+  static std::string peticionAbandonaCuarto(std::vector<std::string>);
   
   //AVISOS
   //Imprime cuando un nuevo usuario se conecta.
@@ -80,6 +92,16 @@ private:
   static void avisoListaGeneral(Json::Value);
   //Imprime el texto privado de un usuario.
   static void avisoMensajePrivado(Json::Value);
+  //Imprime la solicitud de un usuario para un cuarto.
+  static void avisoInvitacion(Json::Value);
+  //Imprime el aviso que un usuario se unió al cuarto.
+  static void avisoUneACuarto(Json::Value);
+  //Imprime la lista de usuarios de un cuarto.
+  static void avisoListaCuarto(Json::Value);
+  //Imprime el mensaje enviado al cuarto.
+  static void avisoTextoCuarto(Json::Value);
+  //Imprime la notificación cuando un usuario abandona un cuarto.
+  static void avisoAbandonaCuarto(Json::Value);
 
   //RESPUESTAS
   //Respuesta del servidor de la petición del usuario para identificarse.
@@ -88,6 +110,20 @@ private:
   static int respuestaPeticionInvalida(Json::Value);
   //Respuesta del servidor cuando el usuario del mensaje privado no existe.
   static int respuestaMensajePrivado(Json::Value);
+  //Respuesta del servidor cuando el cuarto ya existe o se creó con éxito.
+  static int respuestaCrearCuarto(Json::Value);
+  //Respuesta del servidor cuando hay un error al invitar usuarios.
+  static int respuestaInvitaACuarto(Json::Value);
+  //Respuesta del servidor cuando hay un error al unirse a un cuarto.
+  static int respuestaUnirseCuarto(Json::Value);
+  //Respuesta del servidor cuando hay un error al solicitar la lista del cuarto.
+  static int respuestaListaCuarto(Json::Value);
+  //Respuesta del servidor cuando hay un error al mandar mensaje al cuarto.
+  static int respuestaMandaMensajeCuarto(Json::Value);
+  //Respuesta del servidor cuando hay un error al solicitar la lista del cuarto.
+  static int respuestaAbandonaCuarto(Json::Value);
+  //Respuesta para las peticiones del usuario en un cuarto.
+  static int respuestaPeticionCuarto(std::string, std::string);
 };
   
 #endif

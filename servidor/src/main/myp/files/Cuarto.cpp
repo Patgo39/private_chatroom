@@ -40,3 +40,7 @@ bool Cuarto::hayUsuarioUnido(int clientSocket){
     return false;
   return mapaUsuarios[clientSocket];
 }
+
+void Cuarto::borra(int clientSocket){
+  mapaUsuarios.erase(clientSocket);
+}

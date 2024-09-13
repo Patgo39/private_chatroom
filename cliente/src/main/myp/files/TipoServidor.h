@@ -35,7 +35,7 @@ class TipoServidor{
   //El mensaje del cliente es invalido.
   INVALID = 0,
   //El usuario fue invitado a un cuarto.
-  INIVTATION = -1
+  INVITATION = -1
   };
   static std::string getString(TipoServidor::Tipo);
 };

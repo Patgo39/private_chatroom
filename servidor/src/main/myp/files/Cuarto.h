@@ -31,6 +31,8 @@ class Cuarto{
   void activaUsuario(int);
   //El usuario ya se unió al cuarto.
   bool hayUsuarioUnido(int);
+  //Elimina un usuario del mapa.
+  void borra(int);
 };
 
 #endif

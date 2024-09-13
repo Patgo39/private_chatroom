@@ -332,6 +332,8 @@ std::string ManejaPeticionCliente::manejaDejarCuarto(std::string peticion, Cuart
     return convierteACadena(respuesta);
   }
 
+  cuarto.borra(us.getSocket());
+  
   respuesta["type"] = respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::LEFT_ROOM);
   respuesta["roomname"] = nombreCuarto;
   respuesta["username"] = us.getNombre();
