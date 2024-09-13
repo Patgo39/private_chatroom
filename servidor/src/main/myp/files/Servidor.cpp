@@ -77,9 +77,9 @@ void Servidor::manejaCliente(int clientSocket){
   while(true){
     
     buffer = recibeMensaje(clientSocket);
-
+    mtx.lock();
     manejaPeticion(buffer, clientSocket);
-    
+    mtx.unlock();
     buffer.clear();
     
   }
@@ -166,12 +166,11 @@ std::string Servidor::recibeMensaje(int clientSocket){
 void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   int tipoCliente = ManejaPeticionCliente::manejaPeticion(solicitud);
   std::string respuesta;
-  bool valido;
+  bool valido = true;
   switch(tipoCliente){
   case TipoCliente::Tipo::STATUS:
     
     {
-      valido = true;
       respuesta = ManejaPeticionCliente::manejaCambioEstado(solicitud, clientSocket, mapa, valido);
       
       if(valido){
@@ -179,9 +178,7 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
       }else{
 	mandaMensajeIndividual(clientSocket, respuesta);
 	respuesta = ManejaPeticionCliente::manejaDesconexion(mapa[clientSocket].getNombre());
-	mtx.lock();
 	desconectaUsuario(clientSocket);
-	mtx.unlock();
 	mandaMensajeGeneral(clientSocket, respuesta);
       }
     }
@@ -221,7 +218,6 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   case TipoCliente::Tipo::INVITE:
     {
       std::vector<int> clientesAInvitar;
-      valido = true;
       respuesta = ManejaPeticionCliente::manejaInvitacion(solicitud, cuartos, valido, mapa, clientesAInvitar, clientSocket);
       if(!valido){
 	mandaMensajeIndividual(clientSocket, respuesta);
@@ -235,15 +231,65 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   case TipoCliente::Tipo::JOIN_ROOM:
     {
       std::string avisoDeUsuarioConectado;
-      valido = true;
-      respuesta = ManejaPeticionCliente::manejaUnionACuarto(solicitud, avisoDeUsuarioConectado, cuartos, valido, mapa[clientSocket].getNombre());
+      Cuarto cuarto;
+      respuesta = ManejaPeticionCliente::manejaUnionACuarto(solicitud, avisoDeUsuarioConectado, cuartos, valido, mapa[clientSocket], cuarto);
+
+      if(!valido){
+	mandaMensajeIndividual(clientSocket, respuesta);
+      }else{
+	std::vector<int> vectorUsuarios = cuarto.getVectorUsuarios();
+
+	for(int socket:vectorUsuarios){
+	  if(socket != clientSocket){
+	    mandaMensajeIndividual(socket, avisoDeUsuarioConectado);
+	  }
+	}
+	mandaMensajeIndividual(clientSocket, respuesta);
+	
+      }
     }
     break;
   case TipoCliente::Tipo::ROOM_USERS:
+    
+    respuesta = ManejaPeticionCliente::manejaListaCuarto(solicitud, cuartos, mapa, clientSocket);
+    mandaMensajeIndividual(clientSocket, respuesta);
     break;
+    
   case TipoCliente::Tipo::ROOM_TEXT:
+    {
+      Cuarto cuarto;
+      respuesta = ManejaPeticionCliente::manejaMensajeCuarto(solicitud, cuarto, cuartos, valido, mapa[clientSocket]);
+
+      if(valido){
+	std::vector<int> socketsUsuariosCuarto = cuarto.getVectorUsuarios();
+
+	for(int socket: socketsUsuariosCuarto){
+	  if(socket != clientSocket){
+	    mandaMensajeIndividual(socket, respuesta);
+	  }
+	}
+      }else{
+	mandaMensajeIndividual(clientSocket, respuesta);
+      }
+    }
     break;
   case TipoCliente::Tipo::LEAVE_ROOM:
+    {
+      Cuarto cuarto;
+      respuesta = ManejaPeticionCliente::manejaDejarCuarto(solicitud, cuarto, cuartos, valido, mapa[clientSocket]);
+
+      if(valido){
+	std::vector<int> socketsUsuariosCuarto = cuarto.getVectorUsuarios();
+
+	for(int socket: socketsUsuariosCuarto){
+	  if(socket != clientSocket){
+	    mandaMensajeIndividual(socket, respuesta);
+	  }
+	}
+      }else{
+	mandaMensajeIndividual(clientSocket, respuesta);
+      }
+    }
     break;
   case TipoCliente::Tipo::DISCONNECT:
     respuesta = ManejaPeticionCliente::manejaDesconexion(mapa[clientSocket].getNombre());

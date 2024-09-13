@@ -24,10 +24,17 @@ public:
   static std::string manejaNuevoCuarto(std::string, Cuarto&, std::vector<Cuarto>&);
   static std::string manejaInvitacion(std::string, std::vector<Cuarto>&, bool&, std::map<int, Usuario>, std::vector<int>&, int);
   
-  static std::string manejaUnionACuarto(std::string, std::string&, std::vector<Cuarto>&, bool&, std::string);
+  static std::string manejaUnionACuarto(std::string, std::string&, std::vector<Cuarto>&, bool&, Usuario, Cuarto&);
+
+  static std::string manejaListaCuarto(std::string, std::vector<Cuarto>&, std::map<int, Usuario>&, int);
+
+  static std::string manejaMensajeCuarto(std::string, Cuarto&, std::vector<Cuarto>&, bool&, Usuario us);
+
+  static std::string manejaDejarCuarto(std::string, Cuarto&, std::vector<Cuarto>&, bool&, Usuario us);
 private:
   static Json::Value convierteAJson(std::string);
   static std::string convierteACadena(Json::Value);
   static Json::Value regresaRespuesta(TipoCliente::Tipo, ResultadoServidor::Resultado, std::string);
+  static bool existeCuarto(std::string, std::vector<Cuarto>&, Cuarto&);
 };
 #endif

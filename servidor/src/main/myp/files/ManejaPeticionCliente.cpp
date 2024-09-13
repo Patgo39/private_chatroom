@@ -181,8 +181,12 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
   }
 
   //Se obtiene un vector de cadenas de la lista de invitados.
-  std::vector<std::string> vectorInvitados(arregloInvitados.begin(), arregloInvitados.end());
-  //std::vector<std::string> vectorInvitados;
+  std::vector<std::string> vectorInvitados;
+  int tam = int(arregloInvitados.size());
+  for(int i = 0; i<tam; i++){
+    vectorInvitados.push_back(arregloInvitados[i].asString());
+  }
+  
   //Se revisa si existen los usuarios del vector de invitados.
   for(std::string username: vectorInvitados){
     if(usuariosSockets.find(username) != usuariosSockets.end()){
@@ -205,9 +209,134 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
   return convierteACadena(respuesta);
 }
 
-std::string ManejaPeticionCliente::manejaUnionACuarto(std::string peticion, std::string &mensajeGeneral, std::vector<Cuarto> &cuartos, bool &valido, std::string nombre){
+std::string ManejaPeticionCliente::manejaUnionACuarto(std::string peticion, std::string &mensajeGeneral, std::vector<Cuarto> &cuartos, bool &valido, Usuario us, Cuarto &cuarto){
 
-  return "Hola";
+  Json::Value pet = convierteAJson(peticion);
+  Json::Value respuesta;
+  std::string nombreCuarto = pet["roomname"].asString();
+  bool hayCuarto = false;
+  
+  for(Cuarto c:cuartos){
+    if(c.getNombre() == nombreCuarto){
+      cuarto = c;
+      hayCuarto = true;
+    }
+  }
+
+  if(!hayCuarto){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::JOIN_ROOM, ResultadoServidor::Resultado::NOT_INVITED, nombreCuarto);
+    valido = false;
+    return convierteACadena(respuesta);
+  }
+
+  if(!cuarto.existeUsuario(us.getSocket())){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::JOIN_ROOM, ResultadoServidor::Resultado::NOT_INVITED, nombreCuarto);
+    valido = false;
+    return convierteACadena(respuesta);
+  }
+  cuarto.activaUsuario(us.getSocket());
+  
+  respuesta = regresaRespuesta(TipoCliente::Tipo::JOIN_ROOM, ResultadoServidor::Resultado::SUCCESS, nombreCuarto);
+
+  Json::Value mensajeCuarto;
+  mensajeCuarto["type"] = TipoServidor::getString(TipoServidor::Tipo::JOINED_ROOM);
+  mensajeCuarto["roomname"] = nombreCuarto;
+  mensajeCuarto["username"] = us.getNombre();
+
+  mensajeGeneral = convierteACadena(mensajeCuarto);
+  return convierteACadena(respuesta);
+}
+
+std::string ManejaPeticionCliente::manejaListaCuarto(std::string peticion, std::vector<Cuarto> &cuartos, std::map<int, Usuario> &mapaUsuarios, int clientSocket){
+
+  Json::Value solicitud = convierteAJson(peticion);
+  Json::Value respuesta;
+  std::string nombreCuarto = solicitud["roomname"].asString();
+  bool hayCuarto = false;
+  Cuarto cuarto;
+  
+  for(Cuarto c:cuartos){
+    if(c.getNombre() == nombreCuarto){
+      hayCuarto = true;
+      cuarto = c;
+    }
+  }
+
+  if(!hayCuarto){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::ROOM_USERS, ResultadoServidor::Resultado::NO_SUCH_ROOM, nombreCuarto);
+    return convierteACadena(respuesta);
+  }
+
+  if(!cuarto.hayUsuarioUnido(clientSocket)){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::ROOM_USERS, ResultadoServidor::Resultado::NOT_JOINED, nombreCuarto);
+  }
+
+  std::vector<int> socketUsuariosCuarto = cuarto.getVectorUsuarios();
+  Json::Value listaUsuarios;
+
+  for(int socket: socketUsuariosCuarto){
+    listaUsuarios[mapaUsuarios[socket].getNombre()] = mapaUsuarios[socket].getEstado();
+  }
+
+  respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::ROOM_USER_LIST);
+  respuesta["roomname"] = nombreCuarto;
+  respuesta["users"] = listaUsuarios;
+
+  return convierteACadena(respuesta);
+}
+
+std::string ManejaPeticionCliente::manejaMensajeCuarto(std::string peticion, Cuarto& cuarto, std::vector<Cuarto>& vectorCuartos, bool &valido, Usuario us){
+
+  Json::Value respuesta;
+  Json::Value solicitud = convierteAJson(peticion);
+  std::string nombreCuarto = solicitud["roomname"].asString();
+
+  if(!existeCuarto(nombreCuarto, vectorCuartos, cuarto)){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::ROOM_TEXT, ResultadoServidor::Resultado::NO_SUCH_ROOM, nombreCuarto);
+    valido = false;
+    
+    return convierteACadena(respuesta);
+  }
+  if(!cuarto.hayUsuarioUnido(us.getSocket())){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::ROOM_TEXT, ResultadoServidor::Resultado::NOT_JOINED, nombreCuarto);
+    valido = false;
+    
+    return convierteACadena(respuesta);
+  }
+
+  respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::ROOM_TEXT_FROM);
+  respuesta["roomname"] = nombreCuarto;
+  respuesta["username"] = us.getNombre();
+  respuesta["text"] = solicitud["text"].asString();
+
+  return convierteACadena(respuesta);
+}
+
+std::string ManejaPeticionCliente::manejaDejarCuarto(std::string peticion, Cuarto& cuarto, std::vector<Cuarto> &vectorCuartos, bool &valido, Usuario us){
+
+  Json::Value solicitud = convierteAJson(peticion);
+  std::string nombreCuarto = solicitud["roomname"].asString();
+  Json::Value respuesta;
+
+  if(!existeCuarto(nombreCuarto, vectorCuartos, cuarto)){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::LEAVE_ROOM, ResultadoServidor::Resultado::NO_SUCH_ROOM, nombreCuarto);
+    valido = false;
+    
+    return convierteACadena(respuesta);
+  }
+
+  if(!cuarto.hayUsuarioUnido(us.getSocket())){
+    respuesta = regresaRespuesta(TipoCliente::Tipo::LEAVE_ROOM, ResultadoServidor::Resultado::NOT_JOINED, nombreCuarto);
+    valido = false;
+    
+    return convierteACadena(respuesta);
+  }
+
+  respuesta["type"] = respuesta["type"] = TipoServidor::getString(TipoServidor::Tipo::LEFT_ROOM);
+  respuesta["roomname"] = nombreCuarto;
+  respuesta["username"] = us.getNombre();
+
+  return convierteACadena(respuesta);
 }
 
 std::string ManejaPeticionCliente::convierteACadena(Json::Value objetoJson){
@@ -233,4 +362,14 @@ Json::Value ManejaPeticionCliente::regresaRespuesta(TipoCliente::Tipo operacion,
   respuesta["extra"] = extra;
   
   return respuesta;
+}
+
+bool ManejaPeticionCliente::existeCuarto(std::string nombreCuarto, std::vector<Cuarto> &cuartos, Cuarto &cuarto){
+  for(Cuarto c:cuartos){
+    if(c.getNombre() == nombreCuarto){
+      cuarto = c;
+      return true;
+    }
+  }
+  return false;
 }

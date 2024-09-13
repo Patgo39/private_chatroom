@@ -11,7 +11,7 @@
 
 class Cuarto{
   std::string nombreCuarto;
-  std::map<int, bool>listaUsuarios;
+  std::map<int, bool> mapaUsuarios;
  public:
   //Constructor por defecto.
   Cuarto() = default;
@@ -22,13 +22,15 @@ class Cuarto{
   //Regresa el nombre de un cuarto.
   std::string getNombre();
   //Regresa un arreglo de usuarios activos.
-  std::vector<int> getListaUsuarios();
+  std::vector<int> getVectorUsuarios();
   //Si un usuario ya aceptó la invitación o está invitado, regresa true.
   bool existeUsuario(int);
   //Avisa al cuarto que un usuario ha sido invitado.
   void registraUsuario(int);
   //Avisa al cuarto que un usuario aceptó la invitación.
   void activaUsuario(int);
+  //El usuario ya se unió al cuarto.
+  bool hayUsuarioUnido(int);
 };
 
 #endif
