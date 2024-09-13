@@ -92,7 +92,8 @@ void Cliente::recibeMensaje(int clientSocket){
     
     buff[recibido] = '\0';
     std::cout<<"\r"<<std::string(50, ' ')<<"\r";
-    
+
+    std::cout<<buff<<std::endl;
     int respuesta = MensajeJson::manejaRespuestaServidor(buff);
     
     if(respuesta == 0){

@@ -21,7 +21,7 @@ public:
   static std::string manejaCambioEstado(std::string, int, std::map<int, Usuario>&, bool&);
   static std::string manejaListaGeneral(std::map<int, Usuario>&);
   static std::string manejaMensajePrivado(std::string, std::map<int, Usuario>&, int, int&);
-  static std::string manejaNuevoCuarto(std::string, Cuarto&, std::vector<Cuarto>&);
+  static std::string manejaNuevoCuarto(std::string, Cuarto&, std::vector<Cuarto>&, int);
   static std::string manejaInvitacion(std::string, std::vector<Cuarto>&, bool&, std::map<int, Usuario>, std::vector<int>&, int);
   
   static std::string manejaUnionACuarto(std::string, std::string&, std::vector<Cuarto>&, bool&, Usuario, Cuarto&);

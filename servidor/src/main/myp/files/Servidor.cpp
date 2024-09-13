@@ -77,9 +77,10 @@ void Servidor::manejaCliente(int clientSocket){
   while(true){
     
     buffer = recibeMensaje(clientSocket);
-    mtx.lock();
+    //std::cout<<buffer<<std::endl;
+    //mtx.lock();
     manejaPeticion(buffer, clientSocket);
-    mtx.unlock();
+    //mtx.unlock();
     buffer.clear();
     
   }
@@ -93,6 +94,7 @@ void Servidor::manejaCliente(int clientSocket){
  * @param clientSocket el socket del cliente.
  */
 void Servidor::desconectaUsuario(int clientSocket){
+  mtx.lock();
   Usuario us = mapa[clientSocket];
   mapa.erase(clientSocket);
   //close(clientSocket);
@@ -100,6 +102,7 @@ void Servidor::desconectaUsuario(int clientSocket){
   if(mapa.size() == 0){
     desconecta();
   }
+  mtx.unlock();
 }
 
 /**
@@ -211,14 +214,20 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   case TipoCliente::Tipo::NEW_ROOM:
     {
       Cuarto cuarto;
-      respuesta = ManejaPeticionCliente::manejaNuevoCuarto(solicitud, cuarto, cuartos);
+      mtx.lock();
+      respuesta = ManejaPeticionCliente::manejaNuevoCuarto(solicitud, cuarto, cuartos, clientSocket);
+      mtx.unlock();
+      
       mandaMensajeIndividual(clientSocket, respuesta);
     }
     break;
   case TipoCliente::Tipo::INVITE:
     {
       std::vector<int> clientesAInvitar;
+      mtx.lock();
       respuesta = ManejaPeticionCliente::manejaInvitacion(solicitud, cuartos, valido, mapa, clientesAInvitar, clientSocket);
+      mtx.unlock();
+      
       if(!valido){
 	mandaMensajeIndividual(clientSocket, respuesta);
       }else{
@@ -232,8 +241,10 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     {
       std::string avisoDeUsuarioConectado;
       Cuarto cuarto;
+      mtx.lock();
       respuesta = ManejaPeticionCliente::manejaUnionACuarto(solicitud, avisoDeUsuarioConectado, cuartos, valido, mapa[clientSocket], cuarto);
-
+      mtx.unlock();
+      
       if(!valido){
 	mandaMensajeIndividual(clientSocket, respuesta);
       }else{
@@ -276,8 +287,10 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
   case TipoCliente::Tipo::LEAVE_ROOM:
     {
       Cuarto cuarto;
+      mtx.lock();
       respuesta = ManejaPeticionCliente::manejaDejarCuarto(solicitud, cuarto, cuartos, valido, mapa[clientSocket]);
-
+      mtx.unlock();
+      
       if(valido){
 	std::vector<int> socketsUsuariosCuarto = cuarto.getVectorUsuarios();
 
@@ -293,10 +306,14 @@ void Servidor::manejaPeticion(std::string solicitud, int clientSocket){
     break;
   case TipoCliente::Tipo::DISCONNECT:
     respuesta = ManejaPeticionCliente::manejaDesconexion(mapa[clientSocket].getNombre());
-    mtx.lock();
     desconectaUsuario(clientSocket);
-    mtx.unlock();
     mandaMensajeGeneral(clientSocket, respuesta);
+
+    for(Cuarto c:cuartos){
+      if(c.existeUsuario(clientSocket)){
+	c.borra(clientSocket);
+      }
+    }
     break;
   }
 }

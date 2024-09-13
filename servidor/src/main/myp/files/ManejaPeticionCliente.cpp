@@ -110,7 +110,7 @@ std::string ManejaPeticionCliente::manejaMensajePrivado(std::string peticion, st
   return convierteACadena(respuesta);
 }
 
-std::string ManejaPeticionCliente::manejaNuevoCuarto(std::string peticion, Cuarto &cuarto, std::vector<Cuarto> &cuartos){
+std::string ManejaPeticionCliente::manejaNuevoCuarto(std::string peticion, Cuarto &cuarto, std::vector<Cuarto> &cuartos, int clientSocket){
   
   Json::Value pet = convierteAJson(peticion);
   Json::Value respuesta;
@@ -122,8 +122,12 @@ std::string ManejaPeticionCliente::manejaNuevoCuarto(std::string peticion, Cuart
     }
   }
   cuarto = Cuarto(nombre);
+  
+  cuarto.registraUsuario(clientSocket);
+  cuarto.activaUsuario(clientSocket);
+  
   cuartos.push_back(cuarto);
-
+  
   respuesta = regresaRespuesta(TipoCliente::Tipo::NEW_ROOM, ResultadoServidor::Resultado::SUCCESS, nombre);
 
   return convierteACadena(respuesta);
@@ -142,16 +146,12 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
   
   //Json de la petición.
   Json::Value pet = convierteAJson(peticion);
-  
   //El Json de la respuesta a la petición.
   Json::Value respuesta;
-  
   //El arreglo Json de la lista de invitados.
   Json::Value arregloInvitados = pet["usernames"];
-  
   //El cuarto que recibirá a los invitados de la lista.
   Cuarto cuarto;
-  
   //Nombre del cuarto que recibirá a los invitados.
   std::string nombreCuarto = pet["roomname"].asString();
   
@@ -161,11 +161,13 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
   //Mapa de usuarios de la lista general que asocia los nombres con los sockets.
   std::map<std::string, int> usuariosSockets;
 
+  int posicion;
+  int longitudCuartos = (int)cuartos.size();
   //Se revisa si existe el cuarto.
-  for(Cuarto c:cuartos){
-    if(nombreCuarto == c.getNombre()){
+  for(int i = 0; i < longitudCuartos; i++){
+    if(nombreCuarto == cuartos[i].getNombre()){
       existeCuarto = true;
-      cuarto = c;
+      posicion = i;
     }
   }
   //Si no existe el cuarto se regresa un Json de respuesta tipo NO_SUCH_ROOM.
@@ -175,6 +177,12 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
     return convierteACadena(respuesta);
   }
 
+  if(!cuartos[posicion].hayUsuarioUnido(clientSocket)){
+    valido = false;
+    respuesta = regresaRespuesta(TipoCliente::Tipo::INVITE, ResultadoServidor::Resultado::NOT_JOINED, nombreCuarto);
+    return convierteACadena(respuesta);
+  }
+  
   //Crea el mapa de usuarios en el servidor que relaciona nombres con sockets.
   for(auto elemento:mapaUsuarios){
     usuariosSockets[elemento.second.getNombre()] = elemento.first;
@@ -189,15 +197,17 @@ std::string ManejaPeticionCliente::manejaInvitacion(std::string peticion, std::v
   
   //Se revisa si existen los usuarios del vector de invitados.
   for(std::string username: vectorInvitados){
-    if(usuariosSockets.find(username) != usuariosSockets.end()){
+    if(usuariosSockets.find(username) == usuariosSockets.end()){
       respuesta = regresaRespuesta(TipoCliente::INVITE, ResultadoServidor::Resultado::NO_SUCH_USER, username);
+      valido = false;
       return convierteACadena(respuesta);
-    }else{
+      
+    }else if(!cuartos[posicion].hayUsuarioUnido(usuariosSockets[username])){
       //Se crea el vector de sockets de clientes innvitados.
       int socket = usuariosSockets[username];
       clientesAInvitar.push_back(socket);
       //Se le indica al cuarto que un usuario fue invitado.
-      cuarto.registraUsuario(socket);
+      cuartos[posicion].registraUsuario(socket);
     }
   }
 
@@ -224,7 +234,7 @@ std::string ManejaPeticionCliente::manejaUnionACuarto(std::string peticion, std:
   }
 
   if(!hayCuarto){
-    respuesta = regresaRespuesta(TipoCliente::Tipo::JOIN_ROOM, ResultadoServidor::Resultado::NOT_INVITED, nombreCuarto);
+    respuesta = regresaRespuesta(TipoCliente::Tipo::JOIN_ROOM, ResultadoServidor::Resultado::NO_SUCH_ROOM, nombreCuarto);
     valido = false;
     return convierteACadena(respuesta);
   }

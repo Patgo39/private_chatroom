@@ -30,7 +30,7 @@ void Cuarto::registraUsuario(int clientSocket){
 }
 
 void Cuarto::activaUsuario(int clientSocket){
-  if(!existeUsuario(clientSocket)){
+  if(existeUsuario(clientSocket)){
     mapaUsuarios[clientSocket] = true;
   }
 }

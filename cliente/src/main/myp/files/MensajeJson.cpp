@@ -237,25 +237,30 @@ int MensajeJson::respuestaCrearCuarto(Json::Value respuesta){
   std::string nombreCuarto = respuesta["extra"].asString();
   
   if(respuesta["result"].asString() == ResultadoServidor::getString(ResultadoServidor::Resultado::ROOM_ALREADY_EXISTS)){
-    std::cout<<"EL NOMBRE DEL CUARTO "<<nombreCuarto<<" YA FUE OCUPADO"<<std::endl;
+    std::cout<<"EL NOMBRE DEL CUARTO '"<<nombreCuarto<<"' YA FUE OCUPADO"<<std::endl;
   }else if(respuesta["result"].asString() == ResultadoServidor::getString(ResultadoServidor::Resultado::SUCCESS)){
-    std::cout<<"EL CUARTO "<<nombreCuarto<<" FUE CREADO EXITOSAMENTE"<<std::endl;
+    std::cout<<"EL CUARTO '"<<nombreCuarto<<"' FUE CREADO EXITOSAMENTE"<<std::endl;
   }
   
   return 1;
 }
 
 int MensajeJson::respuestaInvitaACuarto(Json::Value respuesta){
-  std::string nombreCuarto = respuesta["extra"].asString();
+  std::string nombre = respuesta["extra"].asString();
   std::string resultado = respuesta["result"].asString();
 
-  return respuestaPeticionCuarto(resultado, nombreCuarto);
+  return respuestaPeticionCuarto(resultado, nombre);
 }
   
 int MensajeJson::respuestaUnirseCuarto(Json::Value respuesta){
   std::string nombreCuarto = respuesta["extra"].asString();
   std::string resultado = respuesta["result"].asString();
 
+  if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::SUCCESS)){
+    std::cout<<"USTED SE UNIÓ AL CUARTO '"<<nombreCuarto<<"'."<<std::endl;
+    return 1;
+  }
+  
   return respuestaPeticionCuarto(resultado, nombreCuarto);
 }
 
@@ -280,12 +285,14 @@ int MensajeJson::respuestaAbandonaCuarto(Json::Value respuesta){
   return respuestaPeticionCuarto(resultado, nombreCuarto);
 }
 
-int MensajeJson::respuestaPeticionCuarto(std::string resultado, std::string nombreCuarto){
+int MensajeJson::respuestaPeticionCuarto(std::string resultado, std::string extra){
   
   if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::NO_SUCH_ROOM)){
-    std::cout<<"PETICIÓN RECHAZADA, EL CUARTO "<<nombreCuarto<<" NO EXISTE."<<std::endl;
+    std::cout<<"PETICIÓN RECHAZADA, EL CUARTO '"<<extra<<"' NO EXISTE."<<std::endl;
   }else if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::NOT_JOINED)){
-    std::cout<<"PETICIÓN RECHAZADA, AÚN NO SE HA UNIDO AL CUARTO "<<nombreCuarto<<"."<<std::endl;
+    std::cout<<"PETICIÓN RECHAZADA, AÚN NO SE HA UNIDO AL CUARTO "<<extra<<"."<<std::endl;
+  }else if(resultado == ResultadoServidor::getString(ResultadoServidor::Resultado::NO_SUCH_USER)){
+    std::cout<<"PETICIÓN RECHAZADA, EL USUARIO '"<<extra<<"' no existe."<<std::endl;
   }
 
   return 1;
@@ -352,8 +359,12 @@ std::string MensajeJson::peticionCreaCuarto(std::vector<std::string> entradaUsua
 
   int i = 0;
   for(std::string s:entradaUsuario){
-    if(i>=3)
-      nombreCuarto += s + " ";
+    if(i>=2){
+      if(nombreCuarto != ""){
+	nombreCuarto += " ";
+      }
+      nombreCuarto += s;
+    }
     i++;
   }
 
@@ -376,7 +387,7 @@ std::string MensajeJson::peticionInvitaACuarto(std::vector<std::string> entradaU
   int separador = 0;
   int i = 0;
   for(std::string s: entradaUsuario){
-    if(i >= 3){
+    if(i >= 2){
       
       if(s == "|"){
 	separador++;
@@ -416,7 +427,7 @@ std::string MensajeJson::peticionUnirseCuarto(std::vector<std::string> entradaUs
 
   int i = 0;
   for(std::string s: entradaUsuario){
-    if(i >= 3){
+    if(i >= 2){
       if(nombreCuarto != ""){
 	nombreCuarto += " ";
       }
@@ -437,7 +448,7 @@ std::string MensajeJson::peticionListaCuarto(std::vector<std::string> entradaUsu
 
   int i = 0;
   for(std::string s: entradaUsuario){
-    if(i >= 3){
+    if(i >= 2){
       if(nombreCuarto != ""){
 	nombreCuarto += " ";
       }
@@ -460,7 +471,7 @@ std::string MensajeJson::peticionMandaMensajeCuarto(std::vector<std::string> ent
   int separador = 0;
   int i = 0;
   for(std::string s: entradaUsuario){
-    if(i >= 3){
+    if(i >= 2){
       
       if(s == "|"){
 	separador++;
@@ -500,7 +511,7 @@ std::string MensajeJson::peticionAbandonaCuarto(std::vector<std::string> entrada
 
   int i = 0;
   for(std::string s: entradaUsuario){
-    if(i >= 3){
+    if(i >= 2){
       if(nombreCuarto != ""){
 	nombreCuarto += " ";
       }
