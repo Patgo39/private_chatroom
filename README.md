@@ -46,3 +46,7 @@ Para interactuar con el servidor, utiliza los siguientes comandos:
 
 Patricio García Ocampo
 
+## Notas Extras
+
+El sistema no tiene implementado por completo los cuartos y falla si no recibe un JSON.
+
