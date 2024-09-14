@@ -77,10 +77,8 @@ void Servidor::manejaCliente(int clientSocket){
   while(true){
     
     buffer = recibeMensaje(clientSocket);
-    //std::cout<<buffer<<std::endl;
-    //mtx.lock();
+    std::cout<<buffer<<std::endl;
     manejaPeticion(buffer, clientSocket);
-    //mtx.unlock();
     buffer.clear();
     
   }
@@ -109,6 +107,7 @@ void Servidor::desconectaUsuario(int clientSocket){
  * Desconecta el socket del servidor para terminar con el programa.
  */
 void Servidor::desconecta(){
+  shutdown(serverSocket, SHUT_RDWR);
   close(serverSocket);
   std::cout<<"\nServidor desconectado"<<std::endl;
 }
