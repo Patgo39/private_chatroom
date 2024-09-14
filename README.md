@@ -36,7 +36,7 @@ Para interactuar con el servidor, utiliza los siguientes comandos:
 - `REQUEST -u`  // USERS Obtiene la lista de usuarios.
 - `REQUEST -t "Nombre del usuario" texto ...`  // TEXT Envía un texto privado.
 - `REQUEST -nr "Nombre de la sala"`  // NEW_ROOM Crea una sala
-- `REQUEST -i "nombre de la sala" "usuario1" "usuario2" "usuario3" ...`  // INVITE Invita usuarios a una sala.
+- `REQUEST -i "nombre de la sala" | "usuario1" "usuario2" "usuario3" ...`  // INVITE Invita usuarios a una sala.
 - `REQUEST -jr "Nombre de la sala"`  // JOIN_ROOM El usuario se une a una sala.
 - `REQUEST -ru "Nombre de la sala"`  // ROOM_USERS Pide la lista de usuarios de la sala
 - `REQUEST -lr "Nombre de la sala"`  // LEAVE_ROOM El usuario abandona la sala
