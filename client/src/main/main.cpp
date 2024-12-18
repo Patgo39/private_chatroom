@@ -7,7 +7,12 @@ int main(){
 
   std::string port = sc.askAndGetPort();
   std::string ip = sc.askAndGetIp();
-  std::string userMessage = sc.getMessage();
+
+  while(true){
+    std::string userMessage = sc.getMessage();
+
+    std::cout<<"x: "<<userMessage<<std::endl;
+  }
   
   return 0;
 }
