@@ -42,8 +42,9 @@ void Screen::showMessage(std::string name, char buffer[], bool general, bool ser
 std::string Screen::getMessage(){
   
   char buffer[bufferSize];
-  std::cin.ignore(100, '\n');
   std::cout<<youString;
+  std::cin>>std::ws; // Descarta espacios en blanco de la entrada.
   std::cin.getline(buffer, bufferSize, '\n');
+  std::fflush(stdout);
   return buffer;
 }
