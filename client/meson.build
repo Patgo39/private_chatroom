@@ -8,4 +8,10 @@ class_files = [
 	'./src/main/client.cpp',
 	'./src/main/client_connection_exception.cpp']
 
-executable('client', sources : class_files, include_directories : incdir)
+#Dependencies
+ncurses = dependency('ncurses', required : true)
+
+executable('client',
+	sources : class_files,
+	include_directories : incdir,
+	dependencies: ncurses)
