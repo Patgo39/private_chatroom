@@ -21,8 +21,16 @@ std::string Screen::askAndGetIp(){
   return ip;
 }
 
-
+/**
+ * Se muestra un mensaje en el terminal. El formato dependerá de los parámetros
+ * específicados.
+ * @param name el nombre del usuario que envió el mensaje.
+ * @param buffer el buffer con el texto a imprimir.
+ * @param general true si el mensaje no es del servidor y es un mensaje privado.
+ * @param true si el mensaje es una respuesta del servidor.
+ */
 void Screen::showMessage(std::string name, char buffer[], bool general, bool serverResponse){
+  
   std::cout<<"\r"<<std::string(50, ' ')<<"\r";
   if(serverResponse){
     std::cout<<buffer<<std::endl;
