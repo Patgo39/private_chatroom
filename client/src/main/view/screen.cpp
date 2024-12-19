@@ -29,7 +29,7 @@ std::string Screen::askAndGetIp(){
  * @param general true si el mensaje no es del servidor y es un mensaje privado.
  * @param true si el mensaje es una respuesta del servidor.
  */
-void Screen::showMessage(std::string name, char buffer[], bool general, bool serverResponse){
+void Screen::showMessage(std::string name, char buffer[], bool general, bool serverResponse, bool continueConnected){
   
   std::cout<<"\r"<<std::string(50, ' ')<<"\r";
   if(serverResponse){
@@ -42,9 +42,10 @@ void Screen::showMessage(std::string name, char buffer[], bool general, bool ser
       std::cout<<message<<std::endl;
     }
   }
-
-  std::cout<<youString;
-  std::fflush(stdout);
+  if(continueConnected){
+    std::cout<<youString;
+    std::fflush(stdout);
+  }
 }
 
 std::string Screen::getMessage(){
