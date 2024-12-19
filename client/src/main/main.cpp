@@ -39,7 +39,7 @@ int main(){
   }catch(ClientConnectionException &e){
     char text[maxSizeBuffer];
     strncpy(text, e.what(), maxSizeBuffer);
-    sc.showMessage("server", text, true, true);
+    sc.showMessage("server", text, true, true, false);
   }
   
   return 0;
