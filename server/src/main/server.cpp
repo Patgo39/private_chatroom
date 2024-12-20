@@ -11,36 +11,47 @@ void Server::start(){
     int opt = 1;
     socklen_t addrlen = sizeof(address);
     
-    // Creating socket file descriptor
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    // Creando un socket.
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-    // Forcefully attaching socket to the port 8080
+    // Se relaciona el socket al puerto
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
         perror("setsockopt");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(port);
     
-    // Bind the socket to the network address and port
+    // Se vincula el socket a la dirección de la red y al puerto.
     if (bind(serverSocket, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
+      perror("bind failed");
+      exit(1);
     }
-    // Start listening for incoming connections
+    // Escucha las posibles conexiones.
     if (listen(serverSocket, 3) < 0) {
-        perror("listen");
-        exit(EXIT_FAILURE);
+      perror("listen");
+      exit(1);
     }
 
-    // Accept incoming connection
-    if ((clientSocket = accept(serverSocket, (struct sockaddr*)&address, &addrlen)) < 0) {
+    // Accepta nuevas conexiones.
+    while(true){
+      //Socket para un nuevo cliente.
+      int clientSocket;
+      
+      if ((clientSocket = accept(serverSocket, (struct sockaddr*)&address, &addrlen)) < 0) {
         perror("accept");
-        exit(EXIT_FAILURE);
+        exit(1);
+      }else{
+	std::thread threadClient(&Server::manageClient, this, clientSocket);
+      }
     }
+}
+
+void Server::manageClient(int clientSocket){
+
 }
 
 void Server::closeConnection(){

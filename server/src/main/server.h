@@ -9,17 +9,21 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <thread>
 
 class Server{
   int port;
   int bufferSize;
   int serverSocket;
   
-
+public:
   Server(int _port, int _bufferSize);
-
   void start();
   void closeConnection();
+
+private:
+  void manageClient(int clientSocket);
+  void disconnectClient(int clientSocket);
 };
 
 #endif
