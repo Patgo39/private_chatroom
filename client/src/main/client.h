@@ -22,7 +22,7 @@ class Client{
   Client(int _port, int _bufferSize, std::string _ipAddress);
   void start();
   void sendMessage(std::string);
-  std::string receiveMessages();
+  std::string receiveMessages(int &received);
   void closeConection();
 };
 

@@ -35,7 +35,7 @@ void Server::start(){
       perror("listen");
       exit(1);
     }
-
+    std::cout<<"Server started succesfully!"<<std::endl;
     // Accepta nuevas conexiones.
     while(true){
       //Socket para un nuevo cliente.
@@ -46,15 +46,26 @@ void Server::start(){
         exit(1);
       }else{
 	std::thread threadClient(&Server::manageClient, this, clientSocket);
+	threadClient.detach();
       }
     }
+    
 }
 
 void Server::manageClient(int clientSocket){
   clientSocketsArray.push_back(clientSocket);
   char buffer[bufferSize] = {0};
   while(true){
-    read(clientSocket, buffer, bufferSize);
+    int received = recv(clientSocket, buffer, bufferSize, 0);
+
+    if(received <= 0) continue;
+    
+    std::cout<<"server: "<<buffer<<std::endl;
+    std::string data(buffer);
+    /*for(int socket : clientSocketsArray){
+      sendMessageToClient(socket, data);
+      }*/
+    buffer[0] = '\0';
   }
 }
 
