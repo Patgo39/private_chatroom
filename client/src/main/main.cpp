@@ -7,9 +7,12 @@
 
 std::atomic<bool> continue_thread{true};
 
-void manageReceivedMessages(Screen sc){
+void manageReceivedMessages(Screen sc, Client c){
   while(continue_thread){
-    
+    int received = 0;
+    std::string text = c.receiveMessages(received);
+    if(received <= 0) continue;
+    sc.showMessage("Client", text.c_str(), true, false, true);
   }
 }
 
@@ -19,27 +22,28 @@ int main(){
 
   int port = std::stoi(sc.askAndGetPort());
   std::string ip = sc.askAndGetIp();
-
-  // Se inicia la conexión con el servidor.
   Client c = Client(port, maxSizeBuffer, ip);
-
+  
   try{
+    // Se inicia la conexión con el servidor.
     c.start();
 
-    std::thread thread_show_messages(manageReceivedMessages, sc);
+    std::thread thread_show_messages(manageReceivedMessages, sc, c);
 
     while(continue_thread){
+      //Se obtienen los mensajes del ususario.
       std::string userMessage = sc.getMessage();
+      //Si el texto ingresado es x, termina la conexión.
       if(userMessage == "x;"){
 	std::cout<<"byeee"<<std::endl;
 	continue_thread = false;
+      }else{
+	c.sendMessage(userMessage);
       }
     }
     thread_show_messages.join();
   }catch(ClientConnectionException &e){
-    char text[maxSizeBuffer];
-    strncpy(text, e.what(), maxSizeBuffer);
-    sc.showMessage("server", text, true, true, false);
+    sc.showMessage("server", e.what(), true, true, false);
   }
   
   return 0;

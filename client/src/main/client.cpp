@@ -31,9 +31,9 @@ void Client::sendMessage(std::string message){
   send(clientSocket, message.c_str(), message.size(), 0);
 }
 
-std::string Client::receiveMessages(){
+std::string Client::receiveMessages(int &received){
   char buffer[bufferSize] = {0};
-  ssize_t valread = read(clientSocket, buffer, bufferSize);
+  received = recv(clientSocket, buffer, bufferSize, 0);
   return buffer;
 }
 

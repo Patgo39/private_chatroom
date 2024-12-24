@@ -27,7 +27,7 @@ class Screen{
   //Se pregunta y se recibe la entrada del usuario para la ip.
   std::string askAndGetIp();
   //Se muestra un mensaje de otro usuario o la respuesta del servidor.
-  void showMessage(std::string name, char buffer[], bool general, bool serverResponse, bool continueConnected);
+  void showMessage(std::string name, const char buffer[], bool general, bool serverResponse, bool continueConnected);
   //Se obtiene la entrada del usuario.
   std::string getMessage();
 };
