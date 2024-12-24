@@ -51,7 +51,15 @@ void Server::start(){
 }
 
 void Server::manageClient(int clientSocket){
+  clientSocketsArray.push_back(clientSocket);
+  char buffer[bufferSize] = {0};
+  while(true){
+    read(clientSocket, buffer, bufferSize);
+  }
+}
 
+void Server::sendMessageToClient(int clientSocket, std::string data){
+  send(clientSocket, data.c_str(), data.size(), 0);
 }
 
 void Server::closeConnection(){
