@@ -10,11 +10,14 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <thread>
+#include <vector>
 
 class Server{
   int port;
   int bufferSize;
   int serverSocket;
+  //Vector temporal para almacenar sockets de clientes.
+  std::vector<int> clientSocketsArray;
   
 public:
   Server(int _port, int _bufferSize);
@@ -23,6 +26,7 @@ public:
 
 private:
   void manageClient(int clientSocket);
+  void sendMessageToClient(int clientSocket, std::string data);
   void disconnectClient(int clientSocket);
 };
 
