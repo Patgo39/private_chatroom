@@ -28,12 +28,13 @@ void Client::start(){
 }
 
 void Client::sendMessage(std::string message){
-  send(clientSocket, message.c_str(), message.size(), 0);
+  send(clientSocket, message.c_str(), message.length(), 0);
 }
 
 std::string Client::receiveMessages(int &received){
   char buffer[bufferSize] = {0};
   received = recv(clientSocket, buffer, bufferSize, 0);
+  std::cout<<"The received result is : "<<received<<std::endl;
   return buffer;
 }
 
