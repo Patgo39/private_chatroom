@@ -34,7 +34,6 @@ void Client::sendMessage(std::string message){
 std::string Client::receiveMessages(int &received){
   char buffer[bufferSize] = {0};
   received = recv(clientSocket, buffer, bufferSize, 0);
-  std::cout<<"The received result is : "<<received<<std::endl;
   return buffer;
 }
 

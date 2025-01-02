@@ -55,7 +55,8 @@ void Server::start(){
 void Server::manageClient(int clientSocket){
   
   clientSocketsArray.push_back(clientSocket);
-  std::cout<<"CLient "<<clientSocket<<" connected succesfully!"<<std::endl;
+  std::cout<<"Client "<<clientSocket<<" connected succesfully!"<<std::endl;
+  sendMessageToClient(clientSocket, "You are connected.");
   char buffer[bufferSize] = {0};
   
   while(true){
