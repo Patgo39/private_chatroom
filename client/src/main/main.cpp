@@ -21,6 +21,10 @@ void manageReceivedMessages(Screen &sc, Client &c){
     }
 }
 
+void manageCommand(Client &c, std::string command){
+
+}
+
 int main(){
   const int maxSizeBuffer = 1024;
   Screen sc = Screen(maxSizeBuffer);
@@ -41,14 +45,8 @@ int main(){
       
       //Se obtienen los mensajes del ususario.
       std::string userMessage = sc.getMessage();
-      
-      //Si el texto ingresado es x, termina la conexión.
-      if(userMessage == "x;"){
-	std::cout<<"byeee"<<std::endl;
-	continue_thread = false;
-      }else{
-	c.sendMessage(userMessage);
-      }
+
+      manageCommand(c, userMessage);
     }
     
     
