@@ -32,15 +32,15 @@ Para ejecutar el servidor y el cliente, utiliza los siguientes comandos:
 
 Para interactuar con el servidor, utiliza los siguientes comandos:
 
-- `REQUEST -s "new_status"`  // STATUS Cambia el estado del usuario
-- `REQUEST -u`  // USERS Obtiene la lista de usuarios.
-- `REQUEST -t "Nombre del usuario" texto ...`  // TEXT Envía un texto privado.
-- `REQUEST -nr "Nombre de la sala"`  // NEW_ROOM Crea una sala
-- `REQUEST -i "nombre de la sala" | "usuario1" "usuario2" "usuario3" ...`  // INVITE Invita usuarios a una sala.
-- `REQUEST -jr "Nombre de la sala"`  // JOIN_ROOM El usuario se une a una sala.
-- `REQUEST -ru "Nombre de la sala"`  // ROOM_USERS Pide la lista de usuarios de la sala
-- `REQUEST -lr "Nombre de la sala"`  // LEAVE_ROOM El usuario abandona la sala
-- `REQUEST -d`  // DISCONNECT Desconecta al usuario
+- `/status "new_status"`  // Cambia el estado del usuario
+- `/list`  // Obtiene la lista de usuarios.
+- `/private "username" text...`  // Envía un texto privado.
+- `/new "Room name"`  // Crea un cuarto.
+- `/invite "Room name" "usuario1" "usuario2" "usuario3" ...`  // Invita usuarios a una sala.
+- `/join "Nombre de la sala"`  // El usuario se une a una sala.
+- `/room "Nombre de la sala"`  // Pide la lista de usuarios de la sala
+- `/leave "Nombre de la sala"`  // El usuario abandona la sala
+- `/disconnect`  // Desconecta al usuario
 
 ## Autor
 
