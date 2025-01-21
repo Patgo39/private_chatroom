@@ -16,7 +16,7 @@ En las carpetas `servidor/` y `cliente/`, ejecuta los siguientes comandos para c
 
 ```bash
 meson setup builddir
-meson compile -C builddir
+ninja -C builddir
 ```
 
 ## Ejecución del proyecto
