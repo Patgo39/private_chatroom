@@ -31,7 +31,7 @@ Para ejecutar el servidor y el cliente, utiliza los siguientes comandos:
 ## Comandos para la Ejecución
 
 Para interactuar con el servidor, utiliza los siguientes comandos:
-
+- `/identify "username"`  // Cambia el estado del usuario
 - `/status "new_status"`  // Cambia el estado del usuario
 - `/list`  // Obtiene la lista de usuarios.
 - `/private "username" text...`  // Envía un texto privado.
