@@ -4,6 +4,7 @@
 #include <atomic>
 #include "./view/screen.h"
 #include "client.h"
+#include "command_manager.h"
 
 std::atomic<bool> continue_thread{true};
 
@@ -21,8 +22,22 @@ void manageReceivedMessages(Screen &sc, Client &c){
     }
 }
 
-void manageCommand(Client &c, std::string command){
+void manageCommand(Client &c, Screen &sc, std::string command){
+  bool stillConnected = true;
+  CommandManager cm = CommandManager();
+  try{
+    std::string json = cm.getJsonFromCommand(command, stillConnected);
+    c.sendMessage(json);
 
+    if(!stillConnected){
+      c.closeConection();
+      continue_thread = false;
+      sc.showMessage("Server", "You're now disconnected.", true, true, false);
+    }
+  }catch(CommandException &e){
+    std::string error = e.what();
+    sc.showMessage("Error", error, true, true, false);
+  }
 }
 
 int main(){
@@ -46,13 +61,13 @@ int main(){
       //Se obtienen los mensajes del ususario.
       std::string userMessage = sc.getMessage();
 
-      manageCommand(c, userMessage);
+      manageCommand(c, sc, userMessage);
     }
     
     
   }catch(ClientConnectionException &e){
     std::string error = e.what();
-    sc.showMessage("server", error, true, true, false);
+    sc.showMessage("Server", error, true, true, false);
   }
   
   return 0;

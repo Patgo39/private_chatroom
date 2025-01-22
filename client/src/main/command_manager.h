@@ -12,7 +12,7 @@ class CommandManager{
   
  public:
   CommandManager();
-  std::string getJsonFromCommand(std::string userMessage);
+  std::string getJsonFromCommand(std::string userMessage, bool &stillConnected);
 
  private:
   std::vector<std::string> getCommandAsVector(std::string userMessage);
@@ -25,10 +25,12 @@ class CommandManager{
   std::string manageJoinRoom(std::vector<std::string> command);
   std::string manageRoomList(std::vector<std::string> command);
   std::string manageLeaveRoom(std::vector<std::string> command);
-  std::string manageDisconnect(std::vector<std::string> command);
+  std::string manageDisconnect();
   std::string manageNormalText(std::string userMessage);
 
   std::string turnJsonToString(Json::Value json);
+  
+  std::vector<std::string> getParametersFromCommand(std::vector<std::string> command);
 };
 
 #endif

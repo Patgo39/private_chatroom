@@ -26,8 +26,9 @@ std::string Screen::askAndGetIp(){
  * específicados.
  * @param name el nombre del usuario que envió el mensaje.
  * @param buffer el buffer con el texto a imprimir.
- * @param general true si el mensaje no es del servidor y es un mensaje privado.
- * @param true si el mensaje es una respuesta del servidor.
+ * @param general true si el mensaje no es del servidor y no es un mensaje privado.
+ * @param serverResponse true si el mensaje es una respuesta del servidor.
+ * @param continueConnected true si el usuario sigue conectado.
  */
 void Screen::showMessage(std::string name, std::string buffer, bool general, bool serverResponse, bool continueConnected){
   
