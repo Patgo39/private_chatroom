@@ -31,15 +31,15 @@ Para ejecutar el servidor y el cliente, utiliza los siguientes comandos:
 ## Comandos para la Ejecución
 
 Para interactuar con el servidor, utiliza los siguientes comandos:
-- `/identify "username"`  // Cambia el estado del usuario
-- `/status "new_status"`  // Cambia el estado del usuario
+- `/identify 'username'`  // Cambia el estado del usuario
+- `/changestatus 'new_status'`  // Cambia el estado del usuario
 - `/list`  // Obtiene la lista de usuarios.
-- `/private "username" text...`  // Envía un texto privado.
-- `/new "Room name"`  // Crea un cuarto.
-- `/invite "Room name" "usuario1" "usuario2" "usuario3" ...`  // Invita usuarios a una sala.
-- `/join "Nombre de la sala"`  // El usuario se une a una sala.
-- `/room "Nombre de la sala"`  // Pide la lista de usuarios de la sala
-- `/leave "Nombre de la sala"`  // El usuario abandona la sala
+- `/private 'username' 'message...'`  // Envía un texto privado.
+- `/newroom 'Room name'`  // Crea un cuarto.
+- `/invite 'Room name' 'usuario1' 'usuario2' 'usuario3' ...`  // Invita usuarios a una sala.
+- `/join 'Nombre de la sala'`  // El usuario se une a una sala.
+- `/roomlist 'Nombre de la sala'`  // Pide la lista de usuarios de la sala
+- `/leave 'Nombre de la sala'`  // El usuario abandona la sala
 - `/disconnect`  // Desconecta al usuario
 
 ## Autor
