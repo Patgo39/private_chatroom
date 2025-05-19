@@ -121,6 +121,26 @@
             <mxPoint x="340" y="150" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="sypXZAQXjwbFtqqLpAum-1" value="client" style="swimlane;whiteSpace=wrap;html=1;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="110" y="290" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="sypXZAQXjwbFtqqLpAum-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="sypXZAQXjwbFtqqLpAum-1" source="sypXZAQXjwbFtqqLpAum-3" target="sypXZAQXjwbFtqqLpAum-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-10" y="110" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-20" y="43" />
+              <mxPoint x="-20" y="76" />
+              <mxPoint x="-19" y="76" />
+              <mxPoint x="-19" y="73" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sypXZAQXjwbFtqqLpAum-3" value="+ Client()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sypXZAQXjwbFtqqLpAum-1">
+          <mxGeometry y="54" width="170" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="sypXZAQXjwbFtqqLpAum-4" value="+ clientSocket, userName, identified" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sypXZAQXjwbFtqqLpAum-1">
+          <mxGeometry y="80" width="170" height="26" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
