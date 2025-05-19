@@ -82,6 +82,7 @@ void Server::manageClient(int clientSocket){
 }
 
 void Server::sendMessageToClient(int clientSocket, std::string data){
+
   send(clientSocket, data.c_str(), data.length(), 0);
 }
 
