@@ -1,5 +1,7 @@
 #include "server.h"
 
+std::mutex mtx;
+
 Server::Server(int _port, int _bufferSize){
   port = _port;
   bufferSize = _bufferSize;
@@ -54,8 +56,11 @@ void Server::start(){
 
 void Server::manageClient(int clientSocket){
 
+  mtx.lock();
   //Se agrega el cliente y el socket al mapa, siendo el socket la llave.
   socketsMap.insert({clientSocket, Client(clientSocket)});
+  mtx.unlock();
+  
   bool keepConection = true;
   
   std::cout<<"Client "<<clientSocket<<" connected succesfully!"<<std::endl;
@@ -78,8 +83,11 @@ void Server::manageClient(int clientSocket){
     buffer[0] = '\0';
     data.clear();
   }
+  mtx.lock();
   socketsMap.erase(clientSocket); // Se elimina el cliente del mapa de sockets.
-  disconnectClient(clientSocket);
+  mtx.unlock();
+
+  disconnectClient(clientSocket); // Se desconecta al usuario
 }
 
 void Server::sendMessageToClient(int clientSocket, std::string data){
