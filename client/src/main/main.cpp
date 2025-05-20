@@ -12,11 +12,11 @@ void manageReceivedMessages(Screen &sc, Client &c){
   
   while(continue_thread){
     
-    int received = -1;
-    std::string text = c.receiveMessages(received);
+    std::string text = c.receiveMessages();
     
-    if(received <= 0)
+    if(text == ""){
       continue;
+    }
 
     sc.showMessage("Client", text.c_str(), true, false, true);
     }
@@ -56,6 +56,7 @@ int main(){
     std::thread thread_show_messages(manageReceivedMessages, std::ref(sc), std::ref(c));
     thread_show_messages.detach();
 
+    // Ciclo que mantiene la conexión con el servidor
     while(continue_thread){
       
       //Se obtienen los mensajes del ususario.
