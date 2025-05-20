@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <thread>
+#include <mutex>
 #include <vector>
 #include <bits/stdc++.h>
 #include "client.h"
