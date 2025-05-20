@@ -53,13 +53,16 @@ void Server::start(){
 }
 
 void Server::manageClient(int clientSocket){
+
+  //Se agrega el cliente y el socket al mapa, siendo el socket la llave.
+  socketsMap.insert({clientSocket, Client(clientSocket)});
+  bool keepConection = true;
   
-  clientSocketsArray.push_back(clientSocket);
   std::cout<<"Client "<<clientSocket<<" connected succesfully!"<<std::endl;
-  sendMessageToClient(clientSocket, "You are connected.");
+  
   char buffer[bufferSize] = {0};
   
-  while(true){
+  while(keepConection){
 
     int received = recv(clientSocket, buffer, bufferSize, 0);
 
@@ -67,23 +70,25 @@ void Server::manageClient(int clientSocket){
 
     //Se conserva unicamente la cantidad de bytes leídos en el buffer.
     buffer[received] = '\0';
-    std::string data(buffer);
-    
-    std::cout<<"server: "<<buffer<<std::endl;
-    
-    for(int socket : clientSocketsArray){
-      sendMessageToClient(socket, data);
-    }
+    std::string data(buffer); // Se convierte el char array a string
+    std::cout<<"client "<<clientSocket<<": "<<data<<std::endl; // Se imprime el mensaje del usuario
 
+    
     //Se eliminan los datos del buffer y data.
     buffer[0] = '\0';
     data.clear();
   }
+  socketsMap.erase(clientSocket); // Se elimina el cliente del mapa de sockets.
+  disconnectClient(clientSocket);
 }
 
 void Server::sendMessageToClient(int clientSocket, std::string data){
-
   send(clientSocket, data.c_str(), data.length(), 0);
+
+}
+
+void Server::disconnectClient(int clientSocket){
+  close(clientSocket);
 }
 
 void Server::closeConnection(){

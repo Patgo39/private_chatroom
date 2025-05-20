@@ -4,7 +4,8 @@ incdir = include_directories('src/main')
 
 class_files = [
       	'src/main/main.cpp',
-	'./src/main/server.cpp']
+	'./src/main/server.cpp',
+	'./src/main/client.cpp']
 
 #Dependencies:
 #Jsoncpp
