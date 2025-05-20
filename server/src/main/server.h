@@ -11,13 +11,15 @@
 #include <unistd.h>
 #include <thread>
 #include <vector>
+#include <bits/stdc++.h>
+#include "client.h"
 
 class Server{
   int port;
   int bufferSize;
   int serverSocket;
   //Vector temporal para almacenar sockets de clientes.
-  std::vector<int> clientSocketsArray;
+  std::map<int, Client> socketsMap;
   
 public:
   Server(int _port, int _bufferSize);
