@@ -17,12 +17,13 @@ class Client{
   int bufferSize;
   std::string ipAddress;
   int clientSocket;
+  
  public:
   
   Client(int _port, int _bufferSize, std::string _ipAddress);
   void start();
   void sendMessage(std::string);
-  std::string receiveMessages(int &received);
+  std::string receiveMessages();
   void closeConection();
 };
 

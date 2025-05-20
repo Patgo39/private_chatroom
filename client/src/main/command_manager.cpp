@@ -4,6 +4,14 @@ CommandManager::CommandManager(){
 
 }
 
+/**
+ * Analiza el caso de todo comando posible incluyendo los posibles errores y
+ * se trabaja con el comando según sea el caso.
+ * @param userMessage el mensaje del usuario con el comando.
+ * @param stillConnected referencia a un booleano <True> para que el cliente
+ * mantenga la conexión con el servidor y <False> para otro caso.
+ * @return Json del comando recibido.
+ **/
 std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &stillConnected){
   std::vector<std::string> command = getCommandAsVector(userMessage);
 
@@ -48,6 +56,11 @@ std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &st
   
 }
 
+/**
+ * Convierte el comando del usuario en un vector.
+ * @param userMessage el mensaje del usuario con el comando.
+ * @return command el comando del usuario convertido a vector.
+ **/
 std::vector<std::string> CommandManager::getCommandAsVector(std::string userMessage){
   std::vector<std::string> command;
   std::string temp;
@@ -59,6 +72,11 @@ std::vector<std::string> CommandManager::getCommandAsVector(std::string userMess
   return command;
 }
 
+/**
+ * Construye el Json del comando para el comando de un mensaje público.
+ * @param userMessage el mensaje del usuario con el comando.
+ * @return el String con el json del comando.
+ **/
 std::string CommandManager::manageNormalText(std::string userMessage){
   Json::Value json;
   json["type"] = "PUBLIC_TEXT";
@@ -67,12 +85,22 @@ std::string CommandManager::manageNormalText(std::string userMessage){
   return turnJsonToString(json);
 }
 
+/**
+ * Convierte un objeto Json a un String.
+ * @param json el objeto json.
+ * @return output el String con el Json 
+ **/
 std::string CommandManager::turnJsonToString(Json::Value json){
   Json::StreamWriterBuilder builder;
   const std::string output = Json::writeString(builder, json);
   return output;
 }
 
+/**
+ * Convierte el comando /identify a Json y luego a String.
+ * @param command el vector con el comando del usuario.
+ * @return el String del json del comando.
+ **/
 std::string CommandManager::manageIdentification(std::vector<std::string> command){
 
   std::vector<std::string> name = getParametersFromCommand(command);

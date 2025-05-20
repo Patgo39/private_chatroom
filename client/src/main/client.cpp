@@ -2,7 +2,7 @@
 
 Client::Client(int _port, int _bufferSize, std::string _ipAddress){
   port = _port;
-  bufferSize = bufferSize;
+  bufferSize = _bufferSize;
   ipAddress = _ipAddress;
   clientSocket = 0;
 }
@@ -31,9 +31,9 @@ void Client::sendMessage(std::string message){
   send(clientSocket, message.c_str(), message.length(), 0);
 }
 
-std::string Client::receiveMessages(int &received){
+std::string Client::receiveMessages(){
   char buffer[bufferSize] = {0};
-  received = recv(clientSocket, buffer, bufferSize, 0);
+  int received = recv(clientSocket, buffer, bufferSize, 0);
   return buffer;
 }
 
