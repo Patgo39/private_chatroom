@@ -130,6 +130,12 @@
         <mxCell id="sypXZAQXjwbFtqqLpAum-4" value="+ clientSocket, userName, identified" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="sypXZAQXjwbFtqqLpAum-1" vertex="1">
           <mxGeometry x="10" y="80" width="170" height="40" as="geometry" />
         </mxCell>
+        <mxCell id="bLBxmp9YYoAkUxcLh9Ey-1" value="user_status" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="310" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bLBxmp9YYoAkUxcLh9Ey-2" value="+ AWAY, ACTIVE, BUSY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="bLBxmp9YYoAkUxcLh9Ey-1">
+          <mxGeometry y="30" width="170" height="26" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
