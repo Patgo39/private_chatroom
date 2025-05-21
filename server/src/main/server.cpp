@@ -62,10 +62,10 @@ void Server::manageClient(int clientSocket){
   mtx.unlock();
   
   bool keepConection = true;
-  
   std::cout<<"Client "<<clientSocket<<" connected succesfully!"<<std::endl;
-  
   char buffer[bufferSize] = {0};
+
+  RequestManager manager = RequestManager();
   
   while(keepConection){
 
@@ -75,17 +75,17 @@ void Server::manageClient(int clientSocket){
 
     //Se conserva unicamente la cantidad de bytes leídos en el buffer.
     buffer[received] = '\0';
-    std::string data(buffer); // Se convierte el char array a string
-    std::cout<<"client "<<clientSocket<<": "<<data<<std::endl; // Se imprime el mensaje del usuario
+    std::string message(buffer); // Se convierte el char array a string
+    std::cout<<"client "<<clientSocket<<": "<<message<<std::endl; // Se imprime el mensaje del usuario
 
+    mtx.lock();
+    manager.getResponse(socketsMap.at(clientSocket), message);
+    mtx.unlock();
     
     //Se eliminan los datos del buffer y data.
     buffer[0] = '\0';
-    data.clear();
+    message.clear();
   }
-  mtx.lock();
-  socketsMap.erase(clientSocket); // Se elimina el cliente del mapa de sockets.
-  mtx.unlock();
 
   disconnectClient(clientSocket); // Se desconecta al usuario
 }
@@ -96,6 +96,9 @@ void Server::sendMessageToClient(int clientSocket, std::string data){
 }
 
 void Server::disconnectClient(int clientSocket){
+  mtx.lock();
+  socketsMap.erase(clientSocket); // Se elimina el cliente del mapa de sockets.
+  mtx.unlock();
   close(clientSocket);
 }
 

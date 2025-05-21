@@ -9,3 +9,15 @@ std::string UserStatus::getString(UserStatus::Status status){
   return "NULL";
 }
 
+UserStatus::Status getStatusFromString(std::string status){
+
+  if (status == "ACTIVE"){
+    return UserStatus::Status::ACTIVE;
+  }else if(status == "BUSY"){
+    return UserStatus::Status::BUSY;
+  }else if(status == "AWAY"){
+    return UserStatus::Status::AWAY;
+  }
+
+  return UserStatus::Status::ACTIVE;
+}
