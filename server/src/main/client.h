@@ -4,11 +4,13 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include "user_status.h"
 
 class Client{
   int clientSocket;
   std::string userName;
   bool identified;
+  UserStatus::Status status;
   // vector para almacenar las salas en las que se encuentra el cliente
   // se reemplazará por una futura clase Room
   std::vector<int> rooms;

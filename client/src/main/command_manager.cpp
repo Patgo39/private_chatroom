@@ -125,6 +125,10 @@ std::string CommandManager::manageNewStatus(std::vector<std::string> command){
     throw CommandException("Invalid use of command /status.");
   }
 
+  for(char l:newStatus[0]){
+    l = toupper(l);
+  }
+  
   Json::Value json;
   json["type"] = "STATUS";
   json["status"] = newStatus[0];

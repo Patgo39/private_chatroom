@@ -4,6 +4,7 @@ Client::Client(int _clientSocket){
   clientSocket = _clientSocket;
   identified = false;
   userName = "";
+  status = UserStatus::Status::ACTIVE;
 }
 
 void Client::setUserName(std::string _userName){

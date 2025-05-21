@@ -14,6 +14,9 @@
 #include <vector>
 #include <bits/stdc++.h>
 #include "client.h"
+#include "request_manager.h"
+#include "room.h"
+#include <map>
 
 class Server{
   int port;
@@ -21,6 +24,7 @@ class Server{
   int serverSocket;
   //Vector temporal para almacenar sockets de clientes.
   std::map<int, Client> socketsMap;
+  std::vector<Room> roomVector;
   
 public:
   Server(int _port, int _bufferSize);
