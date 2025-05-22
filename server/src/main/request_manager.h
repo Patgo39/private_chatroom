@@ -10,8 +10,8 @@ class RequestManager{
   
 public:
   RequestManager();
-  void getResponse(Client& requester, std::string request);
-  
+  void getResponse(Client requester, std::string request);
+   
 };
 
 #endif

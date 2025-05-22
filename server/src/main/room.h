@@ -13,7 +13,7 @@ class Room{
 
  public:
 
-  Room(std::string _roomName);
+  Room();
   
 };
 
