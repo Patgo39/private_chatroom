@@ -9,7 +9,9 @@ class_files = [
 	'./src/main/user_status.cpp',
 	'./src/main/request_manager.cpp',
 	'./src/main/room.cpp',
-	'./src/main/request_response.cpp']
+	'./src/main/request_response.cpp',
+	'./src/main/json_controller.cpp',
+	'./src/main/operation.cpp']
 
 #Dependencies:
 #Jsoncpp

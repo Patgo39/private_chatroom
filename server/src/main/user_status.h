@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 class UserStatus{
- public:
+public:
   enum Status{
     ACTIVE = 1,
     BUSY = 2,

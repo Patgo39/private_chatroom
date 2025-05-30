@@ -79,8 +79,12 @@ void Server::manageClient(int clientSocket){
     std::cout<<"client "<<clientSocket<<": "<<message<<std::endl; // Se imprime el mensaje del usuario
 
     mtx.lock();
-    manager.getResponse(socketsMap.at(clientSocket), message);
+    RequestResponse response = manager.getResponse(socketsMap.at(clientSocket), message, socketsMap, roomMap);
     mtx.unlock();
+
+    keepConection = response.getKeepConection();
+
+    manageClientRequest(socketsMap.at(clientSocket), response);
     
     //Se eliminan los datos del buffer y data.
     buffer[0] = '\0';
@@ -88,6 +92,37 @@ void Server::manageClient(int clientSocket){
   }
 
   disconnectClient(clientSocket); // Se desconecta al usuario
+}
+
+void Server:: manageClientRequest(Client client, RequestResponse response){
+  std::string clientResponse = response.getUserResponse();
+  int requesterSocket = client.getSocket();
+  Message generalContent = response.getPublicMessage();
+  
+  if(clientResponse != ""){
+    sendMessageToClient(client.getSocket(), clientResponse);
+  }
+
+  switch(generalContent.type){
+    
+  case Message::MessageType::GENERAL://General
+    for(const auto& pair : socketsMap){
+      int socket = pair.first;
+
+      if(socket == requesterSocket){
+	continue;
+      }
+      sendMessageToClient(socket, generalContent.message);
+    }
+    break;
+    
+  case Message::MessageType::SPECIFIC: //Specific
+
+    break;
+    
+  case Message::MessageType::NONMESSAGE: break; // Nonmessage
+  }
+  
 }
 
 void Server::sendMessageToClient(int clientSocket, std::string data){

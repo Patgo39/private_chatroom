@@ -13,8 +13,16 @@ void Client::setUserName(std::string _userName){
   }
 }
 
+void Client::setUserStatus(UserStatus::Status _status){
+  status = _status;
+}
+
 std::string Client::getUserName(){
   return userName;
+}
+
+std::string Client::getUserStatus(){
+  return UserStatus::getString(status);
 }
 
 void Client::identify(){
@@ -29,6 +37,18 @@ int Client::getSocket(){
 
 bool Client::isIdentified(){
   return identified;
+}
+
+void Client::joinToRoom(std::string roomName){
+  for (char &c : roomName){
+    c = toupper(c);
+  }
+  
+  rooms.push_back(roomName);
+}
+
+std::vector<std::string> Client::getRoomVector(){
+  return rooms;
 }
 
 
