@@ -4,7 +4,6 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
-#include "client.h"
 #include "room.h"
 
 
@@ -27,20 +26,23 @@ struct Message{
 };
 
 class RequestResponse{
-  // El cliente que emitió la petición.
-  Client requester;
-  // El posible cuarto que haya creado el cliente.
-  Room room;
   // True para mantener la conexión del cliente, false para desconectar.
-  bool keepConetion;
+  bool keepConection;
   // Respuesta para el usuario
-  std::string requestResponse;
+  std::string userResponse;
   // Mensaje general
   Message message;
   
  public:
- RequestResponse(Client requester);
-  void createRoom(std::string roomName);
+  RequestResponse();
+  
+  Message getPublicMessage();
+  std::string getUserResponse();
+  bool getKeepConection();
+
+  void stopConection();
+  void setUserResponse(std::string response);
+  void setGeneralMessage(std::string json);
   
 };
 #endif

@@ -9,8 +9,12 @@ std::string UserStatus::getString(UserStatus::Status status){
   return "NULL";
 }
 
-UserStatus::Status getStatusFromString(std::string status){
+UserStatus::Status UserStatus::getStatusFromString(std::string status){
 
+  for(char &c:status){
+    c = std::toupper(c);
+  }
+  
   if (status == "ACTIVE"){
     return UserStatus::Status::ACTIVE;
   }else if(status == "BUSY"){

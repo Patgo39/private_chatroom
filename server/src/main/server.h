@@ -16,6 +16,7 @@
 #include "client.h"
 #include "request_manager.h"
 #include "room.h"
+#include "request_response.h"
 #include <map>
 
 class Server{
@@ -24,7 +25,8 @@ class Server{
   int serverSocket;
   //Vector temporal para almacenar sockets de clientes.
   std::map<int, Client> socketsMap;
-  std::vector<Room> roomVector;
+  // Relaciona el nombre del cuarto en mayúsculas con el objeto cuarto
+  std::map<std::string, Room> roomMap;
   
 public:
   Server(int _port, int _bufferSize);
@@ -34,6 +36,7 @@ public:
 private:
   void manageClient(int clientSocket);
   void sendMessageToClient(int clientSocket, std::string data);
+  void manageClientRequest(Client client, RequestResponse response);
   void disconnectClient(int clientSocket);
 };
 

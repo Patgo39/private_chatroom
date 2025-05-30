@@ -5,6 +5,7 @@
 #include "client.h"
 #include <string>
 #include <map>
+#include <vector>
 
 class Room{
 
@@ -14,7 +15,7 @@ class Room{
  public:
 
   Room();
-  
+  void inviteUser(Client client);
 };
 
 #endif
