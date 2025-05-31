@@ -19,12 +19,13 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
     return getInvalidRequestResponse();
   }
 
-  std::string type = value["type"].asString();
-
-  if(type == ""){
+  if(!value.isMember("type")){
     /** Se manda error de json incompleto y se deconecta al usuario*/
     return getInvalidRequestResponse();
   }
+
+  std::string type = value["type"].asString();
+  
   if(type != "IDENTIFY" && !requester.isIdentified()){
     /** Se manda error de usuario no identificado y se desconecta*/
     data.stopConection();
@@ -40,15 +41,29 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
     return manageStatusRequest(value, requester);
   }
 
+  if(type == "TEXT"){
+    return manageTextRequest(value, socketsMap, requester);
+  }
+
+  if(type == "PUBLIC_TEXT"){
+    return managePublicTextRequest(value, requester);
+  }
+
   return getInvalidRequestResponse();
 }
 
 RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, Client &requester, std::map<int, Client> &socketsMap){
+
+  if(!value.isMember("username")){
+    return getInvalidRequestResponse();
+  }
+  
   std::string username = value["username"].asString();
   RequestResponse response = RequestResponse();
 
-  if(username == ""){
-    return getInvalidRequestResponse();
+  if(username.length() > 8){
+    response.setUserResponse(jsonController.getUsernameMaxCharResponse(username));
+    return response;
   }
 
   for(const auto& pair : socketsMap){
@@ -70,6 +85,11 @@ RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, Client 
 }
 
 RequestResponse RequestManager::manageStatusRequest(Json::Value value, Client &requester){
+
+  if(!value.isMember("status")){
+    return getInvalidRequestResponse();
+  }
+  
   std::string status = value["status"].asString();
   RequestResponse response = RequestResponse();
 
@@ -77,7 +97,66 @@ RequestResponse RequestManager::manageStatusRequest(Json::Value value, Client &r
   requester.setUserStatus(statusValue);
   status = requester.getUserStatus();
 
-  response.setGeneralMessage(jsonController.getNewStatusAdvice(requester));
+  std::string message = jsonController.getNewStatusAdvice(requester);
+  response.setGeneralMessage(message);
+  response.setUserResponse(message);
+  return response;
+}
+
+RequestResponse RequestManager::manageUsersRequest(Json::Value value, std::map<int, Client> socketsMap){
+
+  RequestResponse response = RequestResponse();
+
+  response.setUserResponse(jsonController.getServerUserListResponse(socketsMap));
+  return response;
+}
+
+RequestResponse RequestManager::manageTextRequest(Json::Value value, std::map<int, Client> socketsMap, Client requester){
+
+  if(!value.isMember("username") || !value.isMember("text")){
+    return getInvalidRequestResponse();
+  }
+  
+  RequestResponse response = RequestResponse();
+  std::string userTarget = value["username"].asString();
+  std::string text = value["text"].asString();
+  bool userExists;
+  int socketTarget;
+  
+  if(text == ""){
+    return response;
+  }
+
+  for(const auto& pair : socketsMap){
+    Client c = pair.second;
+    if(c.getUserName() == userTarget){
+      userExists = true;
+      socketTarget = c.getSocket();
+    }
+  }
+
+  if(!userExists){
+    response.setUserResponse(jsonController.getNoSuchUserResponse(userTarget, Operation::Type::TEXT));
+    return response;
+  }
+  
+  std::string privateText = jsonController.getPrivateTextAdvice(requester.getUserName(), text);
+  response.setSpecificMessage(privateText, {socketTarget});
+  return response;
+}
+
+RequestResponse RequestManager::managePublicTextRequest(Json::Value value, Client requester){
+
+  if(!value.isMember("text")){
+    return getInvalidRequestResponse();
+  }
+  
+  RequestResponse response = RequestResponse();
+  std::string text = value["text"].asString();
+  std::string senderUsername = requester.getUserName();
+
+  std::string json = jsonController.getPublicTextAdvice(senderUsername, text);
+  response.setGeneralMessage(json);
   return response;
 }
 

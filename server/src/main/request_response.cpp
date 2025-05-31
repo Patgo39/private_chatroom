@@ -31,3 +31,7 @@ void RequestResponse::setGeneralMessage(std::string json){
   
 }
 
+void RequestResponse::setSpecificMessage(std::string json, std::vector<int> sockets){
+  message = {json, "", sockets, Message::MessageType::SPECIFIC};
+}
+

@@ -30,19 +30,52 @@ std::string JsonController::turnJsonToString(Json::Value json){
 
 /**Respuestas para el solicitante de la petición*/
 std::string JsonController::getIdentificationResponse(std::string username){
-  return "";
+  Json::Value json;
+
+  json["type"] = "RESPONSE";
+  json["operation"] = "IDENTIFY";
+  json["result"] = "SUCCESS";
+  json["extra"] = username;
+  
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getUsernameAlreadyExistsResponse(std::string username){
-  return "";
+  Json::Value json;
+  
+  json["type"] = "RESPONSE";
+  json["operation"] = "IDENTIFY";
+  json["result"] = "USER_ALREADY_EXISTS";
+  json["extra"] = username;
+
+  return turnJsonToString(json);
+}
+
+std::string JsonController::getUsernameMaxCharResponse(std::string username){
+  Json::Value json;
+  
+  json["type"] = "RESPONSE";
+  json["operation"] = "IDENTIFY";
+  json["result"] = "USERNAME_TOO_LONG";
+  json["extra"] = username;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getServerUserListResponse(std::map<int, Client> usersMap){
-  return "";
-}
+  Json::Value json;
+  Json::Value users;
 
-std::string JsonController::getUserTargetDoesntExistsResponse(std::string username){
-  return "";
+  for(const auto& pair : usersMap){
+    Client c = pair.second;
+
+    users[c.getUserName()] = c.getUserStatus();
+  }
+  
+  json["type"] = "USER_LIST";
+  json["users"] = users;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getNewRoomCreatedResponse(std::string roomName){
@@ -58,7 +91,23 @@ std::string JsonController::getNoSuchRoomResponse(std::string roomName, Operatio
 }
 
 std::string JsonController::getNoSuchUserResponse(std::string username, Operation::Type type){
-  return "";
+
+  std::string operation;
+  
+  switch(type){
+  case Operation::Type::INVITE: operation = "INVITE"; break;
+  case Operation::Type::TEXT: operation = "TEXT"; break;
+  default: /**Lanza error*/break;
+  }
+  
+  Json::Value json;
+  
+  json["type"] = "RESPONSE";
+  json["operation"] = operation;
+  json["result"] = "NO_SUCH_USER";
+  json["extra"] = username;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getJoinRoomSuccessResponse(std::string roomName){
@@ -80,19 +129,43 @@ std::string JsonController::getRoomUsersResponse(std::vector<Client> roomUsers){
 
   /**Mensajes generales*/
 std::string JsonController::getNewUserAdvice(std::string username){
-  return "";
+  Json::Value json;
+
+  json["type"] = "NEW_USER";
+  json["username"] = username;
+
+  return turnJsonToString(json);
+
 }
 
 std::string JsonController::getNewStatusAdvice(Client client){
-  return "";
+  Json::Value json;
+
+  json["type"] = "NEW_STATUS";
+  json["username"] = client.getUserName();
+  json["status"] = client.getUserStatus();
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getPrivateTextAdvice(std::string username, std::string message){
-  return "";
+  Json::Value json;
+
+  json["type"] = "TEXT_FROM";
+  json["username"] = username;
+  json["text"] = message;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getPublicTextAdvice(std::string username, std::string message){
-  return "";
+  
+  Json::Value json;
+
+  json["type"] = "PUBLIC_TEXT";
+  json["text"] = message;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getInvitationAdvice(std::string username, std::string roomName){
@@ -108,10 +181,23 @@ std::string JsonController::getRoomTextAdvice(std::string username, std::string 
 }
 
 std::string JsonController::getLeftRoomAdvice(std::string username, std::string roomName){
-  return "";
+
+  Json::Value json;
+
+  json["type"] = "LEFT_ROOM";
+  json["roomname"] = roomName;
+  json["username"] = username;
+
+  return turnJsonToString(json);
 }
 
 std::string JsonController::getUserDisconnectedAdvice(std::string username){
-  return "";
+
+  Json::Value json;
+
+  json["type"] = "DISCONNECTED";
+  json["username"] = username;
+
+  return turnJsonToString(json);
 }
 

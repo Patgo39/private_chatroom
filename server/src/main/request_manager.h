@@ -17,6 +17,9 @@ public:
 private:
   RequestResponse manageIdentifyRequest(Json::Value value, Client &requester, std::map<int, Client> &socketsMap);
   RequestResponse manageStatusRequest(Json::Value value, Client &requester);
+  RequestResponse manageUsersRequest(Json::Value value, std::map<int, Client> socketsMap);
+  RequestResponse manageTextRequest(Json::Value value, std::map<int, Client> socketsMap, Client requester);
+  RequestResponse managePublicTextRequest(Json::Value value, Client requester);
   // Regresa el objeto respuesta para Jsons incompletos o invalidos.
   RequestResponse getInvalidRequestResponse();
 };

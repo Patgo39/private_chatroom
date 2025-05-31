@@ -20,7 +20,7 @@ struct Message{
   // El nombre del cuarto si es que el mensaje es para algún cuarto.
   std::string roomName;
   // Vector con el nombre de usuarios objetivo, si es que es el caso.
-  std::vector<std::string> targetNames;
+  std::vector<int> targetsockets;
   // Tipo del mensaje.
   MessageType type;
 };
@@ -43,6 +43,6 @@ class RequestResponse{
   void stopConection();
   void setUserResponse(std::string response);
   void setGeneralMessage(std::string json);
-  
+  void setSpecificMessage(std::string json, std::vector<int> targetSockets);
 };
 #endif
