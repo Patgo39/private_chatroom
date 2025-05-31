@@ -101,6 +101,7 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
   
   if(clientResponse != ""){
     sendMessageToClient(client.getSocket(), clientResponse);
+    std::cout<<"Client Message: "<<clientResponse<<std::endl;
   }
 
   switch(generalContent.type){
@@ -113,6 +114,7 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
 	continue;
       }
       sendMessageToClient(socket, generalContent.message);
+      std::cout<<"General Message: "<<generalContent.message<<std::endl;
     }
     break;
     
