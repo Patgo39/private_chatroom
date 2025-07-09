@@ -63,6 +63,7 @@ RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, Client 
 
   if(username.length() > 8){
     response.setUserResponse(jsonController.getUsernameMaxCharResponse(username));
+    response.stopConection();
     return response;
   }
 
