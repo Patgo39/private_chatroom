@@ -109,8 +109,9 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
   case Message::MessageType::GENERAL://General
     for(const auto& pair : socketsMap){
       int socket = pair.first;
+      Client c = pair.second;
 
-      if(socket == requesterSocket){
+      if(socket == requesterSocket || !c.isIdentified()){
 	continue;
       }
       sendMessageToClient(socket, generalContent.message);
