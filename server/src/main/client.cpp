@@ -40,11 +40,19 @@ bool Client::isIdentified(){
 }
 
 void Client::joinToRoom(std::string roomName){
-  for (char &c : roomName){
-    c = toupper(c);
+  rooms.push_back(roomName);
+}
+
+void Client::forgetRoom(std::string roomName){
+  int position = 0;
+  for(std::string name:rooms){
+    if(name == roomName){
+      rooms.erase(rooms.begin() + position);
+      break;
+    }
+    position ++;
   }
   
-  rooms.push_back(roomName);
 }
 
 std::vector<std::string> Client::getRoomVector(){
