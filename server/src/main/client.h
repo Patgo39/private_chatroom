@@ -12,7 +12,6 @@ class Client{
   bool identified;
   UserStatus::Status status;
   // vector para almacenar las salas en las que se encuentra el cliente
-  // se reemplazará por una futura clase Room
   std::vector<std::string> rooms;
 
 
@@ -24,12 +23,14 @@ public:
   
   std::string getUserName();
   std::string getUserStatus();
+  int getSocket();
+  std::vector<std::string> getRoomVector();
   
   void identify();
-  int getSocket();
   bool isIdentified();
   void joinToRoom(std::string roomName);
-  std::vector<std::string> getRoomVector();
+  void forgetRoom(std::string roomName);
+  
   
 };
 

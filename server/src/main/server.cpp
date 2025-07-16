@@ -1,13 +1,23 @@
 #include "server.h"
 
-std::mutex mtx;
+std::mutex mtx; // Objeto para evitar que múltiples hilos accedan a recursos compartidos.
 
+/**
+ * El constructor del servidor inicializa el puerto y el tamaño del buffer con
+ * aquellos datos que recibe. Además el socket del servidor inicia en 0.
+ * @param _port el puerto por el que se conectarán los clientes.
+ * @param _bufferSize el tamaño máximo del buffer del servidor
+ */
 Server::Server(int _port, int _bufferSize){
   port = _port;
   bufferSize = _bufferSize;
   serverSocket = 0;
 }
 
+/**
+ * Se crea e inicia el hilo principal del servidor el cual acepta clientes e
+ * instantáneamente crea un hilo aparte para cada uno.
+ */
 void Server::start(){
   struct sockaddr_in address;
     int opt = 1;
@@ -54,6 +64,15 @@ void Server::start(){
     
 }
 
+/**
+ * La función se ejecuta en un hilo de ejecución que solo se detendrá si el
+ * cliente ejecuta el comando para desconectarse u ocurre un error de
+ * compatibilidad con algún comando.
+ * Se administran las peticiones del cliente en base a los comandos que
+ * introduce.
+ * @param clientSocket el socket por el cual el cliente se comunica con el
+ * servidor.
+ */
 void Server::manageClient(int clientSocket){
 
   mtx.lock();
@@ -82,6 +101,7 @@ void Server::manageClient(int clientSocket){
     RequestResponse response = manager.getResponse(socketsMap.at(clientSocket), message, socketsMap, roomMap);
     mtx.unlock();
 
+    // Se actualiza el estado de la conexión; si debe continuar o no.
     keepConection = response.getKeepConection();
 
     manageClientRequest(socketsMap.at(clientSocket), response);
@@ -94,10 +114,19 @@ void Server::manageClient(int clientSocket){
   disconnectClient(clientSocket); // Se desconecta al usuario
 }
 
+/**
+ * En base a la petición del cliente, se ejecutan los cambios correspondientes
+ * en los atributos del servidor y en objetos como el mapa de clientes o el
+ * mapa de cuartos.
+ * Se manda un mensaje de respuesta al cliente u otros clientes.
+ * @param client el cliente que realizó la petición.
+ * @param response el objeto respuesta que contiene los detalles de la respuesta
+ * para el usuario.
+ */
 void Server:: manageClientRequest(Client client, RequestResponse response){
   std::string clientResponse = response.getUserResponse();
   int requesterSocket = client.getSocket();
-  Message generalContent = response.getPublicMessage();
+  Message generalContent = response.getPublicMessage(); // Se obtiene el mensaje publico para todos a algunos usuarios en especifico.
   
   if(clientResponse != ""){
     sendMessageToClient(client.getSocket(), clientResponse);
@@ -105,34 +134,55 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
   }
 
   switch(generalContent.type){
-    
+    // Caso de mandar un mensaje a todos los clientes conectados.
   case Message::MessageType::GENERAL://General
-    for(const auto& pair : socketsMap){
-      int socket = pair.first;
-      Client c = pair.second;
-
-      if(socket == requesterSocket || !c.isIdentified()){
-	continue;
+    {
+      for(const auto& pair : socketsMap){
+	int socket = pair.first;
+	Client c = pair.second;
+	
+	// No se envia el mensaje al cliente que emitió la petición.
+	if(socket == requesterSocket || !c.isIdentified()){
+	  continue;
+	}
+	sendMessageToClient(socket, generalContent.message);
+	std::cout<<"General Message: "<<generalContent.message<<std::endl;
       }
-      sendMessageToClient(socket, generalContent.message);
-      std::cout<<"General Message: "<<generalContent.message<<std::endl;
     }
     break;
     
   case Message::MessageType::SPECIFIC: //Specific
-
+    {
+      std::vector<int> targets = generalContent.targetSockets; // Se obtiene el vector de los clientes a mandar el mensaje.
+      for(int sock : targets){
+	sendMessageToClient(sock, generalContent.message); 
+      }
+    }
     break;
     
-  case Message::MessageType::NONMESSAGE: break; // Nonmessage
+  case Message::MessageType::NONMESSAGE:
+
+    break; // Nonmessage
+  default:
+    std::cout<<"Message Type Format is invalid"<<std::endl;
   }
   
 }
 
+/**
+ * Manda un mensaje a un cliente en especifico dado su socket.
+ * @param clientSocket el socket del cliente que recibirá el mensaje.
+ * @param data la cadena que contiene el mensaje para el cliente.
+ */
 void Server::sendMessageToClient(int clientSocket, std::string data){
   send(clientSocket, data.c_str(), data.length(), 0);
 
 }
 
+/**
+ * Desconecta a un cliente dado su socket.
+ * @param clientSocket el socket del cliente.
+ */
 void Server::disconnectClient(int clientSocket){
   mtx.lock();
   socketsMap.erase(clientSocket); // Se elimina el cliente del mapa de sockets.
@@ -140,6 +190,9 @@ void Server::disconnectClient(int clientSocket){
   close(clientSocket);
 }
 
+/**
+ * Cierra el socket del servidor evitando que más clientes puedan conectarse.
+ */
 void Server::closeConnection(){
   close(serverSocket);
 }

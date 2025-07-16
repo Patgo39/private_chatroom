@@ -17,7 +17,8 @@ class JsonController{
 
   /**Errores de formato*/
   std::string getInvalidJsonResponse();
-  std::string getNotIdentifiedResponse(); 
+  std::string getNotIdentifiedResponse();
+  std::string getInvalidRoomNameResponse();
 
   /**Respuestas para el solicitante de la petición*/
   std::string getIdentificationResponse(std::string username);

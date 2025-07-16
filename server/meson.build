@@ -11,7 +11,8 @@ class_files = [
 	'./src/main/room.cpp',
 	'./src/main/request_response.cpp',
 	'./src/main/json_controller.cpp',
-	'./src/main/operation.cpp']
+	'./src/main/operation.cpp',
+	'./src/main/room_exception.cpp']
 
 #Dependencies:
 #Jsoncpp

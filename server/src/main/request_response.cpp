@@ -3,7 +3,8 @@
 RequestResponse::RequestResponse(){
   keepConection = true;
   userResponse = "";
-  message = {"", "", {}, Message::MessageType::NONMESSAGE};
+  message = {"", {}, Message::MessageType::NONMESSAGE};
+  extraMessage = {"", {}, Message::MessageType::NONMESSAGE};
 }
 
 Message RequestResponse::getPublicMessage(){
@@ -18,6 +19,8 @@ bool RequestResponse::getKeepConection(){
   return keepConection;
 }
 
+
+
 void RequestResponse::stopConection(){
   keepConection = false;
 }
@@ -27,11 +30,15 @@ void RequestResponse::setUserResponse(std::string response){
 }
 
 void RequestResponse::setGeneralMessage(std::string json){
-  message = {json, "", {}, Message::MessageType::GENERAL};
+  message = {json, {}, Message::MessageType::GENERAL};
   
 }
 
 void RequestResponse::setSpecificMessage(std::string json, std::vector<int> sockets){
-  message = {json, "", sockets, Message::MessageType::SPECIFIC};
+  message = {json, sockets, Message::MessageType::SPECIFIC};
+}
+
+void RequestResponse::setExtraMessage(std::string json, std::vector<int> sockets){
+  message = {json, sockets, Message::MessageType::SPECIFIC};
 }
 

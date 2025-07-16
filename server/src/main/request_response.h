@@ -17,10 +17,8 @@ struct Message{
   
   // Mensaje para los usuarios.
   std::string message;
-  // El nombre del cuarto si es que el mensaje es para algún cuarto.
-  std::string roomName;
   // Vector con el nombre de usuarios objetivo, si es que es el caso.
-  std::vector<int> targetsockets;
+  std::vector<int> targetSockets;
   // Tipo del mensaje.
   MessageType type;
 };
@@ -30,8 +28,10 @@ class RequestResponse{
   bool keepConection;
   // Respuesta para el usuario
   std::string userResponse;
-  // Mensaje general
+  // Aviso o mensaje para el cliente o clientes.
   Message message;
+  // Aviso extra para casos especificos.
+  Message extraMessage;
   
  public:
   RequestResponse();
@@ -44,5 +44,6 @@ class RequestResponse{
   void setUserResponse(std::string response);
   void setGeneralMessage(std::string json);
   void setSpecificMessage(std::string json, std::vector<int> targetSockets);
+  void setExtraMessage(std::string json, std::vector<int> targetSockets);
 };
 #endif
