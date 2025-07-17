@@ -82,6 +82,17 @@ std::string JsonController::getNewRoomCreatedResponse(std::string roomName){
   return "";
 }
 
+std::string JsonController::getNewRoomMaxCharResponse(std::string roomName){
+  Json::Value json;
+  
+  json["type"] = "RESPONSE";
+  json["operation"] = "IDENTIFY";
+  json["result"] = "ROOMNAME_TOO_LONG";
+  json["extra"] = roomName;
+
+  return turnJsonToString(json);
+}
+
 std::string JsonController::getRoomAlreadyExistsResponse(std::string roomName){
   return "";
 }

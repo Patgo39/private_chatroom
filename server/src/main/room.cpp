@@ -7,6 +7,7 @@ Room::Room(std::string _roomName){
 void Room::inviteUser(int clientSocket){
   if(!isUserInList(clientSocket)){
     clientMap[clientSocket] = false;
+    clientMap.insert({clientSocket, false});
   }
 }
 

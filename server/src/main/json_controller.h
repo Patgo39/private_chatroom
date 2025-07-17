@@ -26,6 +26,7 @@ class JsonController{
   std::string getUsernameMaxCharResponse(std::string username);
   std::string getServerUserListResponse(std::map<int, Client> usersMap);
   std::string getNewRoomCreatedResponse(std::string roomName);
+  std::string getNewRoomMaxCharResponse(std::string roomName);
   std::string getRoomAlreadyExistsResponse(std::string roomName); 
   std::string getNoSuchRoomResponse(std::string roomName, Operation::Type type); /**INVITE, JOIN_ROOM, ROOM_USERS, ROOM_TEXT, LEAVE_ROOM*/
   std::string getNoSuchUserResponse(std::string username, Operation::Type type); /**TEXT, INVITE */
