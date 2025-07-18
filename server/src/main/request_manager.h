@@ -36,10 +36,9 @@ private:
   RequestResponse manageRoomUsersRequest(Json::Value value, ServerData data);
   RequestResponse manageRoomTextRequest(Json::Value value, ServerData data);
   RequestResponse manageLeaveRoomRequest(Json::Value value, ServerData data);
-  RequestResponse manageDisconnectRequest(Json::Value value, ServerData data);
+  RequestResponse manageDisconnectRequest(ServerData data);
   // Regresa el objeto respuesta para Jsons incompletos o invalidos.
   RequestResponse getInvalidRequestResponse(ServerData data);
-  void eraseClientData(ServerData data);
 
   std::string trim(const std::string& str);
 };

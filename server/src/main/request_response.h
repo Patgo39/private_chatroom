@@ -12,7 +12,6 @@ struct Message{
   enum class MessageType{
     GENERAL = 1, // Se envia a todos los usuarios menos el emisor.
     SPECIFIC = 2, // Uso tanto para mensajes privados como mensajes a usuarios de algun cuarto
-    NONMESSAGE = 3 // NO hay mensaje para los demás usuarios.
   };
   
   // Mensaje para los usuarios.
@@ -29,21 +28,19 @@ class RequestResponse{
   // Respuesta para el usuario
   std::string userResponse;
   // Aviso o mensaje para el cliente o clientes.
-  Message message;
-  // Aviso extra para casos especificos.
-  Message extraMessage;
+  std::vector<Message> messageVector;
   
  public:
   RequestResponse();
   
-  Message getPublicMessage();
+  std::vector<Message> getMessageVector();
   std::string getUserResponse();
   bool getKeepConection();
 
   void stopConection();
   void setUserResponse(std::string response);
-  void setGeneralMessage(std::string json);
-  void setSpecificMessage(std::string json, std::vector<int> targetSockets);
-  void setExtraMessage(std::string json, std::vector<int> targetSockets);
+  void pushGeneralMessage(std::string json);
+  void pushSpecificMessage(std::string json, std::vector<int> targetSockets);
+  
 };
 #endif

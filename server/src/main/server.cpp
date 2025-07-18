@@ -126,47 +126,45 @@ void Server::manageClient(int clientSocket){
 void Server:: manageClientRequest(Client client, RequestResponse response){
   std::string clientResponse = response.getUserResponse();
   int requesterSocket = client.getSocket();
-  Message generalContent = response.getPublicMessage(); // Se obtiene el mensaje publico para todos a algunos usuarios en especifico.
+  std::vector<Message> messageVector = response.getMessageVector(); // Se obtiene el mensaje publico para todos a algunos usuarios en especifico.
   
   if(clientResponse != ""){
     sendMessageToClient(client.getSocket(), clientResponse);
     std::cout<<"Client Message: "<<clientResponse<<std::endl;
   }
 
-  switch(generalContent.type){
-    // Caso de mandar un mensaje a todos los clientes conectados.
-  case Message::MessageType::GENERAL://General
-    {
-      for(const auto& pair : socketsMap){
-	int socket = pair.first;
-	Client c = pair.second;
-	
+  for(Message messageAdvice : messageVector){
+    switch(messageAdvice.type){
+      // Caso de mandar un mensaje a todos los clientes conectados.
+    case Message::MessageType::GENERAL://General
+      {
+	for(const auto& pair : socketsMap){
+	  int socket = pair.first;
+	  Client c = pair.second;
+	  
 	// No se envia el mensaje al cliente que emitió la petición.
-	if(socket == requesterSocket || !c.isIdentified()){
-	  continue;
+	  if(socket == requesterSocket || !c.isIdentified()){
+	    continue;
 	}
-	sendMessageToClient(socket, generalContent.message);
-	std::cout<<"General Message: "<<generalContent.message<<std::endl;
-      }
+	  sendMessageToClient(socket, messageAdvice.message);
+	  std::cout<<"General Message: "<<messageAdvice.message<<std::endl;
+	}
     }
-    break;
-    
-  case Message::MessageType::SPECIFIC: //Specific
-    {
-      std::vector<int> targets = generalContent.targetSockets; // Se obtiene el vector de los clientes a mandar el mensaje.
-      for(int sock : targets){
-	sendMessageToClient(sock, generalContent.message); 
+      break;
+      
+    case Message::MessageType::SPECIFIC: //Specific
+      {
+	std::vector<int> targets = messageAdvice.targetSockets; // Se obtiene el vector de los clientes a mandar el mensaje.
+	for(int sock : targets){
+	  sendMessageToClient(sock, messageAdvice.message); 
+	}
       }
+      break;
+      
+    default:
+      std::cout<<"Message Type Format is invalid"<<std::endl;
     }
-    break;
-    
-  case Message::MessageType::NONMESSAGE:
-
-    break; // Nonmessage
-  default:
-    std::cout<<"Message Type Format is invalid"<<std::endl;
   }
-  
 }
 
 /**
