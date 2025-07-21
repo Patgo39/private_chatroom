@@ -17,11 +17,17 @@ class Room{
  public:
 
   Room(std::string _roomName);
+  // Agrega un usuario al mapa de clientes.
   void inviteUser(int clientSocket);
+  // Marca un usuario como unido.
   void setUserToJoined(int clientSocket);
+  // Borra un usuario del mapa de clientes.
   void eraseUser(int clientSocket);
+  // Si el cliente está en la lista regresa true. False e.o.c.
   bool isUserInList(int clientSocket);
+  // Regresa true si el cliente está en la lista y unido.
   bool isUserJoined(int clientSocket);
+  // Regresa un vector de sockets con los clientes unidos.
   std::vector<int> getJoinedClients();
 };
 
