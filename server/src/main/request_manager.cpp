@@ -72,37 +72,37 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
   }
 
   if(type == "JOIN_ROOM"){
-
+    return manageJoinRoomRequest(value, data);
   }
   
   if(type == "ROOM_USERS"){
-
+    return manageRoomUsersRequest(value, data);
   }
   
   if(type == "ROOM_TEXT"){
-
+    return manageRoomTextRequest(value, data);
   }
   
   if(type == "LEAVE_ROOM"){
-
+    return manageLeaveRoomRequest(value, data);
   }
   
   if(type == "DISCONNECT"){
-
+    return manageDisconnectRequest(data);
   }
   return getInvalidRequestResponse(data);
 }
 
 /**
- * Administra la petición de identificación. Si todo el formato del json
+ * Administra la petición de identificación. Si el formato del json
  * recibido es correcto y los requisitos de registro son correctos, se agrega
- * un nuevo objeto cliente a la referencia al mapa de clientes del servidor.
- * Se crea el Json de respuesta al emisor y el Json de aviso a los demás
+ * un nuevo objeto cliente a la referencia del mapa de clientes del servidor.
+ * Se crea el Json de respuesta al solicitante y el Json de aviso a los demás
  * clientes.
  * @param value el valor del objeto Json.
- * @param requester la referencia al emisor.
+ * @param requester la referencia al solicitante.
  * @param socketsMap la referencia al mapa de clientes del servidor.
- * @return response el objeto respuesta con el mensaje al emisor y demás
+ * @return response el objeto respuesta con el mensaje al solicitante y demás
  * clientes.
  */
 RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, ServerData data){
@@ -135,7 +135,7 @@ RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, ServerD
   data.requester.setUserName(username);
   data.requester.identify();
 
-  // Se crea la respuesta json para el emisor.
+  // Se crea la respuesta json para el solicitante.
   response.setUserResponse(jsonController.getIdentificationResponse(username));
   // Se crea la respuesta json para los demás clientes.
   response.pushGeneralMessage(jsonController.getNewUserAdvice(username));
@@ -144,25 +144,30 @@ RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, ServerD
 
 /**
  * Adminsitra la petición de cambio de estado. Si el formato del Json es
- * correcto se cambia el estado de la referencia del emisor y se crea el aviso
- * de cambio de estado a los demás clientes conectados.
- * @param value el valor del Json recibido.
- * @param requester la referencia al objeto Cliente del emisor.
+ * correcto se cambia el estado del solicitante y se crea el aviso
+ * de cambio de estado para los demás clientes conectados.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
  * @return response el objeto respuesta con los detalles de la petición.
  */
 RequestResponse RequestManager::manageStatusRequest(Json::Value value, ServerData data){
 
+  // Si el formato del json es incorrecto, se le notifica al usuario y se desconecta.
   if(!value.isMember("status")){
     return getInvalidRequestResponse(data);
   }
-  
+
+  // Se obtiene el nuevo estado.
   std::string status = value["status"].asString();
   RequestResponse response = RequestResponse();
 
+  // Se actualiza el cliente al nuevo estado.
+  // Si el nuevo estado no existe, se actualiza el estado a ACTIVE
   UserStatus::Status statusValue= UserStatus::getStatusFromString(status);
   data.requester.setUserStatus(statusValue);
   status = data.requester.getUserStatus();
 
+  // Se crea el Json y la respuesta.
   std::string message = jsonController.getNewStatusAdvice(data.requester);
   response.pushGeneralMessage(message);
   response.setUserResponse(message);
@@ -172,25 +177,23 @@ RequestResponse RequestManager::manageStatusRequest(Json::Value value, ServerDat
 /**
  * Administra la petición de la lista de usuarios general. Si el formato del
  * Json es correcto se crea el mensaje para el usuario con la lista de usuarios.
- * @param value el valor del Json recibido.
- * @param socketsMap el mapa de clientes conectados.
+ * @param data el struct con referencias a los datos del servidor.
  * @return response la respuesta a la petición del usuario.
  */
 RequestResponse RequestManager::manageUsersRequest(ServerData data){
 
+  // Se crea la respuesta con el Json de la lista de ususarios en el chat.
   RequestResponse response = RequestResponse();
-
   response.setUserResponse(jsonController.getServerUserListResponse(data.socketsMap));
   return response;
 }
 
 /**
  * Administrala petición del usuario para mandar un mensaje privado.
- * Si el formato del
- * Json es correcto se crea el mensaje para el usuario objetivo.
- * @param value el valor del Json recibido.
- * @param socketsMap el mapa de clientes conectados.
- * @param requester el objeto Cliente del emisor.
+ * Si el formato del Json es correcto y existe el usuario, se crea la respuesta
+ * para el destinatario. En caso contrario se le notifica al solicitante del error.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
  * @return response la respuesta a la petición del usuario.
  */
 RequestResponse RequestManager::manageTextRequest(Json::Value value, ServerData data){
@@ -208,7 +211,7 @@ RequestResponse RequestManager::manageTextRequest(Json::Value value, ServerData 
   bool userExists;
   int socketTarget;
 
-  // Mensaje vacío
+  // Si el mensaje es vacío, no se realiza nada.
   if(text == ""){
     return response;
   }
@@ -222,34 +225,55 @@ RequestResponse RequestManager::manageTextRequest(Json::Value value, ServerData 
     }
   }
 
+  // Si el usuario destinatario no existe, se le notifica al solicitante.
   if(!userExists){
     response.setUserResponse(jsonController.getNoSuchUserResponse(userTarget, Operation::Type::TEXT));
     return response;
   }
-  
+
+  // Se prepara la respuesta para el destinatario.
   std::string privateText = jsonController.getPrivateTextAdvice(data.requester.getUserName(), text);
   response.pushSpecificMessage(privateText, {socketTarget});
   return response;
 }
 
+/**
+ * Crea la respuesta con el json que contiene el mensaje público.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el Json para los demás usuarios.
+ */
 RequestResponse RequestManager::managePublicTextRequest(Json::Value value, ServerData data){
 
+  // Si el formato del Json recibido es incorrecto se le notifica al usuario.
   if(!value.isMember("text")){
     return getInvalidRequestResponse(data);
   }
-  
+
+  // Se obtiene el mensaje del Json.
   RequestResponse response = RequestResponse();
   std::string text = value["text"].asString();
   std::string senderUsername = data.requester.getUserName();
 
+  // Se crea la respuesta.
   std::string json = jsonController.getPublicTextAdvice(senderUsername, text);
   response.pushGeneralMessage(json);
   return response;
 }
 
+/**
+ * Crea el cuarto con el nombre especificado por el solicitante en el Json.
+ * Si el formato del Json es correcto, se crea un objeto Room al cual se agrega
+ * directamente el solicitante en su lista y se añade al mapa de cuartos del
+ * servidor.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageNewRoomRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
-  
+
+  // Si el formato del json es incorrecto se desconecta al solicitante.
   if(!value.isMember("roomname")){
     return getInvalidRequestResponse(data);
   }
@@ -258,18 +282,20 @@ RequestResponse RequestManager::manageNewRoomRequest(Json::Value value, ServerDa
   std::string roomName = value["roomname"].asString();
   roomName = trim(roomName);
 
+  // Si el nombre del cuarto es mayor a 16 caracteres, ocurre un error y se
+  // notifica al solicitante.
   if(roomName.length() > 16){
     std::string json = jsonController.getNewRoomMaxCharResponse(roomName);
     response.setUserResponse(json);
   }
 
-  // Si el cuarto ya existe se le notifica al emisor.
+  // Si el cuarto ya existe se le notifica al solicitante.
   if(data.roomMap.find(roomName) != data.roomMap.end()){
     std::string json = jsonController.getRoomAlreadyExistsResponse(roomName);
     response.setUserResponse(json);
     return response;
   }
-  
+  // Se crea el cuarto y se agrega al mapa de cuartos.
   int requesterSocket = data.requester.getSocket(); // Socket del cliente.
   Room room = Room(roomName);
   data.requester.joinToRoom(roomName); 
@@ -277,70 +303,111 @@ RequestResponse RequestManager::manageNewRoomRequest(Json::Value value, ServerDa
   room.setUserToJoined(requesterSocket); // Se agrega al usuario a la lista del cuarto.
   data.roomMap.insert({roomName, room}); // Se agrega el cuarto al mapa de cuartos.
 
-  // Se prepara la respuesta.
+  // Se prepara la respuesta de petición exitosa.
   std::string json = jsonController.getNewRoomCreatedResponse(roomName);
   response.setUserResponse(json);
   return response;
 }
 
+/**
+ * Se maneja la invitación de uno o más clientes a un cuarto. Si el formato del
+ * Json es correcto, si existen todos los usuarios en el chat y el solicitante
+ * ya se encuentra invitado y en el cuarto se crea el aviso para los
+ * destinatarios.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageInviteRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
+  
+  // Si el formato del Json es incompleto, se desconecta al solicitante.
   if(!value.isMember("roomname") || !value.isMember("usernames")){
     return getInvalidRequestResponse(data);
   }
 
-  // Si no existe el cuarto se le notifica al usuario
+  // Se obtiene el nombre del cuarto del Json recibido.
   std::string roomName = value["roomname"].asString();
   roomName = trim(roomName);
-  
+  // Se obtiene la lista de usuarios.
+  Json::Value array = value["usernames"];
+  std::vector<int> invitedSockets; 
+
+  // Si no existe el cuarto se le notifica al usuario
   if(data.roomMap.find(roomName) == data.roomMap.end()){
     std::string json = jsonController.getNoSuchRoomResponse(roomName, Operation::Type::INVITE);
     response.setUserResponse(json);
     return response;
   }
 
-  Json::Value array = value["usernames"];
-  std::vector<int> invitedSockets; 
-  
-  for(Json::Value::ArrayIndex i = 0; i != array.size(); i++){
-    std::string username = array[i].asString();
-    bool finded;
-    
-    for(const auto& pair: data.socketsMap){
-      Client c = pair.second;
-      if(c.getUserName() == username){
-	finded = true;
-	invitedSockets.push_back(c.getSocket());
-      }
-    }
-
-    if(!finded){
-      std::string json = jsonController.getNoSuchUserResponse(username, Operation::Type::INVITE);
+  try{
+    // Si el solicitante aún no se une, no se procesa la petición y se le notifica.
+    if(!data.roomMap.at(roomName).isUserJoined(data.requester.getSocket())){
+      std::string json = jsonController.getNotJoinedResponse(roomName, Operation::Type::INVITE);
       response.setUserResponse(json);
       return response;
     }
-  }
-  // Se prepara el aviso para los usuarios invitados y se invitan al cuarto.
-  std::string json = jsonController.getInvitationAdvice(data.requester.getUserName(), roomName);
-  response.pushSpecificMessage(json, invitedSockets);
 
-  // Se marcan los usuarios como invitados en el cuarto.
-  for(int socket : invitedSockets){
-    data.roomMap.at(roomName).inviteUser(socket);
+    // Se verifica que todos los clientes invitados estén en el mapa de sockets.
+    for(Json::Value::ArrayIndex i = 0; i != array.size(); i++){
+      std::string username = array[i].asString();
+      bool finded;
+      
+      for(const auto& pair: data.socketsMap){
+	Client c = pair.second;
+	if(c.getUserName() == username){
+	  finded = true;
+	invitedSockets.push_back(c.getSocket());
+	}
+      }
+
+      // Si no se encontró un cliente, no se procesa la solicitud y se le notifica al solicitante.
+      if(!finded){
+	std::string json = jsonController.getNoSuchUserResponse(username, Operation::Type::INVITE);
+      response.setUserResponse(json);
+      return response;
+      }
+    }
+    
+    // Se prepara el aviso para los usuarios invitados y se invitan al cuarto.
+    std::string json = jsonController.getInvitationAdvice(data.requester.getUserName(), roomName);
+    response.pushSpecificMessage(json, invitedSockets);
+    
+    // Se marcan los usuarios como invitados en el cuarto.
+    for(int socket : invitedSockets){
+      data.roomMap.at(roomName).inviteUser(socket);
+    }
+    
+  }catch(NoSuchUserInRoomException &e){
+    // Si el solicitante no está invitado, no se procesa la petición y se le notifica.
+    std::string json = jsonController.getNotJoinedResponse(roomName, Operation::Type::INVITE);
+    response.setUserResponse(json);
   }
   
   return response;
 }
 
+/**
+ * Administra la petición de unirse a un cuarto. Si el formato del json es
+ * correcto, el usuario fue previamente invitado y el cuarto existe, se crea la
+ * respuesta.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageJoinRoomRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
+
+  // Si el formato del json no es correcto, se le notifica al solicitante.
   if(!value.isMember("roomname")){
     return getInvalidRequestResponse(data);
   }
 
+  // Se obtiene el nombre del cuarto.
   std::string roomName = value["roomname"].asString();
   roomName = trim(roomName);
-  
+
+  // Se obtienen los datos del usuario.
   int requesterSocket = data.requester.getSocket();
   std::string username = data.requester.getUserName();
 
@@ -352,10 +419,11 @@ RequestResponse RequestManager::manageJoinRoomRequest(Json::Value value, ServerD
   }
 
   try{
+    // Si el usuario ya está invitado, no se realiza ningún aviso.
     if(data.roomMap.at(roomName).isUserJoined(requesterSocket)){
       return response;
     }
-
+    // Se marca el usuario como unido y se le notifica a los demás en el cuarto.
     std::vector<int> joinedClients = data.roomMap.at(roomName).getJoinedClients();
     data.roomMap.at(roomName).setUserToJoined(requesterSocket);
     data.requester.joinToRoom(roomName);
@@ -366,7 +434,7 @@ RequestResponse RequestManager::manageJoinRoomRequest(Json::Value value, ServerD
     
     
   }catch(NoSuchUserInRoomException &e){
-    std::string json = jsonController.getNotInvitedResponse(roomName, Operation::Type::JOIN_ROOM);
+    std::string json = jsonController.getNotInvitedResponse(roomName);
     response.setUserResponse(json);
     
   }
@@ -374,12 +442,21 @@ RequestResponse RequestManager::manageJoinRoomRequest(Json::Value value, ServerD
   return response;
 }
 
+/**
+ * Administra la solicitud de la lista del cuarto. Si el formato del json es
+ * correcto y el solicitante está en el cuarto se crea la respuesta.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageRoomUsersRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
+
+  // Si el formato del json es incorrecto se le notifica al solicitante.
   if(!value.isMember("roomname")){
     return getInvalidRequestResponse(data);
   }
-
+  
   std::string roomName = value["roomname"].asString();
   roomName = trim(roomName);
   int requesterSocket = data.requester.getSocket();
@@ -392,6 +469,7 @@ RequestResponse RequestManager::manageRoomUsersRequest(Json::Value value, Server
   }
 
   try{
+    // Si el usuario aún no se une se le notifica al solicitante.
     if(!data.roomMap.at(roomName).isUserJoined(requesterSocket)){
       std::string json = jsonController.getNotJoinedResponse(roomName, Operation::Type::ROOM_USERS);
       response.setUserResponse(json);
@@ -405,10 +483,11 @@ RequestResponse RequestManager::manageRoomUsersRequest(Json::Value value, Server
     for(int cSocket : joinedClients){
       clientsInRoom.push_back(data.socketsMap.at(cSocket));
     }
-    std::string json = jsonController.getRoomUsersResponse(clientsInRoom);
+    std::string json = jsonController.getRoomUsersResponse(roomName, clientsInRoom);
     response.setUserResponse(json);
     
   }catch(NoSuchUserInRoomException &e){
+    // Si el usuario aún no está invitado, se le notifica al solicitante.
     std::string json = jsonController.getNotJoinedResponse(roomName, Operation::Type::ROOM_USERS);
     response.setUserResponse(json);
   }
@@ -416,8 +495,18 @@ RequestResponse RequestManager::manageRoomUsersRequest(Json::Value value, Server
   return response;
 }
 
+/**
+ * Administra la petición de un mensaje a un cuarto. Si existe el cuarto y el
+ * usuario está invitado se crea la respuesta a los demás clientes unidos al
+ * cuarto.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageRoomTextRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
+
+  // Si el formato del json no es correcto, se le notifica al usuario.
   if(!value.isMember("roomname") || !value.isMember("text")){
     return getInvalidRequestResponse(data);
   }
@@ -458,6 +547,13 @@ RequestResponse RequestManager::manageRoomTextRequest(Json::Value value, ServerD
   return response;
 }
 
+/**
+ * Se administra la solicitud para abandonar el cuarto. Si el solicitante está
+ * unido al cuarto y el cuarto existe, se le borra de la lista.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::manageLeaveRoomRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
   if(!value.isMember("roomname")){
@@ -487,6 +583,10 @@ RequestResponse RequestManager::manageLeaveRoomRequest(Json::Value value, Server
     std::vector<int> joinedClients = data.roomMap.at(roomName).getJoinedClients();
     json = jsonController.getLeftRoomAdvice(userName, roomName);
     response.pushSpecificMessage(json, joinedClients);
+
+    if(joinedClients.size() <= 0){
+      data.roomMap.erase(roomName);
+    }
     
   }catch(NoSuchUserInRoomException &e){
     // Si no fue invitado al cuarto, se le notifica al cliente.
@@ -497,6 +597,13 @@ RequestResponse RequestManager::manageLeaveRoomRequest(Json::Value value, Server
   return response;
 }
 
+/**
+ * Administra la petición de desconectarse. Se borra la usuario del mapa de
+ * sockets del servidor y se le notifica a los demás clientes.
+ * @param value el valor del objeto Json.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante. 
+ */
 RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
   RequestResponse response = RequestResponse();
   std::vector<std::string> roomVector = data.requester.getRoomVector();
@@ -504,11 +611,18 @@ RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
   std::string json = jsonController.getUserDisconnectedAdvice(userName);
   response.pushGeneralMessage(json);
 
+  // Se borra al solicitante de cada cuarto conectado y se le notifica a los
+  // clientes unidos.
   for(std::string roomName : roomVector){
     data.roomMap.at(roomName).eraseUser(data.requester.getSocket());
     std::vector<int> clientsInRoom = data.roomMap.at(roomName).getJoinedClients();
     json = jsonController.getLeftRoomAdvice(userName, roomName);
     response.pushSpecificMessage(json, clientsInRoom);
+
+    // Si el cuarto queda vacío, se elimina del mapa de cuartos.
+    if(clientsInRoom.size() <= 0){
+      data.roomMap.erase(roomName);
+    }
   }
   data.socketsMap.erase(data.requester.getSocket());
   response.stopConection();
@@ -516,13 +630,22 @@ RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
   return response;
 }
 
-
+/**
+ * Crea el aviso del formato de json incorrecto y se desconecta del chat.
+ * @param data el struct con referencias a los datos del servidor.
+ * @return response la respuesta con el aviso al solicitante.
+ */
 RequestResponse RequestManager::getInvalidRequestResponse(ServerData data){
   RequestResponse response = manageDisconnectRequest(data);
   response.setUserResponse(jsonController.getInvalidJsonResponse());
   return response;
 }
 
+/**
+ * Regresa una cadena sin espacios al inicio o al final.
+ * @param str la cadena la cual se le eliminarán los espacios.
+ * @return str la cadena con el formato solicitado.
+ */
 std::string RequestManager::trim(const std::string& str){
   size_t first = str.find_first_not_of(" \t\n\r\f\v"); // Find first non-whitespace character
   if (std::string::npos == first) { // If no non-whitespace characters found (string is all whitespace)

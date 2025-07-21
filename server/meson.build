@@ -12,7 +12,8 @@ class_files = [
 	'./src/main/request_response.cpp',
 	'./src/main/json_controller.cpp',
 	'./src/main/operation.cpp',
-	'./src/main/room_exception.cpp']
+	'./src/main/room_exception.cpp',
+	'./src/main/invalid_operation_exception.cpp']
 
 #Dependencies:
 #Jsoncpp
