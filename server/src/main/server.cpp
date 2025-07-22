@@ -12,6 +12,7 @@ Server::Server(int _port, int _bufferSize){
   port = _port;
   bufferSize = _bufferSize;
   serverSocket = 0;
+  connected = true;
 }
 
 /**
@@ -43,17 +44,24 @@ void Server::start(){
       exit(1);
     }
     // Escucha las posibles conexiones.
-    if (listen(serverSocket, 3) < 0) {
+    if (listen(serverSocket, 10000) < 0) {
       perror("listen");
       exit(1);
     }
     std::cout<<"Server started succesfully!"<<std::endl;
+    std::cout<<"To stop the server press CTRL + C when no client is connected."<<std::endl;
+    
     // Accepta nuevas conexiones.
     while(true){
       //Socket para un nuevo cliente.
       int clientSocket;
       
       if ((clientSocket = accept(serverSocket, (struct sockaddr*)&address, &addrlen)) < 0) {
+
+	if(!connected){
+	  return;
+	}
+	
         perror("accept");
         exit(1);
       }else{
@@ -192,5 +200,14 @@ void Server::disconnectClient(int clientSocket){
  * Cierra el socket del servidor evitando que más clientes puedan conectarse.
  */
 void Server::closeConnection(){
+  connected = false;
   close(serverSocket);
+}
+
+/**
+ * Regresa true si hay clientes conectados y false en otro caso.
+ * @return valor booleano del estado del mapa de sockets.
+ */
+bool Server::hasClients(){
+  return !socketsMap.empty();
 }

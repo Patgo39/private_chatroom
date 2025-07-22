@@ -54,7 +54,7 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
   if(type == "USERS"){
     return manageUsersRequest(data);
   }
-
+  
   if(type == "TEXT"){
     return manageTextRequest(value, data);
   }
@@ -62,7 +62,7 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
   if(type == "PUBLIC_TEXT"){
     return managePublicTextRequest(value, data);
   }
-
+  
   if(type == "NEW_ROOM"){
     return manageNewRoomRequest(value, data);
   }
@@ -272,7 +272,6 @@ RequestResponse RequestManager::managePublicTextRequest(Json::Value value, Serve
  */
 RequestResponse RequestManager::manageNewRoomRequest(Json::Value value, ServerData data){
   RequestResponse response = RequestResponse();
-
   // Si el formato del json es incorrecto se desconecta al solicitante.
   if(!value.isMember("roomname")){
     return getInvalidRequestResponse(data);
@@ -287,8 +286,9 @@ RequestResponse RequestManager::manageNewRoomRequest(Json::Value value, ServerDa
   if(roomName.length() > 16){
     std::string json = jsonController.getNewRoomMaxCharResponse(roomName);
     response.setUserResponse(json);
+    return response;
   }
-
+  
   // Si el cuarto ya existe se le notifica al solicitante.
   if(data.roomMap.find(roomName) != data.roomMap.end()){
     std::string json = jsonController.getRoomAlreadyExistsResponse(roomName);
@@ -624,7 +624,6 @@ RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
       data.roomMap.erase(roomName);
     }
   }
-  data.socketsMap.erase(data.requester.getSocket());
   response.stopConection();
   
   return response;

@@ -39,6 +39,8 @@ class Server{
   std::map<int, Client> socketsMap; // Mapa que relaciona el socket con un objeto cliente.
   // Relaciona el nombre del cuarto con el objeto cuarto
   std::map<std::string, Room> roomMap;
+  // Estado del servidor
+  bool connected;
   
 public:
   Server(int _port, int _bufferSize);
@@ -46,6 +48,8 @@ public:
   void start();
   // Cierra el socket del servidor.
   void closeConnection();
+  // Regresa true si hay clientes conectados y false en otro caso.
+  bool hasClients();
 
 private:
   // Administra las peticiones del cliente.
