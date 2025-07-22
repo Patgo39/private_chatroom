@@ -1,5 +1,10 @@
 #include "operation.h"
 
+/**
+ * Dado un objeto Type se obtiene su equivalente en cadena.
+ * @param type un objeto Type.
+ * @return una cadena equivalente al objeto Type recibido.
+ */
 std::string Operation::getStringFromType(Type type){
   switch(type){
   case INVITE: return "INVITE";
