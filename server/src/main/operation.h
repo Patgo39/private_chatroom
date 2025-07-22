@@ -6,6 +6,7 @@
 
 class Operation{
  public:
+  // Enumeración con el tipo de operación.
   enum Type{
     INVITE = 1,
     JOIN_ROOM = 2,
@@ -14,7 +15,8 @@ class Operation{
     LEAVE_ROOM = 5,
     TEXT = 6
   };
-  
+
+  // Dado un objeto Type se obtiene su equivalente en cadena.
   static std::string getStringFromType(Type type);
 };
 
