@@ -34,7 +34,7 @@ std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &st
     return manageInviteUsersToRoom(command);
     
   }else if(command[0] == "/join"){
-    return manageInviteUsersToRoom(command);
+    return manageJoinRoom(command);
     
   }else if(command[0] == "/roomlist"){
     return manageRoomList(command);
@@ -183,8 +183,8 @@ std::string CommandManager::manageInviteUsersToRoom(std::vector<std::string> com
   
   Json::Value jsonArray;
 
-  for(std::string parameter : parameters){
-    jsonArray.append(parameter);
+  for(std::size_t i = 1; i< parameters.size(); i++){
+    jsonArray.append(parameters[i]);
   }
   
   Json::Value json;

@@ -11,7 +11,6 @@ Room::Room(std::string _roomName){
  */
 void Room::inviteUser(int clientSocket){
   if(!isUserInList(clientSocket)){
-    clientMap[clientSocket] = false;
     clientMap.insert({clientSocket, false});
   }
 }
@@ -22,10 +21,10 @@ void Room::inviteUser(int clientSocket){
  * @throw NoSuchUserInRoomException si el usuario no está en la lista.
  */
 void Room::setUserToJoined(int clientSocket){
-  if(isUserInList(clientSocket)){
-    clientMap[clientSocket] = true;
+  if(!isUserInList(clientSocket)){
+    throw NoSuchUserInRoomException("");
   }
-  throw NoSuchUserInRoomException("");
+  clientMap[clientSocket] = true;
 }
 
 /**
@@ -34,10 +33,10 @@ void Room::setUserToJoined(int clientSocket){
  * @throw NoSuchUserInRoomException si el usuario no está en la lista.
  */
 void Room::eraseUser(int clientSocket){
-  if(isUserInList(clientSocket)){
-    clientMap.erase(clientSocket);
+  if(!isUserInList(clientSocket)){
+    throw NoSuchUserInRoomException("");
   }
-  throw NoSuchUserInRoomException("");
+  clientMap.erase(clientSocket);
 }
 
 /**
