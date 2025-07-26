@@ -12,11 +12,15 @@ CommandManager::CommandManager(){
  * mantenga la conexión con el servidor y <False> para otro caso.
  * @return Json del comando recibido.
  **/
-std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &stillConnected){
+std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &stillConnected, bool &ownMessage){
   std::vector<std::string> command = getCommandAsVector(userMessage);
 
   if(command[0] == "/identify"){
     return manageIdentification(command);
+    
+  }else if(command[0] == "/help"){
+    ownMessage = true;
+    return manageHelpCommand();
     
   }else if(command[0] == "/changestatus"){
     return manageNewStatus(command);
@@ -115,6 +119,25 @@ std::string CommandManager::manageIdentification(std::vector<std::string> comman
 
   return turnJsonToString(json);
   
+}
+
+std::string CommandManager::manageHelpCommand(){
+  std::string helpMessage =
+    "Available commands:\n"
+    "/identify 'username'             - Identify yourself with a username.\n"
+    "/changestatus 'new_status'       - Change your status (only: AWAY, BUSY, ACTIVE).\n"
+    "/list                            - Show the list of all connected users.\n"
+    "/private 'username' 'message...' - Send a private message to a user.\n"
+    "/newroom 'Room name'             - Create a new chat room.\n"
+    "/invite 'Room name' 'user1' 'user2' ... - Invite users to a room.\n"
+    "/join 'Room name'                - Join an existing chat room.\n"
+    "/roomlist 'Room name'            - List the users currently in a room.\n"
+    "/leave 'Room name'               - Leave the specified chat room.\n"
+    "/disconnect                      - Disconnect from the server.\n"
+    "\nNote: If you try to perform any action without identifying yourself first, "
+    "you will be disconnected from the chat.\n";
+
+  return helpMessage;
 }
 
 std::string CommandManager::manageNewStatus(std::vector<std::string> command){
