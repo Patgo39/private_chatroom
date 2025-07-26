@@ -18,25 +18,29 @@ void manageReceivedMessages(Screen &sc, Client &c){
       continue;
     }
 
-    sc.showMessage("Client", text.c_str(), true, false, true);
+    sc.showMessage("Client", text.c_str(), false, true);
     }
 }
 
 void manageCommand(Client &c, Screen &sc, std::string command){
   bool stillConnected = true;
+  bool ownMessage = false;
   CommandManager cm = CommandManager();
   try{
-    std::string json = cm.getJsonFromCommand(command, stillConnected);
-    c.sendMessage(json);
+    std::string output = cm.getJsonFromCommand(command, stillConnected, ownMessage);
+    if(ownMessage)
+      sc.showMessage("INFO", output, false, true);
+    else
+      c.sendMessage(output);
 
     if(!stillConnected){
       c.closeConection();
       continue_thread = false;
-      sc.showMessage("Server", "You're now disconnected.", true, true, false);
+      sc.showMessage("SERVER", "You're now disconnected.", true, false);
     }
   }catch(CommandException &e){
     std::string error = e.what();
-    sc.showMessage("Error", error, true, true, false);
+    sc.showMessage("Error", error, true, false);
   }
 }
 
@@ -68,7 +72,7 @@ int main(){
     
   }catch(ClientConnectionException &e){
     std::string error = e.what();
-    sc.showMessage("Server", error, true, true, false);
+    sc.showMessage("Server", error, true, false);
   }
   
   return 0;

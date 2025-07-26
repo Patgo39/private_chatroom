@@ -351,7 +351,7 @@ RequestResponse RequestManager::manageInviteRequest(Json::Value value, ServerDat
     // Se verifica que todos los clientes invitados estén en el mapa de sockets.
     for(Json::Value::ArrayIndex i = 0; i != array.size(); i++){
       std::string username = array[i].asString();
-      bool finded;
+      bool finded = false;
       
       for(const auto& pair: data.socketsMap){
 	Client c = pair.second;
@@ -580,6 +580,9 @@ RequestResponse RequestManager::manageLeaveRoomRequest(Json::Value value, Server
       response.setUserResponse(json);
       return response;
     }
+    // Se borra el usuario del cuarto y el cuarto del usuario.
+    data.roomMap.at(roomName).eraseUser(data.requester.getSocket());
+    data.requester.forgetRoom(roomName);
     std::vector<int> joinedClients = data.roomMap.at(roomName).getJoinedClients();
     json = jsonController.getLeftRoomAdvice(userName, roomName);
     response.pushSpecificMessage(json, joinedClients);
@@ -608,9 +611,8 @@ RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
   RequestResponse response = RequestResponse();
   std::vector<std::string> roomVector = data.requester.getRoomVector();
   std::string userName = data.requester.getUserName();
-  std::string json = jsonController.getUserDisconnectedAdvice(userName);
-  response.pushGeneralMessage(json);
-
+  std::string json = "";
+  
   // Se borra al solicitante de cada cuarto conectado y se le notifica a los
   // clientes unidos.
   for(std::string roomName : roomVector){
@@ -624,6 +626,8 @@ RequestResponse RequestManager::manageDisconnectRequest(ServerData data){
       data.roomMap.erase(roomName);
     }
   }
+  json = jsonController.getUserDisconnectedAdvice(userName);
+  response.pushGeneralMessage(json);
   response.stopConection();
   
   return response;

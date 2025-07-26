@@ -11,6 +11,8 @@
 
 #include <iostream>
 #include <string>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
 
 class Screen{
   //Cadena para que el usuario sepa dónde escribir su comando o mensaje.
@@ -27,7 +29,7 @@ class Screen{
   //Se pregunta y se recibe la entrada del usuario para la ip.
   std::string askAndGetIp();
   //Se muestra un mensaje de otro usuario o la respuesta del servidor.
-  void showMessage(std::string name, std::string buffer, bool general, bool serverResponse, bool continueConnected);
+  void showMessage(std::string name, std::string buffer, bool serverResponse, bool continueConnected);
   //Se obtiene la entrada del usuario.
   std::string getMessage();
 };
