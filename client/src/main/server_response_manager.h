@@ -14,7 +14,8 @@ class ServerResponseManager{
   Message getMessageFromResponse(std::string serverResponse);
 
  private:
-  
+  Message manageServerResponse(Json::Value value);
+  Message manageServerAdvice(Json::Value value);
   
 };
 
