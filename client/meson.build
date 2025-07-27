@@ -10,7 +10,10 @@ class_files = [
 	'./src/main/client_connection_exception.cpp',
 	'./src/main/command_exception.cpp',
 	'./src/main/command_manager.cpp',
-	'./src/main/view/user_interface.cpp']
+	'./src/main/view/user_interface.cpp',
+	'./src/main/server_response_manager.cpp',
+	',/src/main/message.cpp',
+	'./src/main/server_response_exception.cpp']
 
 #Dependencies:
 ftxui_proj = subproject('ftxui')
