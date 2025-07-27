@@ -5,6 +5,7 @@
 #include "./view/screen.h"
 #include "client.h"
 #include "command_manager.h"
+#include "./view/user_interface.h"
 
 std::atomic<bool> continue_thread{true};
 
@@ -17,7 +18,7 @@ void manageReceivedMessages(Screen &sc, Client &c){
     if(text == ""){
       continue;
     }
-
+    
     sc.showMessage("Client", text.c_str(), false, true);
     }
 }
