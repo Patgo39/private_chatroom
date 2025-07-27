@@ -19,13 +19,14 @@ class Message{
   std::string text;
   std::string userName;
   std::string roomName;
+  bool keepConection;
   Type messageType;
   Visibility messageVisibility;
 
  public:
   Message();
   // Setters
-  void setResponse(std::string text);
+  void setServerResponse(std::string text,  bool keepConection);
   void setRoomAdvice(std::string text, std::string roomName, std::string userName);
   void setServerAdvice(std::string text);
   void setPublicMessage(std::string text, std::string userName);

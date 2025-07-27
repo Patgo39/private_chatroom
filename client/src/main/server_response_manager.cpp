@@ -11,10 +11,27 @@ Message ServerResponseManager::getMessageFromResponse(std::string serverResponse
   bool ok = parseFromStream(builder, streamRequest, &value, &errs);
 
   if(!ok){
-    /**Lanza excepción o algo por el estilo por no ser un json*/
+    throw ServerResponseException("Server response is not a JSON.");
   }
 
   if(!value.isMember("type")){
-    /**Lanza excepción o algo por el estilo por no tener la llave necesaria*/
+    throw ServerResponseException("Server response has no 'type' key.");
+  }
+
+  std::string type = value["type"].asString();
+  
+  if(type == "RESPONSE"){
+    manageServerResponse(value);
+  }else{
+    manageServerAdvice(value);
   }
 }
+
+Message ServerResponseManager::manageServerResponse(Json::Value value){
+  
+}
+
+Message ServerResponseManager::manageServerAdvice(Json::Value value){
+  
+}
+
