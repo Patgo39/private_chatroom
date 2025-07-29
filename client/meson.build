@@ -12,8 +12,10 @@ class_files = [
 	'./src/main/command_manager.cpp',
 	'./src/main/view/user_interface.cpp',
 	'./src/main/server_response_manager.cpp',
-	',/src/main/message.cpp',
-	'./src/main/server_response_exception.cpp']
+	'./src/main/message.cpp',
+	'./src/main/server_response_exception.cpp',
+	'./src/main/operation_enum.cpp',
+	'./src/main/result_enum.cpp']
 
 #Dependencies:
 ftxui_proj = subproject('ftxui')
