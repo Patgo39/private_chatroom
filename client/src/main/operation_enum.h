@@ -5,9 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-class OperationEnum{
- public:
-  enum Operation{
+enum Operation{
     IDENTIFY,
     STATUS,
     USERS,
@@ -20,6 +18,9 @@ class OperationEnum{
     LEAVE_ROOM,
     DISCONNECT
   };
+
+class OperationEnum{
+ public:
 
   static Operation getOperationFromString(std::string operation);
 };

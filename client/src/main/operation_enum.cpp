@@ -1,6 +1,6 @@
 #include "operation_enum.h"
 
-OperationEnum::Operation OperationEnum::getOperationFromString(std::string operation){
+Operation OperationEnum::getOperationFromString(std::string operation){
   if (operation == "IDENTIFY") return Operation::IDENTIFY;
     if (operation == "STATUS") return Operation::STATUS;
     if (operation == "USERS") return Operation::USERS;
