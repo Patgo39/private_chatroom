@@ -5,9 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-class ResultEnum{
- public:
-  enum Result{
+enum Result{
     USER_ALREADY_EXISTS,
     NO_SUCH_USER,
     ROOM_ALREADY_EXISTS,
@@ -15,7 +13,10 @@ class ResultEnum{
     NOT_INVITED,
     NOT_JOINED,
     NAME_TOO_LONG,
-  };
+};
+
+class ResultEnum{
+ public:
 
   static Result getResultFromString(std::string result);
 };

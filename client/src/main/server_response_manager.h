@@ -4,8 +4,11 @@
 #include <iostream>
 #include "message.h"
 #include <string>
+#include <stdexcept>
 #include <json/json.h>
 #include "server_response_exception.cpp"
+#include "operation_enum.h"
+#include "result_enum.h"
 
 class ServerResponseManager{
   Message message;

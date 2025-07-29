@@ -2,6 +2,7 @@
 
 Message::Message(){
   keepConection = true;
+  roomOperation = Message::RoomOperation::NONE;
 }
 
 void Message::setServerResponse(std::string text, bool keepConnection) {

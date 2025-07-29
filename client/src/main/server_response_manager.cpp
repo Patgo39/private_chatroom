@@ -57,9 +57,37 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     }
 
     if(result == "SUCCESS"){
+
+      if(!value.isMember("extra")){
+	throw ServerResponseException("Invalid server JSON format.");
+      }
+
+      std::string extra = value["extra"].asString();
       
+      try{
+	Operation op = OperationEnum::getOperationFromString(operation);
+	
+        switch (op) {
+	case Operation::IDENTIFY:
+	  text = "\nYou have successfully identified yourself";
+	  break;
+	case Operation::NEW_ROOM:
+	  text = "\nThe room named " + extra + " has been successfully created.";
+	  break;
+	case Operation::JOIN_ROOM:
+	  text = "\nYou have successfully joined the room " + extra;
+	  break;
+	default:
+	  throw ServerResponseException("Invalid server JSON format.");
+	
+	}
+      }catch(const std::invalid_argument& e){
+	throw ServerResponseException("Invalid server JSON format.");
+      }
+
+      message.setServerResponse(text, true);
     }
-  
+       
 }
 
 Message ServerResponseManager::manageServerAdvice(Json::Value value){

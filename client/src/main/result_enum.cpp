@@ -1,6 +1,6 @@
 #include "result_enum.h"
 
-ResultEnum::Result ResultEnum::getResultFromString(std::string result) {
+Result ResultEnum::getResultFromString(std::string result) {
   if (result == "USER_ALREADY_EXISTS") return USER_ALREADY_EXISTS;
   if (result == "NO_SUCH_USER") return NO_SUCH_USER;
   if (result == "ROOM_ALREADY_EXISTS") return ROOM_ALREADY_EXISTS;
