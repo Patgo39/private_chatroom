@@ -8,7 +8,7 @@
 #include "server_response_exception.cpp"
 
 class ServerResponseManager{
-
+  Message message;
  public:
   ServerResponseManager();
   Message getMessageFromResponse(std::string serverResponse);
