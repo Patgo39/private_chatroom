@@ -2,51 +2,95 @@
 
 Message::Message(){
   keepConection = true;
-  roomOperation = Message::RoomOperation::NONE;
 }
 
-void Message::setServerResponse(std::string text, bool keepConnection) {
-    // implementación aquí
+void Message::setRoomCreationWithAdvice(std::string _roomName, std::string _text){
+  type = Type::ACTION_WITH_TEXT;
+  subtype = Action::CREATE;
+  roomName = _roomName;
+  text = _text;
 }
 
-void Message::setRoomAdvice(std::string text, std::string roomName, std::string userName) {
-    // implementación aquí
+void Message::setServerResponse(std::string _text, bool _keepConection) {
+  type = Type::ADVICE;
+  subtype = Advice::RESPONSE;
+  keepConection = _keepConection;
+  text = _text;
 }
 
-void Message::setServerAdvice(std::string text) {
-    // implementación aquí
+void Message::setRoomAdvice(std::string _text, std::string _roomName) {
+  type = Type::ADVICE;
+  subtype = Advice::ROOM_ADVICE;
+  text = _text;
+  roomName = _roomName;
 }
 
-void Message::setPublicMessage(std::string text, std::string userName) {
-    // implementación aquí
+void Message::setServerAdvice(std::string _text) {
+  type = Type::ADVICE;
+  subtype = Advice::NORMAL_ADVICE;
+  text = _text;
 }
 
-void Message::setRoomMessage(std::string text, std::string userName, std::string roomName) {
-    // implementación aquí
+void Message::setPublicMessage(std::string _text, std::string _userName) {
+  type = Type::TEXT;
+  subtype = Text::PUBLIC;
+  text = _text;
+  userName = _userName;
 }
 
-void Message::setPrivateMessage(std::string text, std::string userName) {
-    // implementación aquí
+void Message::setRoomMessage(std::string _text, std::string _roomName, std::string _userName){
+  type = Type::TEXT;
+  subtype = Text::ROOM;
+  text = _text;
+  roomName = _roomName;
+  userName = _userName;
+}
+
+void Message::setPrivateMessage(std::string _text, std::string _userName) {
+  type = Type::TEXT;
+  subtype = Text::PRIVATE;
+  text = _text;
+  userName = _userName;
 }
 
 // Getters
 
-Message::Type Message::getMessageType() {
-    // implementación aquí
+Type Message::getMessageType(){
+  return type;
 }
 
-Message::Visibility Message::getMessageVisibility() {
-    // implementación aquí
+Advice Message::getMessageAdviceType(){
+  if(!std::holds_alternative<Advice>(subtype)){
+    throw std::logic_error("Not an Advice message.");
+  }
+
+  return std::get<Advice>(subtype);
+}
+
+Text Message::getMessageTextType(){
+  if(!std::holds_alternative<Text>(subtype)){
+    throw std::logic_error("Not a Text message.");
+  }
+
+  return std::get<Text>(subtype);
+}
+
+Action Message::getMessageOperationType(){
+  if(!std::holds_alternative<Action>(subtype)){
+    throw std::logic_error("Not an Operation message.");
+  }
+
+  return std::get<Action>(subtype);
 }
 
 std::string Message::getUserName() {
-    // implementación aquí
+  return userName;
 }
 
 std::string Message::getRoomName() {
-    // implementación aquí
+  return roomName;
 }
 
 std::string Message::getText() {
-    // implementación aquí
+  return text;
 }
