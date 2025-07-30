@@ -1,6 +1,7 @@
 #include "server_response_manager.h"
 
 ServerResponseManager::ServerResponseManager(){
+  jsonError = "ERROR: Invalid server JSON format.";
 }
 
 Message ServerResponseManager::getMessageFromResponse(std::string serverResponse){
@@ -14,7 +15,7 @@ Message ServerResponseManager::getMessageFromResponse(std::string serverResponse
   bool ok = parseFromStream(builder, streamRequest, &value, &errs);
 
   if(!ok){
-    throw ServerResponseException("Server response is not a JSON.");
+    throw ServerResponseException("ERROR: Server response is not a JSON.");
   }
 
   if(!value.isMember("type")){
@@ -24,15 +25,14 @@ Message ServerResponseManager::getMessageFromResponse(std::string serverResponse
   std::string type = value["type"].asString();
   
   if(type == "RESPONSE"){
-    manageServerResponse(value);
-  }else{
-    manageServerAdvice(value);
+    return manageServerResponse(value);
   }
+  return manageServerAdvice(value);
 }
 
 Message ServerResponseManager::manageServerResponse(Json::Value value){
   if(!value.isMember("operation") || !value.isMember("result")){
-    throw ServerResponseException("Invalid server JSON format.");
+    throw ServerResponseException(jsonError);
   }
 
   std::string operation = value["operation"].asString();
@@ -61,11 +61,11 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
   try{
     op = OperationEnum::getOperationFromString(operation);    
   }catch(const std::invalid_argument& e){
-    throw ServerResponseException("ERROR: Invalid server JSON format.");
+    throw ServerResponseException(jsonError);
   }
   // Se obtiene el valor de la llave extra.
   if(!value.isMember("extra")){
-    throw ServerResponseException("ERROR: Invalid server JSON format.");
+    throw ServerResponseException(jsonError);
   }
   std::string extra = value["extra"].asString();
 
@@ -85,7 +85,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
       message.setRoomCreationWithAdvice(extra, text);
       return message;
     default:
-      throw ServerResponseException("ERROR: Invalid server JSON format.");
+      throw ServerResponseException(jsonError);
     }
     
     message.setServerResponse(text, true);
@@ -123,15 +123,19 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     message.setServerResponse(text, true);
     return message;
   }catch(const std::invalid_argument& e){
-    throw ServerResponseException("ERROR: Invalid server JSON format.");
+    throw ServerResponseException(jsonError);
   }
 
   // Si el formato del json no contiene operaciones Invalidas o resultados
   // exitosos, el formato del JSON recibido es erroneo.
-  throw ServerResponseException("ERROR: Invalid server JSON format.");
+  throw ServerResponseException(jsonError);
 }
 
 Message ServerResponseManager::manageServerAdvice(Json::Value value){
-  
+  try{
+
+  }catch(const std::invalid_argument& e){
+    throw ServerResponseException(jsonError);
+  }
 }
 
