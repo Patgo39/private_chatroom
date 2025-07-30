@@ -1,6 +1,6 @@
 #include "user_advice_enum.h"
 
-UserAdvice getUserAdviceFromString(std::string userAdvice){
+UserAdvice UserAdviceEnum::getUserAdviceFromString(std::string userAdvice){
   if (userAdvice == "NEW_USER")         return UserAdvice::NEW_USER;
   if (userAdvice == "NEW_STATUS")       return UserAdvice::NEW_STATUS;
   if (userAdvice == "USER_LIST")        return UserAdvice::USER_LIST;

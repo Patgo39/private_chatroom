@@ -32,7 +32,7 @@ Message ServerResponseManager::getMessageFromResponse(std::string serverResponse
 
 Message ServerResponseManager::manageServerResponse(Json::Value value){
   if(!value.isMember("operation") || !value.isMember("result")){
-    throw ServerResponseException(jsonError);
+    throw ServerResponseException(jsonError.c_str());
   }
 
   std::string operation = value["operation"].asString();
@@ -61,11 +61,11 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
   try{
     op = OperationEnum::getOperationFromString(operation);    
   }catch(const std::invalid_argument& e){
-    throw ServerResponseException(jsonError);
+    throw ServerResponseException(jsonError.c_str());
   }
   // Se obtiene el valor de la llave extra.
   if(!value.isMember("extra")){
-    throw ServerResponseException(jsonError);
+    throw ServerResponseException(jsonError.c_str());
   }
   std::string extra = value["extra"].asString();
 
@@ -85,7 +85,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
       message.setRoomCreationWithAdvice(extra, text);
       return message;
     default:
-      throw ServerResponseException(jsonError);
+      throw ServerResponseException(jsonError.c_str());
     }
     
     message.setServerResponse(text, true);
@@ -123,19 +123,132 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     message.setServerResponse(text, true);
     return message;
   }catch(const std::invalid_argument& e){
-    throw ServerResponseException(jsonError);
+    throw ServerResponseException(jsonError.c_str());
   }
 
   // Si el formato del json no contiene operaciones Invalidas o resultados
   // exitosos, el formato del JSON recibido es erroneo.
-  throw ServerResponseException(jsonError);
+  throw ServerResponseException(jsonError.c_str());
 }
 
 Message ServerResponseManager::manageServerAdvice(Json::Value value){
+  std::string text;
   try{
+    UserAdvice userad = UserAdviceEnum::getUserAdviceFromString(value["type"].asString());
+    switch (userad) {
+    case UserAdvice::NEW_USER:
+      {
+	if(!value.isMember("username")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	text = "The user " + userName + " has joined the chat.";
+	break;
+      }
+    case UserAdvice::NEW_STATUS:
+      {
+	if(!value.isMember("username") || !value.isMember("status")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string status = value["status"].asString();
+	text = userName + " has changed their status to " + status;
+	break;
+      }
+      
+    case UserAdvice::USER_LIST:
+      if(!value.isMember("users")){
+	throw ServerResponseException(jsonError.c_str());
+      }
+      
+      break;
+      
+    case UserAdvice::TEXT_FROM:
+      {
+	if(!value.isMember("username") || !value.isMember("text")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string msg = value["text"].asString();
+	message.setPrivateMessage(msg, userName);
+	return message;
+	break;
+      }
+      
+    case UserAdvice::PUBLIC_TEXT_FROM:
+      {
+	if(!value.isMember("username") || !value.isMember("text")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string msg = value["text"].asString();
+	message.setPublicMessage(msg, userName);
+	return message;
+	break;
+      }
+      
+    case UserAdvice::JOINED_ROOM:
+      {
+	if(!value.isMember("username") || !value.isMember("roomname")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string roomName = value["roomname"].asString();
+	text = userName + " has joined to the room";
+	message.setRoomAdvice(text, roomName);
+	return message;
+	break;
+      }
+      
+    case UserAdvice::ROOM_USER_LIST:
+      {
+	if(!value.isMember("users") || !value.isMember("roomname")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string roomName = value["roomname"].asString();
+	break;
+      }
+    case UserAdvice::ROOM_TEXT_FROM:
+      {
+	if(!value.isMember("username") || !value.isMember("roomname") || !value.isMember("text")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string roomName = value["roomname"].asString();
+	std::string msg = value["text"].asString();
+	message.setRoomMessage(msg, userName, roomName);
+	return message;
+	break;
+      }
+      
+    case UserAdvice::LEFT_ROOM:
+      {
+	if(!value.isMember("username") || !value.isMember("roomname")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string roomName = value["roomname"].asString();
+	text = userName + " has left the room.";
+	message.setRoomAdvice(text, roomName);
+	return message;
+	break;
+      }
+      
+    case UserAdvice::DISCONNECTED:
+      {
+	if(!value.isMember("username")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	text = userName + " has disconnected from the chat.";
+	break;
+      }
+    }
 
+    message.setServerAdvice(text);
+    return message;
   }catch(const std::invalid_argument& e){
-    throw ServerResponseException(jsonError);
+    throw ServerResponseException(jsonError.c_str());
   }
 }
 
