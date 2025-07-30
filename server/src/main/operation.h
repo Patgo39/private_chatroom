@@ -1,5 +1,5 @@
 #ifndef OPERATION_H
-#define OPERATION_h
+#define OPERATION_H
 
 #include <iostream>
 #include <string>
