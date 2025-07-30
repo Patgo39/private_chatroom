@@ -9,9 +9,11 @@
 #include "server_response_exception.cpp"
 #include "operation_enum.h"
 #include "result_enum.h"
+#include "user_advice_enum.h"
 
 class ServerResponseManager{
   Message message;
+  std::string jsonError;
  public:
   ServerResponseManager();
   Message getMessageFromResponse(std::string serverResponse);
