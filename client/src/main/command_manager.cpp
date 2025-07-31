@@ -1,7 +1,9 @@
 #include "command_manager.h"
 
 CommandManager::CommandManager(){
-
+  cmdRes.stillConnected = true;
+  cmdRes.ownMessage = false;
+  cmdRes.leaveRoom = false;
 }
 
 /**
@@ -12,50 +14,63 @@ CommandManager::CommandManager(){
  * mantenga la conexión con el servidor y <False> para otro caso.
  * @return Json del comando recibido.
  **/
-std::string CommandManager::getJsonFromCommand(std::string userMessage, bool &stillConnected, bool &ownMessage){
+CommandResult CommandManager::getJsonFromCommand(std::string userMessage){
   std::vector<std::string> command = getCommandAsVector(userMessage);
 
   if(command[0] == "/identify"){
-    return manageIdentification(command);
+    cmdRes.output = manageIdentification(command);
+    return cmdRes;
     
   }else if(command[0] == "/help"){
-    ownMessage = true;
-    return manageHelpCommand();
+    cmdRes.ownMessage = true;
+    cmdRes.output = manageHelpCommand();
+    return cmdRes;
     
   }else if(command[0] == "/changestatus"){
-    return manageNewStatus(command);
+   cmdRes.output = manageNewStatus(command);
+   return cmdRes;
     
   }else if(command[0] == "/list"){
-    return manageUsersList(command);
+    cmdRes.output = manageUsersList(command);
+    return cmdRes;
     
   }else if(command[0] == "/private"){
-     return managePrivateMessage(command);
+     cmdRes.output = managePrivateMessage(command);
+     return cmdRes;
     
   }else if(command[0] == "/newroom"){
-    return manageNewRoom(command);
+    cmdRes.output = manageNewRoom(command);
+    return cmdRes;
     
   }else if(command[0] == "/invite"){
-    return manageInviteUsersToRoom(command);
+    cmdRes.output = manageInviteUsersToRoom(command);
+    return cmdRes;
     
   }else if(command[0] == "/join"){
-    return manageJoinRoom(command);
+    cmdRes.output = manageJoinRoom(command);
+    return cmdRes;
     
   }else if(command[0] == "/roomlist"){
-    return manageRoomList(command);
+    cmdRes.output = manageRoomList(command);
+    return cmdRes;
     
   }else if(command[0] == "/leave"){
-    return manageLeaveRoom(command);
+    cmdRes.output = manageLeaveRoom(command);
+    cmdRes.leaveRoom = true;
+    return cmdRes;
     
   }else if(command[0] == "/disconnect"){
-    stillConnected = false;
-    return manageDisconnect();
+    cmdRes.stillConnected = false;
+    cmdRes.output = manageDisconnect();
+    return cmdRes;
     
   }else if(command[0][0] == '/'){
     std::string e = "Command " + command[0] + " doesn't exists.";
     throw CommandException(e.c_str());
     
   }else{
-    return manageNormalText(userMessage);
+    cmdRes.output = manageNormalText(userMessage);
+    return cmdRes;
   }
   
 }
@@ -260,6 +275,8 @@ std::string CommandManager::manageLeaveRoom(std::vector<std::string> command){
   json["type"] = "LEAVE_ROOM";
   json["roomname"] = roomname[0];
 
+  cmdRes.roomToLeave = roomname[0];
+  
   return turnJsonToString(json);
 }
 
