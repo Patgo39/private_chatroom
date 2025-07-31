@@ -21,6 +21,10 @@ std::string UserInterface::askAndGetIp(){
   return ip;
 }
 
+void UserInterface::manageMessageResult(Message result){
+  
+}
+
 void UserInterface::showMessageOnTerminal(std::string message){
   std::cout<<message<<std::endl;
 }
@@ -47,6 +51,9 @@ void UserInterface::pushMessageInCurrentRoom(std::string message){
 }
 
 void UserInterface::eraseRoom(std::string roomName){
+  if(room_messages.find(roomName) == room_messages.end())
+    return;
+      
   room_messages.erase(roomName);
 
   int i = 0;

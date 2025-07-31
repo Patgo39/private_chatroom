@@ -21,8 +21,8 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
       continue;
     }
     Message msg = serverManager.getMessageFromResponse(text);
-    // se muestran los mensajes en la pantalla.
-    }
+    tui.manageMessageResult(msg);
+  }
 }
 
 void manageCommand(Client &c, UserInterface &tui, std::string command){
@@ -35,6 +35,10 @@ void manageCommand(Client &c, UserInterface &tui, std::string command){
     else
       c.sendMessage(cmdRes.output);
 
+    if(cmdRes.leaveRoom){
+      tui.eraseRoom(cmdRes.roomToLeave);
+    }
+    
     if(!cmdRes.stillConnected){
       c.closeConection();
       continue_thread = false;
