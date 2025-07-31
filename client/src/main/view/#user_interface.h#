@@ -17,9 +17,6 @@
 using namespace ftxui;
 
 class UserInterface{
-  ScreenInteractive screen = ScreenInteractive::FitComponent();
-  std::function<void()> exit_loop;
-  
   int bufferSize;
   int selected_chat;
   std::string user_input;
@@ -27,6 +24,7 @@ class UserInterface{
   std::map<std::string, std::list<std::string>> room_messages;
   std::mutex mtx;
   std::condition_variable cv;
+  auto screen
 public:
   UserInterface(int _bufferSize);
   std::string askAndGetPort();

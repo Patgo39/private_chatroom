@@ -7,13 +7,14 @@
 #include <vector>
 #include <sstream>
 #include "command_exception.cpp"
+#include "command_result.h"
 
 class CommandManager{
-  
+  CommandResult cmdRes;
  public:
   CommandManager();
   // Se construye un json dado el comando recibido.
-  std::string getJsonFromCommand(std::string userMessage, bool &stillConnected, bool &ownMessage);
+  CommandResult getJsonFromCommand(std::string userMessage);
 
  private:
   // Se obtienen los parámetros del comando en un vector.

@@ -1,9 +1,28 @@
 #include "user_interface.h"
 
-UserInterface::UserInterface(){
+UserInterface::UserInterface(int _bufferSize){
+  bufferSize = _bufferSize;
   chat_options.push_back("General");
   selected_chat = 0;
   room_messages.insert({"General", {}});
+}
+
+std::string UserInterface::askAndGetPort(){
+  std::string port;
+  std::cout<<"Type the port: ";
+  std::cin>>port;
+  return port;
+}
+
+std::string UserInterface::askAndGetIp(){
+  std::string ip;
+  std::cout<<"Yype the ip: ";
+  std::cin>>ip;
+  return ip;
+}
+
+void UserInterface::showMessageOnTerminal(std::string message){
+  std::cout<<message<<std::endl;
 }
 
 void UserInterface::addNewRoom(std::string roomName){
@@ -19,7 +38,7 @@ void UserInterface::pushRoomMessage(std::string chatName, std::string message){
   }
 }
 
-void UserInterface::pushServerReply(std::string message){
+void UserInterface::pushMessageInCurrentRoom(std::string message){
   room_messages[chat_options[selected_chat]].push_back(message);
 
   while(room_messages[chat_options[selected_chat]].size() > 70){
@@ -57,6 +76,8 @@ void UserInterface::onUserInputEvent(std::string input){
 }
 
 void UserInterface::startMainLoop(){
+  exit_loop = screen.ExitLoopClosure();
+  
   // Se construye la lista de chats.
   Component chat_menu = Menu(&chat_options, &selected_chat);
 
@@ -109,7 +130,11 @@ void UserInterface::startMainLoop(){
   // Split izquierdo vs derecho
   auto root = ResizableSplitLeft(left_menu, right_split, &left_size);
   auto renderer = Renderer(root, [&] {return root->Render() | border;});
-
-  auto screen = ScreenInteractive::Fullscreen();
+  
   screen.Loop(renderer);
+}
+
+void UserInterface::endMainLoop(){
+  if(exit_loop)
+    exit_loop();
 }

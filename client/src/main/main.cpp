@@ -2,15 +2,17 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
-#include "./view/screen.h"
 #include "client.h"
 #include "command_manager.h"
-//#include "./view/user_interface.h"
+#include "./view/user_interface.h"
+#include "server_response_manager.h"
+#include "message.h"
+#include "command_result.h"
 
 std::atomic<bool> continue_thread{true};
 
-void manageReceivedMessages(Screen &sc, Client &c){
-  
+void manageReceivedMessages(UserInterface &tui, Client &c){
+  ServerResponseManager serverManager = ServerResponseManager();
   while(continue_thread){
     
     std::string text = c.receiveMessages();
@@ -18,63 +20,71 @@ void manageReceivedMessages(Screen &sc, Client &c){
     if(text == ""){
       continue;
     }
-    
-    sc.showMessage("Client", text.c_str(), false, true);
+    Message msg = serverManager.getMessageFromResponse(text);
+    // se muestran los mensajes en la pantalla.
     }
 }
 
-void manageCommand(Client &c, Screen &sc, std::string command){
-  bool stillConnected = true;
-  bool ownMessage = false;
+void manageCommand(Client &c, UserInterface &tui, std::string command){
   CommandManager cm = CommandManager();
+  
   try{
-    std::string output = cm.getJsonFromCommand(command, stillConnected, ownMessage);
-    if(ownMessage)
-      sc.showMessage("INFO", output, false, true);
+    CommandResult cmdRes = cm.getJsonFromCommand(command);
+    if(cmdRes.ownMessage)
+      tui.pushMessageInCurrentRoom(cmdRes.output);
     else
-      c.sendMessage(output);
+      c.sendMessage(cmdRes.output);
 
-    if(!stillConnected){
+    if(!cmdRes.stillConnected){
       c.closeConection();
       continue_thread = false;
-      sc.showMessage("SERVER", "You're now disconnected.", true, false);
     }
   }catch(CommandException &e){
     std::string error = e.what();
-    sc.showMessage("Error", error, true, false);
+    tui.pushMessageInCurrentRoom(error);
   }
 }
 
 int main(){
   const int maxSizeBuffer = 1024;
-  Screen sc = Screen(maxSizeBuffer);
-
-  int port = std::stoi(sc.askAndGetPort());
-  std::string ip = sc.askAndGetIp();
+  UserInterface tui = UserInterface(maxSizeBuffer);
+  int port;
+  try{
+    port = std::stoi(tui.askAndGetPort());
+  }catch(const std::invalid_argument& e){
+    std::cout<<"INVALID input type.";
+    exit(1);
+  }
+  std::string ip = tui.askAndGetIp();
   Client c = Client(port, maxSizeBuffer, ip);
   
   try{
     // Se inicia la conexión con el servidor.
     c.start();
-
-    //Se escuchan e imprimen los mensajes recibidos.
-    std::thread thread_show_messages(manageReceivedMessages, std::ref(sc), std::ref(c));
-    thread_show_messages.detach();
-
-    // Ciclo que mantiene la conexión con el servidor
-    while(continue_thread){
-      
-      //Se obtienen los mensajes del ususario.
-      std::string userMessage = sc.getMessage();
-
-      manageCommand(c, sc, userMessage);
-    }
-    
     
   }catch(ClientConnectionException &e){
     std::string error = e.what();
-    sc.showMessage("Server", error, true, false);
+    tui.showMessageOnTerminal(error);
   }
+
+  std::thread textual_user_interface(&UserInterface::startMainLoop, &tui);
+  //Se escuchan e imprimen los mensajes recibidos.
+  std::thread thread_show_messages(manageReceivedMessages, std::ref(tui), std::ref(c));
+  
+  // Ciclo que mantiene la conexión con el servidor
+  while(continue_thread){
+    
+    //Se obtienen los mensajes del ususario.
+    std::string userMessage = tui.getUserMessage();
+    
+    manageCommand(c, tui, userMessage);
+  }
+  
+  tui.endMainLoop();
+  textual_user_interface.join();
+  thread_show_messages.join();
+  
+  tui.showMessageOnTerminal("You are now disconnected.");
   
   return 0;
   
