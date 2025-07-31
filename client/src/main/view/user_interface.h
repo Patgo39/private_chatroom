@@ -13,6 +13,7 @@
 #include "ftxui/component/component_options.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
+#include "../message.h"
 
 using namespace ftxui;
 
@@ -31,6 +32,7 @@ public:
   UserInterface(int _bufferSize);
   std::string askAndGetPort();
   std::string askAndGetIp();
+  void manageMessageResult(Message result);
   void showMessageOnTerminal(std::string message);
   void addNewRoom(std::string roomName);
   void pushRoomMessage(std::string chatName, std::string message);
