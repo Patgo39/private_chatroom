@@ -360,8 +360,9 @@ std::string JsonController::getPublicTextAdvice(std::string username, std::strin
   
   Json::Value json;
 
-  json["type"] = "PUBLIC_TEXT";
+  json["type"] = "PUBLIC_TEXT_FROM";
   json["text"] = message;
+  json["username"] = username;
 
   return turnJsonToString(json);
 }

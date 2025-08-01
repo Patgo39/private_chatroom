@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <memory>
 #include "client.h"
 #include "command_manager.h"
 #include "./view/user_interface.h"
@@ -20,8 +21,14 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
     if(text == ""){
       continue;
     }
-    Message msg = serverManager.getMessageFromResponse(text);
-    tui.manageMessageResult(msg);
+    try{
+      Message msg = serverManager.getMessageFromResponse(text);
+      tui.manageMessageResult(msg);
+      continue_thread = msg.isConnectionKept();
+    }catch(ServerResponseException& e){
+      tui.pushMessageInCurrentRoom(e.what());
+      continue_thread = false;
+    }
   }
 }
 
@@ -40,8 +47,8 @@ void manageCommand(Client &c, UserInterface &tui, std::string command){
     }
     
     if(!cmdRes.stillConnected){
-      c.closeConection();
       continue_thread = false;
+      c.closeConnection();
     }
   }catch(CommandException &e){
     std::string error = e.what();
@@ -87,7 +94,6 @@ int main(){
   tui.endMainLoop();
   textual_user_interface.join();
   thread_show_messages.join();
-  
   tui.showMessageOnTerminal("You are now disconnected.");
   
   return 0;

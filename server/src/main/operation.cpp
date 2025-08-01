@@ -13,5 +13,6 @@ std::string Operation::getStringFromType(Type type){
   case ROOM_TEXT: return "ROOM_TEXT";
   case LEAVE_ROOM: return "LEAVE_ROOM";
   case TEXT: return "TEXT";
+  default: std::abort(); // Nunca debería suceder.
   }
 }

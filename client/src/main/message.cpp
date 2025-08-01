@@ -1,7 +1,7 @@
 #include "message.h"
 
 Message::Message(){
-  keepConection = true;
+  keepConnection = true;
 }
 
 void Message::setRoomCreationWithAdvice(std::string _roomName, std::string _text){
@@ -11,10 +11,10 @@ void Message::setRoomCreationWithAdvice(std::string _roomName, std::string _text
   text = _text;
 }
 
-void Message::setServerResponse(std::string _text, bool _keepConection) {
+void Message::setServerResponse(std::string _text, bool _keepConnection) {
   type = Type::ADVICE;
   subtype = Advice::RESPONSE;
-  keepConection = _keepConection;
+  keepConnection = _keepConnection;
   text = _text;
 }
 
@@ -93,4 +93,8 @@ std::string Message::getRoomName() {
 
 std::string Message::getText() {
   return text;
+}
+
+bool Message::isConnectionKept(){
+  return keepConnection;
 }
