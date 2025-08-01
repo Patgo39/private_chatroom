@@ -37,6 +37,6 @@ std::string Client::receiveMessages(){
   return buffer;
 }
 
-void Client::closeConection(){
+void Client::closeConnection(){
   close(clientSocket);
 }

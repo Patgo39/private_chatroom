@@ -35,7 +35,7 @@ class Message{
   std::string text;
   std::string userName;
   std::string roomName;
-  bool keepConection;
+  bool keepConnection;
   Type type;
   std::variant<Action, Text, Advice> subtype;
 
@@ -60,6 +60,6 @@ class Message{
   std::string getUserName();
   std::string getRoomName();
   std::string getText();
-  
+  bool isConnectionKept();
 };
 #endif

@@ -24,7 +24,7 @@ class Client{
   void start();
   void sendMessage(std::string);
   std::string receiveMessages();
-  void closeConection();
+  void closeConnection();
 };
 
 #endif
