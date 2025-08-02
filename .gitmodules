@@ -1,0 +1,3 @@
+[submodule "client/subprojects/FTXUI-6.1.9"]
+	path = client/subprojects/FTXUI-6.1.9
+	url = https://github.com/ArthurSonzogni/FTXUI.git

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <atomic>
 #include <memory>
+#include <csignal>
 #include "client.h"
 #include "command_manager.h"
 #include "./view/user_interface.h"

@@ -33,7 +33,7 @@ void Client::sendMessage(std::string message){
 
 std::string Client::receiveMessages(){
   char buffer[bufferSize] = {0};
-  int received = recv(clientSocket, buffer, bufferSize, 0);
+  recv(clientSocket, buffer, bufferSize, 0);
   return buffer;
 }
 
