@@ -220,7 +220,7 @@ std::string CommandManager::manageNewRoom(std::vector<std::string> command){
 std::string CommandManager::manageInviteUsersToRoom(std::vector<std::string> command, UserInput input){
   std::vector<std::string> parameters = getParametersFromCommand(command);
 
-  if(parameters.size() < 2){
+  if(parameters.size() < 1){
     throw CommandException("Invalid use of command /invite.");
   }
 
