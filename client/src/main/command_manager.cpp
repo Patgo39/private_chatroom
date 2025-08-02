@@ -14,7 +14,8 @@ CommandManager::CommandManager(){
  * mantenga la conexión con el servidor y <False> para otro caso.
  * @return Json del comando recibido.
  **/
-CommandResult CommandManager::getJsonFromCommand(std::string userMessage){
+CommandResult CommandManager::getJsonFromCommand(UserInput input){
+  std::string userMessage = input.getInput();
   std::vector<std::string> command = getCommandAsVector(userMessage);
 
   if(command[0] == "/identify"){
@@ -43,7 +44,7 @@ CommandResult CommandManager::getJsonFromCommand(std::string userMessage){
     return cmdRes;
     
   }else if(command[0] == "/invite"){
-    cmdRes.output = manageInviteUsersToRoom(command);
+    cmdRes.output = manageInviteUsersToRoom(command, input);
     return cmdRes;
     
   }else if(command[0] == "/join"){
@@ -51,11 +52,11 @@ CommandResult CommandManager::getJsonFromCommand(std::string userMessage){
     return cmdRes;
     
   }else if(command[0] == "/roomlist"){
-    cmdRes.output = manageRoomList(command);
+    cmdRes.output = manageRoomList(command, input);
     return cmdRes;
     
   }else if(command[0] == "/leave"){
-    cmdRes.output = manageLeaveRoom(command);
+    cmdRes.output = manageLeaveRoom(command, input);
     cmdRes.leaveRoom = true;
     return cmdRes;
     
@@ -69,7 +70,7 @@ CommandResult CommandManager::getJsonFromCommand(std::string userMessage){
     throw CommandException(e.c_str());
     
   }else{
-    cmdRes.output = manageNormalText(userMessage);
+    cmdRes.output = manageMessage(userMessage, input);
     return cmdRes;
   }
   
@@ -96,11 +97,16 @@ std::vector<std::string> CommandManager::getCommandAsVector(std::string userMess
  * @param userMessage el mensaje del usuario con el comando.
  * @return el String con el json del comando.
  **/
-std::string CommandManager::manageNormalText(std::string userMessage){
+std::string CommandManager::manageMessage(std::string userMessage, UserInput input){
   Json::Value json;
-  json["type"] = "PUBLIC_TEXT";
-  json["text"] = userMessage;
-
+  if(input.isInputFromMainRoom()){
+    json["type"] = "PUBLIC_TEXT";
+    json["text"] = userMessage;
+  }else{
+    json["type"] = "ROOM_TEXT";
+    json["roomname"] = input.getRoomName();
+    json["text"] = userMessage;
+  }
   return turnJsonToString(json);
 }
 
@@ -139,18 +145,17 @@ std::string CommandManager::manageIdentification(std::vector<std::string> comman
 std::string CommandManager::manageHelpCommand(){
   std::string helpMessage =
     "Available commands:\n"
-    "/identify 'username'             - Identify yourself with a username.\n"
-    "/changestatus 'new_status'       - Change your status (only: AWAY, BUSY, ACTIVE).\n"
-    "/list                            - Show the list of all connected users.\n"
-    "/private 'username' 'message...' - Send a private message to a user.\n"
-    "/newroom 'Room name'             - Create a new chat room.\n"
-    "/invite 'Room name' 'user1' 'user2' ... - Invite users to a room.\n"
-    "/join 'Room name'                - Join an existing chat room.\n"
-    "/roomlist 'Room name'            - List the users currently in a room.\n"
-    "/leave 'Room name'               - Leave the specified chat room.\n"
-    "/disconnect                      - Disconnect from the server.\n"
-    "\nNote: If you try to perform any action without identifying yourself first, "
-    "you will be disconnected from the chat.\n";
+    "* /identify 'username'             - Identify yourself with a username.\n"
+    "* /changestatus 'new_status'       - Change your status (only: AWAY, BUSY, ACTIVE).\n"
+    "* /list                            - Show the list of all connected users.\n"
+    "* /private 'username' 'message...' - Send a private message to a user.\n"
+    "* /newroom 'Room name'             - Create a new chat room.\n"
+    "* /invite 'user1' 'user2' ...      - Invite users to a room. To perform this action, you must be in the room to which you want to invite new users.\n"
+    "* /join 'Room name'                - Join an existing chat room.\n"
+    "* /roomlist                        - List the users currently in a room. To perform this action, you must be inside a room.\n"
+    "* /leave                           - Leave the specified chat room. To perform this action, you must be in the room you wish to leave.\n"
+    "* /disconnect                      - Disconnect from the server.\n"
+    "\nNote: If you try to perform any action without identifying yourself first, you will be disconnected from the chat.\n";
 
   return helpMessage;
 }
@@ -160,7 +165,7 @@ std::string CommandManager::manageNewStatus(std::vector<std::string> command){
   std::vector<std::string> newStatus = getParametersFromCommand(command);
 
   if(newStatus.size() > 1 || newStatus.size() < 1){
-    throw CommandException("Invalid use of command /status.");
+    throw CommandException("Invalid use of command /changestatus.");
   }
 
   for(char l:newStatus[0]){
@@ -212,22 +217,26 @@ std::string CommandManager::manageNewRoom(std::vector<std::string> command){
   return turnJsonToString(json);
 }
 
-std::string CommandManager::manageInviteUsersToRoom(std::vector<std::string> command){
+std::string CommandManager::manageInviteUsersToRoom(std::vector<std::string> command, UserInput input){
   std::vector<std::string> parameters = getParametersFromCommand(command);
 
   if(parameters.size() < 2){
     throw CommandException("Invalid use of command /invite.");
   }
+
+  if(input.isInputFromMainRoom()){
+    throw CommandException("Invite command is only allowed in private rooms.");
+  }
   
   Json::Value jsonArray;
 
-  for(std::size_t i = 1; i< parameters.size(); i++){
+  for(std::size_t i = 0; i< parameters.size(); i++){
     jsonArray.append(parameters[i]);
   }
   
   Json::Value json;
   json["type"] = "INVITE";
-  json["roomname"] = parameters[0];
+  json["roomname"] = input.getRoomName();
   json["usernames"] = jsonArray;
 
   return turnJsonToString(json);
@@ -248,34 +257,37 @@ std::string CommandManager::manageJoinRoom(std::vector<std::string> command){
   return turnJsonToString(json);
 }
 
-std::string CommandManager::manageRoomList(std::vector<std::string> command){
-
-  std::vector<std::string> roomname = getParametersFromCommand(command);
+std::string CommandManager::manageRoomList(std::vector<std::string> command, UserInput input){
   
-  if(roomname.size() > 1 || roomname.size() < 1){
+  if(command.size() > 1){
     throw CommandException("Invalid use of command /roomlist.");
+  }
+  if(input.isInputFromMainRoom()){
+    throw CommandException("You must be in a room to perform /roomlist command.");
   }
 
   Json::Value json;
   json["type"] = "ROOM_USERS";
-  json["roomname"] = roomname[0];
+  json["roomname"] = input.getRoomName();
 
   return turnJsonToString(json);
 }
 
-std::string CommandManager::manageLeaveRoom(std::vector<std::string> command){
+std::string CommandManager::manageLeaveRoom(std::vector<std::string> command, UserInput input){
 
-  std::vector<std::string> roomname = getParametersFromCommand(command);
-  
-  if(roomname.size() > 1 || roomname.size() < 1){
+  if(command.size() > 1){
     throw CommandException("Invalid use of command /leave.");
+  }
+
+  if(input.isInputFromMainRoom()){
+    throw CommandException("You must be in a room to perform /leave command.");
   }
 
   Json::Value json;
   json["type"] = "LEAVE_ROOM";
-  json["roomname"] = roomname[0];
+  json["roomname"] = input.getRoomName();
 
-  cmdRes.roomToLeave = roomname[0];
+  cmdRes.roomToLeave = input.getRoomName();
   
   return turnJsonToString(json);
 }

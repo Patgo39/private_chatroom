@@ -41,7 +41,7 @@ public:
   void showMessageOnTerminal(std::string message);
   void pushMessageInCurrentRoom(std::string message);
   void eraseRoom(std::string roomName);
-  std::string getUserMessage();
+  UserInput getUserInput();
   void startMainLoop();
   void endMainLoop();
 
