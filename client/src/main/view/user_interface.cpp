@@ -152,13 +152,19 @@ void UserInterface::pushMessageToAllRooms(std::string message){
   screen.PostEvent(Event::Custom);
 }
 
-std::string UserInterface::getUserMessage(){
+UserInput UserInterface::getUserInput(){
   std::unique_lock<std::mutex> lock(mtx);
   cv.wait(lock, [this] {return !user_input.empty();});
   
-  std::string msg = user_input;
+  UserInput input = UserInput();
+  if(selected_chat == 0){
+    input.buildGeneralRoomInput(user_input);
+  }else{
+    std::string roomName = chat_options[selected_chat];
+    input.buildPrivateRoomInput(user_input, roomName);
+  }
   user_input.clear();
-  return msg;
+  return input;
 }
 
 void UserInterface::onUserInputEvent(std::string input){

@@ -8,13 +8,14 @@
 #include <sstream>
 #include "command_exception.cpp"
 #include "command_result.h"
+#include "user_input.h"
 
 class CommandManager{
   CommandResult cmdRes;
  public:
   CommandManager();
   // Se construye un json dado el comando recibido.
-  CommandResult getJsonFromCommand(std::string userMessage);
+  CommandResult getJsonFromCommand(UserInput input);
 
  private:
   // Se obtienen los parámetros del comando en un vector.
@@ -32,17 +33,17 @@ class CommandManager{
   // Se construye el json para el comando /newroom.
   std::string manageNewRoom(std::vector<std::string> command);
   // Se construye el json para el comando /invite
-  std::string manageInviteUsersToRoom(std::vector<std::string> command);
+  std::string manageInviteUsersToRoom(std::vector<std::string> command, UserInput input);
   // Se construye el json para el comando /join.
   std::string manageJoinRoom(std::vector<std::string> command);
   // Se construye el json para el comando /roomlist.
-  std::string manageRoomList(std::vector<std::string> command);
+  std::string manageRoomList(std::vector<std::string> command, UserInput input);
   // Se construye el json para el comando /leave.
-  std::string manageLeaveRoom(std::vector<std::string> command);
+  std::string manageLeaveRoom(std::vector<std::string> command, UserInput input);
   // Se construye el json para el comando /disconnect.
   std::string manageDisconnect();
   // Se construye el json para un texto nomal.
-  std::string manageNormalText(std::string userMessage);
+  std::string manageMessage(std::string userMessage, UserInput input);
   // Convierte un objeto json a cadena.
   std::string turnJsonToString(Json::Value json);
   // Agrega los parámetros de un comando a un vector.

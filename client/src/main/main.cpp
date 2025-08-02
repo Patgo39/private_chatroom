@@ -33,11 +33,11 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
   }
 }
 
-void manageCommand(Client &c, UserInterface &tui, std::string command){
+void manageCommand(Client &c, UserInterface &tui, UserInput input){
   CommandManager cm = CommandManager();
   
   try{
-    CommandResult cmdRes = cm.getJsonFromCommand(command);
+    CommandResult cmdRes = cm.getJsonFromCommand(input);
     if(cmdRes.ownMessage)
       tui.pushMessageInCurrentRoom(cmdRes.output);
     else
@@ -87,9 +87,9 @@ int main(){
   while(continue_thread){
     
     //Se obtienen los mensajes del ususario.
-    std::string userMessage = tui.getUserMessage();
+    UserInput input = tui.getUserInput();
     
-    manageCommand(c, tui, userMessage);
+    manageCommand(c, tui, input);
   }
   
   tui.endMainLoop();
