@@ -190,7 +190,8 @@ void UserInterface::startMainLoop(){
   auto input_catch = CatchEvent(input_user_component, [&] (Event event) {
     if(event == Event::Return){ // Enter
       if(!user_input_aux.empty()){
-	room_messages[chat_options[selected_chat]].push_back(user_input_aux);
+	std::string user_input_aux_2 = "'YOU': " + user_input_aux;
+	room_messages[chat_options[selected_chat]].push_back(user_input_aux_2);
 	onUserInputEvent(user_input_aux);
 	user_input_aux.clear();
 	return true;
@@ -205,21 +206,9 @@ void UserInterface::startMainLoop(){
 	input_catch->Render() | border
       });
   });
-
-  // Barra scroll.
-  float scroll_y = 0.1;
-  SliderOption<float> option_y;
-  option_y.value = &scroll_y;
-  option_y.min = 0.f;
-  option_y.max = 1.f;
-  option_y.increment = 0.1f;
-  option_y.direction = Direction::Down;
-  option_y.color_active = Color::Yellow;
-  option_y.color_inactive = Color::YellowLight;
-  auto scrollbar_y = Slider(option_y);
   
   // Se construye la pantalla de mensajes.
-  auto content_messages = Renderer([&] {
+  auto message_render = Renderer([&] {
     std::vector<Element> lines;
     const std::string& current_room = chat_options[selected_chat];
     for (const auto& msg : room_messages[current_room]) {
@@ -228,9 +217,10 @@ void UserInterface::startMainLoop(){
     return vbox(std::move(lines));
   });
 
-
+  auto message_display = Scroller(message_render);
+  
   // Se construye la interfaz.
-  auto right_split = ResizableSplitBottom(right_bottom, content_messages, &bottom_size);
+  auto right_split = ResizableSplitBottom(right_bottom, message_display, &bottom_size);
   // Split izquierdo vs derecho
   auto root = ResizableSplitLeft(left_menu, right_split, &left_size);
   auto renderer = Renderer(root, [&] {return root->Render() | border;});
