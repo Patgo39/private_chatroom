@@ -34,6 +34,7 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
 }
 
 void manageCommand(Client &c, UserInterface &tui, UserInput input){
+  
   CommandManager cm = CommandManager();
   
   try{
@@ -88,7 +89,8 @@ int main(){
     
     //Se obtienen los mensajes del ususario.
     UserInput input = tui.getUserInput();
-    
+    if(!continue_thread)
+      break;
     manageCommand(c, tui, input);
   }
   

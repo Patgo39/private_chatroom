@@ -5,6 +5,7 @@ UserInterface::UserInterface(int _bufferSize){
   chat_options.push_back("General");
   selected_chat = 0;
   room_messages.insert({"General", {}});
+  interrupt_input_loop = false;
 }
 
 std::string UserInterface::askAndGetPort(){
@@ -80,7 +81,12 @@ void UserInterface::manageMessageResult(Message msg){
       case Advice::RESPONSE:
 	{
 	  std::string updated_txt = "SERVER_RESPONSE: "+ txt;
-	  pushMessageInCurrentRoom(updated_txt);
+	  if(msg.isConnectionKept())
+	    pushMessageInCurrentRoom(updated_txt);
+	  else{
+	    pushMessageInCurrentRoom(updated_txt);
+	    onForceFinishEvent();
+	  }
 	  break;
 	}
       case Advice::NORMAL_ADVICE:
@@ -154,9 +160,14 @@ void UserInterface::pushMessageToAllRooms(std::string message){
 
 UserInput UserInterface::getUserInput(){
   std::unique_lock<std::mutex> lock(mtx);
-  cv.wait(lock, [this] {return !user_input.empty();});
-  
+  cv.wait(lock, [this] {return !user_input.empty() || interrupt_input_loop;});
+
   UserInput input = UserInput();
+  
+  if(interrupt_input_loop){
+    return input;
+  }
+  
   if(selected_chat == 0){
     input.buildGeneralRoomInput(user_input);
   }else{
@@ -170,6 +181,15 @@ UserInput UserInterface::getUserInput(){
 void UserInterface::onUserInputEvent(std::string input){
   std::lock_guard<std::mutex> lock(mtx);
   user_input = input;
+  cv.notify_one();
+}
+
+void UserInterface::onForceFinishEvent(){
+  
+  std::lock_guard<std::mutex> lock(mtx);
+  interrupt_input_loop = true;
+  screen.PostEvent(Event::Custom);
+  std::this_thread::sleep_for(std::chrono::seconds(10));
   cv.notify_one();
 }
 
@@ -189,6 +209,9 @@ void UserInterface::startMainLoop(){
   // Se construye la entrada del usuario
   std::string user_input_aux;
   Component input_user_component = Input(&user_input_aux, "Type your message...");
+  input_user_component |= CatchEvent([&] (Event event){
+    return interrupt_input_loop;
+  });
   
   int left_size = 20;
   int bottom_size = 4;

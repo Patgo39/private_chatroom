@@ -43,7 +43,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     if(result == "NOT_IDENTIFIED"){
       text = 
 	"\nERROR: Unauthorized action detected. You must log in before performing "
-	"any operations.\nThe connection will now be terminated.";
+	"any operations.\nThe connection will be terminated in 10 seconds.";
       
       message.setServerResponse(text, false);
       return message;
@@ -51,7 +51,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     
     text = "ERROR: Invalid operation format detected.\n"
       "The request sent by the client does not comply with the required protocol.\n"
-      "The connection will be terminated.";
+      "The connection will be terminated in 10 seconds.";
     message.setServerResponse(text, false);
     return message;
   }
@@ -98,6 +98,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     switch(rs){
     case Result::USER_ALREADY_EXISTS:
       text = "\nOperation failed: the username "+extra+" already exists.";
+      text += "\nThe connection will be terminated in 10 seconds.";
       message.setServerResponse(text, false);
       return message;
     case Result::NO_SUCH_USER:

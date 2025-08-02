@@ -7,6 +7,8 @@
 #include <map>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
+#include <chrono>
 #include <csignal>
 #include "ftxui/component/captured_mouse.hpp"
 #include "ftxui/component/component.hpp"
@@ -33,6 +35,7 @@ class UserInterface{
   std::map<std::string, std::list<std::string>> room_messages;
   std::mutex mtx;
   std::condition_variable cv;
+  bool interrupt_input_loop;
 public:
   UserInterface(int _bufferSize);
   std::string askAndGetPort();
@@ -49,6 +52,7 @@ private:
   void addNewRoom(std::string roomName);
   void pushRoomMessage(std::string chatName, std::string message);
   void onUserInputEvent(std::string input);
+  void onForceFinishEvent();
   void pushMessageToAllRooms(std::string message);
 };
 
