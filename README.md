@@ -7,7 +7,7 @@ Este proyecto es una aplicación de chat en tiempo real que incluye un servidor 
 Para clonar el repositorio, utiliza el siguiente comando:
 
 ```bash
-git clone https://gitlab.com/patriciogarcia321/proyecto1myp
+git clone --recursive https://gitlab.com/patriciogarcia321/proyecto1myp
 ```
 
 ## Configuración del proyecto
