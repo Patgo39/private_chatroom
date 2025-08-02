@@ -5,7 +5,6 @@ incdir = include_directories('src/main', 'src/main/view')
 
 class_files = [
       	'src/main/main.cpp',
-	'./src/main/view/screen.cpp',
 	'./src/main/client.cpp',
 	'./src/main/client_connection_exception.cpp',
 	'./src/main/command_exception.cpp',
@@ -17,7 +16,8 @@ class_files = [
 	'./src/main/server_response_exception.cpp',
 	'./src/main/operation_enum.cpp',
 	'./src/main/result_enum.cpp',
-	'./src/main/user_advice_enum.cpp']
+	'./src/main/user_advice_enum.cpp',
+	'./src/main/user_input.cpp']
 
 #Dependencies:
 cmake = import('cmake')

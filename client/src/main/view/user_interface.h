@@ -18,6 +18,7 @@
 #include "ftxui/dom/elements.hpp"
 #include "scroller.h"
 #include "../message.h"
+#include "../user_input.h"
 
 using namespace ftxui;
 
