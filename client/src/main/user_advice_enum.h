@@ -11,6 +11,7 @@ enum class UserAdvice{
     USER_LIST,
     TEXT_FROM,
     PUBLIC_TEXT_FROM,
+    INVITATION,
     JOINED_ROOM,
     ROOM_USER_LIST,
     ROOM_TEXT_FROM,

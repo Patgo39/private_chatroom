@@ -42,7 +42,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
   if(operation == "INVALID"){
     if(result == "NOT_IDENTIFIED"){
       text = 
-	"\nERROR: Unauthorized action detected. You must log in before performing "
+	"ERROR: Unauthorized action detected. You must log in before performing "
 	"any operations.\nThe connection will be terminated in 10 seconds.";
       
       message.setServerResponse(text, false);
@@ -74,14 +74,14 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     
     switch (op) {
     case Operation::IDENTIFY:
-      text = "\nYou have successfully identified yourself";
+      text = "You have successfully identified yourself.";
       break;
     case Operation::NEW_ROOM:
-      text = "\nThe room named " + extra + " has been successfully created.";
+      text = "The room named " + extra + " has been successfully created.";
       message.setRoomCreationWithAdvice(extra, text);
       return message;
     case Operation::JOIN_ROOM:
-      text = "\nYou have successfully joined the room " + extra;
+      text = "You have successfully joined the room " + extra + ".";
       message.setRoomCreationWithAdvice(extra, text);
       return message;
     default:
@@ -97,27 +97,27 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
     Result rs = ResultEnum::getResultFromString(result);
     switch(rs){
     case Result::USER_ALREADY_EXISTS:
-      text = "\nOperation failed: the username "+extra+" already exists.";
+      text = "Operation failed: the username "+extra+" already exists.";
       text += "\nThe connection will be terminated in 10 seconds.";
       message.setServerResponse(text, false);
       return message;
     case Result::NO_SUCH_USER:
-      text = "\nOperation failed: " + extra + " does not exist";
+      text = "Operation failed: " + extra + " does not exist.";
       break;
     case Result::ROOM_ALREADY_EXISTS:
-      text = "\nOperation failed: The room " + extra + "already exists";
+      text = "Operation failed: The room " + extra + " already exists.";
       break;
     case Result::NO_SUCH_ROOM:
-      text = "\nOperation failed: The room " + extra + "does not exist";
+      text = "Operation failed: The room " + extra + " does not exist.";
       break;
     case Result::NOT_INVITED:
-      text = "\nOperation failed: You have not yet invited to the room " + extra;
+      text = "Operation failed: You have not yet invited to the room " + extra + ".";
       break;
     case Result::NOT_JOINED:
-      text = "\nOperation failed: You have not yet joined to the room " + extra;
+      text = "Operation failed: You have not yet joined to the room " + extra + ".";
       break;
     case Result::NAME_TOO_LONG:
-      text = "\nOperation failed: The provided name " +extra + " is too long";
+      text = "Operation failed: The provided name " +extra + " is too long.";
       break; 
     }
 
@@ -133,7 +133,7 @@ Message ServerResponseManager::manageServerResponse(Json::Value value){
 }
 
 Message ServerResponseManager::manageServerAdvice(Json::Value value){
-  std::string text;
+  std::string text = "";
   try{
     UserAdvice userad = UserAdviceEnum::getUserAdviceFromString(value["type"].asString());
     switch (userad) {
@@ -143,7 +143,7 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	  throw ServerResponseException(jsonError.c_str());
 	}
 	std::string userName = value["username"].asString();
-	text = "The user " + userName + " has joined the chat.";
+	text = "'" + userName + "' has joined the chat.";
 	break;
       }
     case UserAdvice::NEW_STATUS:
@@ -153,17 +153,28 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	}
 	std::string userName = value["username"].asString();
 	std::string status = value["status"].asString();
-	text = userName + " has changed their status to " + status;
+	text = userName + " has changed their status to " + status + ".";
 	break;
       }
       
     case UserAdvice::USER_LIST:
-      if(!value.isMember("users")){
-	throw ServerResponseException(jsonError.c_str());
+      {
+	if(!value.isMember("users")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	Json::Value users_json = value["users"];
+	if(!users_json.isObject()){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	
+	text = "Users List:\n";
+	for(Json::ValueConstIterator itr = users_json.begin(); itr != users_json.end(); ++itr){
+	  text += "\tName: " + itr.name() + " | Status: " + itr->asString() + ", \n";
+	}
+	message.setServerResponse(text, true);
+	return message;
+	break;
       }
-      
-      break;
-      
     case UserAdvice::TEXT_FROM:
       {
 	if(!value.isMember("username") || !value.isMember("text")){
@@ -187,7 +198,16 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	return message;
 	break;
       }
-      
+    case UserAdvice::INVITATION:
+      {
+	if(!value.isMember("username") || !value.isMember("roomname")){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	std::string userName = value["username"].asString();
+	std::string roomName = value["roomname"].asString();
+	text = userName + " invited you to room '" + roomName + "'.";
+	break;
+      }
     case UserAdvice::JOINED_ROOM:
       {
 	if(!value.isMember("username") || !value.isMember("roomname")){
@@ -195,10 +215,9 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	}
 	std::string userName = value["username"].asString();
 	std::string roomName = value["roomname"].asString();
-	text = userName + " has joined to the room";
+	text = userName + " has joined to the room.";
 	message.setRoomAdvice(text, roomName);
 	return message;
-	break;
       }
       
     case UserAdvice::ROOM_USER_LIST:
@@ -207,7 +226,17 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	  throw ServerResponseException(jsonError.c_str());
 	}
 	std::string roomName = value["roomname"].asString();
-	break;
+	Json::Value users_json = value["users"];
+	if(!users_json.isObject()){
+	  throw ServerResponseException(jsonError.c_str());
+	}
+	
+	text = "Room Users:\n";
+	for(Json::ValueConstIterator itr = users_json.begin(); itr != users_json.end(); ++itr){
+	  text += "\tName: " + itr.name() + " | Status: " + itr->asString() + ", \n";
+	}
+	message.setRoomAdvice(text, roomName);
+	return message;
       }
     case UserAdvice::ROOM_TEXT_FROM:
       {
@@ -217,9 +246,8 @@ Message ServerResponseManager::manageServerAdvice(Json::Value value){
 	std::string userName = value["username"].asString();
 	std::string roomName = value["roomname"].asString();
 	std::string msg = value["text"].asString();
-	message.setRoomMessage(msg, userName, roomName);
+	message.setRoomMessage(msg, roomName, userName);
 	return message;
-	break;
       }
       
     case UserAdvice::LEFT_ROOM:

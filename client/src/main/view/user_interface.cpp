@@ -50,7 +50,7 @@ void UserInterface::manageMessageResult(Message msg){
       Text text = msg.getMessageTextType();
       std::string username = msg.getUserName();
       std::string txt = msg.getText();
-      std::string updated_message = "\n'" + username + "': " + txt;
+      std::string updated_message = "'" + username + "': " + txt;
       switch(text){
       case Text::PUBLIC:
 	pushRoomMessage("General", updated_message);
@@ -58,8 +58,8 @@ void UserInterface::manageMessageResult(Message msg){
 	
       case Text::PRIVATE:
 	{
-	  std::string update_message = "PRIVATE->" + updated_message;
-	  pushRoomMessage("General", updated_message);
+	  std::string private_message = "PRIVATE||" + updated_message;
+	  pushRoomMessage("General", private_message);
 	  break;
 	}
       case Text::ROOM:
@@ -113,12 +113,22 @@ void UserInterface::showMessageOnTerminal(std::string message){
 void UserInterface::addNewRoom(std::string roomName){
   room_messages.insert({roomName, {}}); // Se agrega el cuarto en el mapa.
   chat_options.push_back(roomName); // Se agrega el cuarto en el vector.
+  screen.PostEvent(Event::Custom);
 }
 
 void UserInterface::pushRoomMessage(std::string chatName, std::string message){
-  
-  room_messages[chatName].push_back(message);
+  std::vector<std::string> divided_message;
+  std::stringstream ss(message);
+  std::string line;
 
+  while(std::getline(ss, line, '\n')){
+    divided_message.push_back(line);
+  }
+
+  for(std::string message_line : divided_message){
+    room_messages[chatName].push_back(message_line);
+  }
+  
   while(room_messages[chatName].size() > 70){
     room_messages[chatName].pop_front();
   }
@@ -126,12 +136,8 @@ void UserInterface::pushRoomMessage(std::string chatName, std::string message){
 }
 
 void UserInterface::pushMessageInCurrentRoom(std::string message){
-  room_messages[chat_options[selected_chat]].push_back(message);
-
-  while(room_messages[chat_options[selected_chat]].size() > 70){
-    room_messages[chat_options[selected_chat]].pop_front();
-  }
-  screen.PostEvent(Event::Custom);
+  std::string room_name = chat_options[selected_chat];
+  pushRoomMessage(room_name, message);
 }
 
 void UserInterface::eraseRoom(std::string roomName){
@@ -149,6 +155,7 @@ void UserInterface::eraseRoom(std::string roomName){
   }
 
   chat_options.erase(chat_options.begin() + i);
+  screen.PostEvent(Event::Custom);
 }
 
 void UserInterface::pushMessageToAllRooms(std::string message){
@@ -213,18 +220,25 @@ void UserInterface::startMainLoop(){
     return interrupt_input_loop;
   });
   
-  int left_size = 20;
+  int left_size = 15;
   int bottom_size = 4;
   
   auto input_catch = CatchEvent(input_user_component, [&] (Event event) {
-    if(event == Event::Return){ // Enter
-      if(!user_input_aux.empty()){
-	std::string user_input_aux_2 = "'YOU': " + user_input_aux;
-	room_messages[chat_options[selected_chat]].push_back(user_input_aux_2);
-	onUserInputEvent(user_input_aux);
-	user_input_aux.clear();
-	return true;
+    if(event == Event::Return){
+      // Se limpian los espacios para revisar si la cadena es vacía.
+      std::string trimmed = user_input_aux;
+      trimmed.erase(std::remove_if(trimmed.begin(), trimmed.end(),
+          [](unsigned char c){ return std::isspace(c); }), trimmed.end());
+      
+      if(!trimmed.empty()){
+        std::string user_input_aux_2 = "'YOU': " + user_input_aux;
+        room_messages[chat_options[selected_chat]].push_back(user_input_aux_2);
+        onUserInputEvent(user_input_aux);
+        user_input_aux.clear();
+        return true;
       }
+      user_input_aux.clear();
+      return true; // Se limpia el buffer.
     }
     return false;
   });
@@ -237,15 +251,18 @@ void UserInterface::startMainLoop(){
   });
   
   // Se construye la pantalla de mensajes.
+  Box messages_box; 
+  
   auto message_render = Renderer([&] {
     std::vector<Element> lines;
     const std::string& current_room = chat_options[selected_chat];
+    
     for (const auto& msg : room_messages[current_room]) {
-      lines.push_back(paragraph(msg));
+      lines.push_back(paragraph(msg)); 
     }
     return vbox(std::move(lines));
   });
-
+  
   auto message_display = Scroller(message_render);
   
   // Se construye la interfaz.
@@ -253,7 +270,7 @@ void UserInterface::startMainLoop(){
   // Split izquierdo vs derecho
   auto root = ResizableSplitLeft(left_menu, right_split, &left_size);
   auto renderer = Renderer(root, [&] {return root->Render() | border;});
-
+  
   screen.Loop(renderer);
 }
 

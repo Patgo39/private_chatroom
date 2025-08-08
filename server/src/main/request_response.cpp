@@ -3,6 +3,7 @@
 RequestResponse::RequestResponse(){
   keepConection = true;
   userResponse = "";
+  messageVector.push_back({"", {}, Message::MessageType::NONE});
 }
 
 /**

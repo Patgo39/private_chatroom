@@ -5,11 +5,13 @@
 #include <string>
 #include <list>
 #include <map>
+#include <vector>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
 #include <chrono>
 #include <csignal>
+#include <sstream>
 #include "ftxui/component/captured_mouse.hpp"
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/component_base.hpp"
@@ -17,7 +19,7 @@
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
 #include <ftxui/component/captured_mouse.hpp>
-#include "ftxui/dom/elements.hpp"
+#include "ftxui/dom/flexbox_config.hpp" 
 #include "scroller.h"
 #include "../message.h"
 #include "../user_input.h"

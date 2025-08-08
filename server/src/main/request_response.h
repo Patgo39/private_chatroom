@@ -11,8 +11,9 @@ struct Message{
 
   // Enumeración para el tipo de mensaje que puede haber.
   enum class MessageType{
-    GENERAL = 1, // Se envia a todos los usuarios menos el emisor.
-    SPECIFIC = 2, // Uso tanto para mensajes privados como mensajes a usuarios de algun cuarto
+    GENERAL, // Se envia a todos los usuarios menos el emisor.
+    SPECIFIC, // Uso tanto para mensajes privados como mensajes a usuarios de algun cuarto
+    NONE
   };
   
   // Mensaje para los usuarios.

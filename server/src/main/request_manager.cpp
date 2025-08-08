@@ -106,7 +106,7 @@ RequestResponse RequestManager::getResponse(Client &requester, std::string reque
  * clientes.
  */
 RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, ServerData data){
-
+  
   // Si no se encuentra la llave username en el json se manda al usuario un mensaje de error.
   if(!value.isMember("username")){
     return getInvalidRequestResponse(data);
@@ -116,6 +116,10 @@ RequestResponse RequestManager::manageIdentifyRequest(Json::Value value, ServerD
   username = trim(username);
   RequestResponse response = RequestResponse();
 
+  if(data.requester.isIdentified()){
+    return response;
+  }
+  
   if(username.length() > 8){
     response.setUserResponse(jsonController.getUsernameMaxCharResponse(username));
     response.stopConection();
@@ -331,6 +335,10 @@ RequestResponse RequestManager::manageInviteRequest(Json::Value value, ServerDat
   roomName = trim(roomName);
   // Se obtiene la lista de usuarios.
   Json::Value array = value["usernames"];
+  if(!array.isArray()){
+    return getInvalidRequestResponse(data);
+  }
+  
   std::vector<int> invitedSockets; 
 
   // Si no existe el cuarto se le notifica al usuario

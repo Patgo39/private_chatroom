@@ -150,10 +150,10 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
 	  int socket = pair.first;
 	  Client c = pair.second;
 	  
-	// No se envia el mensaje al cliente que emitió la petición.
+	  // No se envia el mensaje al cliente que emitió la petición.
 	  if(socket == requesterSocket || !c.isIdentified()){
 	    continue;
-	}
+	  }
 	  sendMessageToClient(socket, messageAdvice.message);
 	}
 	std::cout<<"General Message: "<<messageAdvice.message<<std::endl;
