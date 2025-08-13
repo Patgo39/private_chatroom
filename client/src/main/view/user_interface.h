@@ -17,9 +17,9 @@
 #include "ftxui/component/component_base.hpp"
 #include "ftxui/component/component_options.hpp"
 #include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/dom/elements.hpp"
 #include <ftxui/component/captured_mouse.hpp>
-#include "ftxui/dom/flexbox_config.hpp" 
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/flexbox_config.hpp>
 #include "scroller.h"
 #include "../message.h"
 #include "../user_input.h"

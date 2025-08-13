@@ -107,12 +107,12 @@ void Server::manageClient(int clientSocket){
 
     mtx.lock();
     RequestResponse response = manager.getResponse(socketsMap.at(clientSocket), message, socketsMap, roomMap);
-    mtx.unlock();
 
     // Se actualiza el estado de la conexión; si debe continuar o no.
     keepConection = response.getKeepConection();
 
     manageClientRequest(socketsMap.at(clientSocket), response);
+    mtx.unlock();
     
     //Se eliminan los datos del buffer y data.
     buffer[0] = '\0';
@@ -176,6 +176,7 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
     default:
       std::cout<<"Message Type Format is invalid"<<std::endl;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
   }
 }
 

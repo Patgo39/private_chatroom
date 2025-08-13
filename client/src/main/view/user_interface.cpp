@@ -201,6 +201,7 @@ void UserInterface::onForceFinishEvent(){
 }
 
 void UserInterface::startMainLoop(){
+  
   exit_loop = screen.ExitLoopClosure();
   
   // Se construye la lista de chats.
@@ -217,6 +218,10 @@ void UserInterface::startMainLoop(){
   std::string user_input_aux;
   Component input_user_component = Input(&user_input_aux, "Type your message...");
   input_user_component |= CatchEvent([&] (Event event){
+    if(event == Event::CtrlC || event == Event::CtrlZ){
+  
+      return true;
+    }
     return interrupt_input_loop;
   });
   
@@ -270,7 +275,9 @@ void UserInterface::startMainLoop(){
   // Split izquierdo vs derecho
   auto root = ResizableSplitLeft(left_menu, right_split, &left_size);
   auto renderer = Renderer(root, [&] {return root->Render() | border;});
-  
+
+  screen.ForceHandleCtrlC(false);
+  screen.ForceHandleCtrlZ(false);
   screen.Loop(renderer);
 }
 

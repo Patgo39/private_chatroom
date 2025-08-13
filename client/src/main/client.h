@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -17,6 +20,11 @@ class Client{
   int bufferSize;
   std::string ipAddress;
   int clientSocket;
+  bool stop_listening; // Variable booleana que indica si se escucha al servidor.
+  std::string buffer_string;
+  std::condition_variable cv;
+  std::mutex mtx;
+  std::thread listening_thread;
   
  public:
   
@@ -25,6 +33,9 @@ class Client{
   void sendMessage(std::string);
   std::string receiveMessages();
   void closeConnection();
+
+private:
+  void onServerMessageEvent();
 };
 
 #endif

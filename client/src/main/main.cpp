@@ -1,9 +1,9 @@
 #include <iostream>
 #include <thread>
-#include <chrono>
 #include <atomic>
 #include <memory>
 #include <csignal>
+#include <termios.h>
 #include "client.h"
 #include "command_manager.h"
 #include "./view/user_interface.h"
@@ -18,10 +18,10 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
   while(continue_thread){
     
     std::string text = c.receiveMessages();
-    
-    if(text == ""){
+    if(text.empty()){
       continue;
     }
+    
     try{
       Message msg = serverManager.getMessageFromResponse(text);
       tui.manageMessageResult(msg);
@@ -34,9 +34,10 @@ void manageReceivedMessages(UserInterface &tui, Client &c){
 }
 
 void manageCommand(Client &c, UserInterface &tui, UserInput input){
+  if(!continue_thread)
+      return;
   
   CommandManager cm = CommandManager();
-  
   try{
     CommandResult cmdRes = cm.getJsonFromCommand(input);
     if(cmdRes.ownMessage)
@@ -59,6 +60,7 @@ void manageCommand(Client &c, UserInterface &tui, UserInput input){
 }
 
 int main(){
+  
   const int maxSizeBuffer = 1024;
   UserInterface tui = UserInterface(maxSizeBuffer);
   int port;
@@ -69,6 +71,12 @@ int main(){
     exit(1);
   }
   std::string ip = tui.askAndGetIp();
+
+  // Ignora la señal CTRL + C
+  std::signal(SIGINT, SIG_IGN);
+  // Ignora la señal CTRL + Z
+  std::signal(SIGTSTP, SIG_IGN);
+  
   Client c = Client(port, maxSizeBuffer, ip);
   
   try{
@@ -78,19 +86,18 @@ int main(){
   }catch(ClientConnectionException &e){
     std::string error = e.what();
     tui.showMessageOnTerminal(error);
+    exit(1);
   }
-
+  
   std::thread textual_user_interface(&UserInterface::startMainLoop, &tui);
   //Se escuchan e imprimen los mensajes recibidos.
   std::thread thread_show_messages(manageReceivedMessages, std::ref(tui), std::ref(c));
-  
+
   // Ciclo que mantiene la conexión con el servidor
   while(continue_thread){
     
     //Se obtienen los mensajes del ususario.
     UserInput input = tui.getUserInput();
-    if(!continue_thread)
-      break;
     manageCommand(c, tui, input);
   }
   
@@ -102,4 +109,3 @@ int main(){
   return 0;
   
 }
-
