@@ -107,12 +107,12 @@ void Server::manageClient(int clientSocket){
 
     mtx.lock();
     RequestResponse response = manager.getResponse(socketsMap.at(clientSocket), message, socketsMap, roomMap);
-    mtx.unlock();
 
     // Se actualiza el estado de la conexión; si debe continuar o no.
     keepConection = response.getKeepConection();
 
     manageClientRequest(socketsMap.at(clientSocket), response);
+    mtx.unlock();
     
     //Se eliminan los datos del buffer y data.
     buffer[0] = '\0';
@@ -150,13 +150,13 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
 	  int socket = pair.first;
 	  Client c = pair.second;
 	  
-	// No se envia el mensaje al cliente que emitió la petición.
+	  // No se envia el mensaje al cliente que emitió la petición.
 	  if(socket == requesterSocket || !c.isIdentified()){
 	    continue;
-	}
+	  }
 	  sendMessageToClient(socket, messageAdvice.message);
-	  std::cout<<"General Message: "<<messageAdvice.message<<std::endl;
 	}
+	std::cout<<"General Message: "<<messageAdvice.message<<std::endl;
     }
       break;
       
@@ -164,14 +164,19 @@ void Server:: manageClientRequest(Client client, RequestResponse response){
       {
 	std::vector<int> targets = messageAdvice.targetSockets; // Se obtiene el vector de los clientes a mandar el mensaje.
 	for(int sock : targets){
+	  if(sock == requesterSocket){
+	    continue;
+	  }
 	  sendMessageToClient(sock, messageAdvice.message); 
 	}
+	std::cout<<"SPECIFIC: "<<messageAdvice.message<<std::endl;
       }
       break;
-      
+    case Message::MessageType::NONE: break;
     default:
       std::cout<<"Message Type Format is invalid"<<std::endl;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
   }
 }
 

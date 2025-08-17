@@ -6,6 +6,7 @@ UserAdvice UserAdviceEnum::getUserAdviceFromString(std::string userAdvice){
   if (userAdvice == "USER_LIST")        return UserAdvice::USER_LIST;
   if (userAdvice == "TEXT_FROM")        return UserAdvice::TEXT_FROM;
   if (userAdvice == "PUBLIC_TEXT_FROM") return UserAdvice::PUBLIC_TEXT_FROM;
+  if (userAdvice == "INVITATION")       return UserAdvice::INVITATION;
   if (userAdvice == "JOINED_ROOM")      return UserAdvice::JOINED_ROOM;
   if (userAdvice == "ROOM_USER_LIST")   return UserAdvice::ROOM_USER_LIST;
   if (userAdvice == "ROOM_TEXT_FROM")   return UserAdvice::ROOM_TEXT_FROM;

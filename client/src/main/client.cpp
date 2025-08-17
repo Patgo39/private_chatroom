@@ -5,6 +5,8 @@ Client::Client(int _port, int _bufferSize, std::string _ipAddress){
   bufferSize = _bufferSize;
   ipAddress = _ipAddress;
   clientSocket = 0;
+  buffer_string = "";
+  stop_listening = false;
 }
 
 void Client::start(){
@@ -25,6 +27,8 @@ void Client::start(){
     if (connect(clientSocket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         throw ClientConnectionException("Connection Failed");
     }
+
+    listening_thread = std::thread(&Client::onServerMessageEvent, this);
 }
 
 void Client::sendMessage(std::string message){
@@ -32,11 +36,43 @@ void Client::sendMessage(std::string message){
 }
 
 std::string Client::receiveMessages(){
+  std::unique_lock<std::mutex> lock(mtx);
+  cv.wait(lock, [this] {return stop_listening || !buffer_string.empty();});
+
+  if(stop_listening)
+    return "";
+
+  std::string aux_string = buffer_string;
+  buffer_string.clear();
+  return aux_string;
+}
+
+void Client::onServerMessageEvent(){
   char buffer[bufferSize] = {0};
-  recv(clientSocket, buffer, bufferSize, 0);
-  return buffer;
+  while(!stop_listening){
+    ssize_t bytes_received = recv(clientSocket, buffer, bufferSize, 0);
+    if(bytes_received > 0){
+      buffer[bytes_received] = '\0';
+      {
+	std::lock_guard<std::mutex> lock(mtx);
+	buffer_string = buffer;
+      }
+      cv.notify_one();
+    }else{
+      continue;
+    }
+  }
 }
 
 void Client::closeConnection(){
+  {
+    std::lock_guard<std::mutex> lock(mtx);
+    stop_listening = true;
+  }
+  shutdown(clientSocket, SHUT_RDWR);
   close(clientSocket);
+  cv.notify_all();
+  if(listening_thread.joinable()) {
+    listening_thread.join();
+  }
 }

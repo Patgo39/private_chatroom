@@ -1,5 +1,5 @@
 #include "scroller.h"
-
+#include "ftxui/dom/canvas.hpp"
 #include <algorithm>                           // for max, min
 #include <ftxui/component/component_base.hpp>  // for Component, ComponentBase
 #include <ftxui/component/event.hpp>  // for Event, Event::ArrowDown, Event::ArrowUp, Event::End, Event::Home, Event::PageDown, Event::PageUp
@@ -24,18 +24,24 @@ class ScrollerBase : public ComponentBase {
   Element OnRender() final {
     auto focused = Focused() ? focus : ftxui::select;
     auto style = Focused() ? inverted : nothing;
-
+    
     Element background = ComponentBase::Render();
     background->ComputeRequirement();
+    int old_size = size_;
     size_ = background->requirement().min_y;
+    
+    if(size_ > old_size){
+      selected_ = size_;
+    }
+    
     return dbox({
-               std::move(background),
-               vbox({
-                   text(L"") | size(HEIGHT, EQUAL, selected_),
-                   text(L"") | style | focused,
-               }),
-           }) |
-           vscroll_indicator | yframe | yflex | reflect(box_);
+	std::move(background),
+	vbox({
+	    text(L"") | size(HEIGHT, EQUAL, selected_),
+	    text(L"") | style | focused,
+	  }),
+      }) |
+      vscroll_indicator | yframe | yflex | reflect(box_);
   }
 
   bool OnEvent(Event event) final {

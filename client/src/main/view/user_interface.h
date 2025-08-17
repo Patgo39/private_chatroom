@@ -5,17 +5,21 @@
 #include <string>
 #include <list>
 #include <map>
+#include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
+#include <chrono>
 #include <csignal>
+#include <sstream>
 #include "ftxui/component/captured_mouse.hpp"
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/component_base.hpp"
 #include "ftxui/component/component_options.hpp"
 #include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/dom/elements.hpp"
 #include <ftxui/component/captured_mouse.hpp>
-#include "ftxui/dom/elements.hpp"
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/flexbox_config.hpp>
 #include "scroller.h"
 #include "../message.h"
 #include "../user_input.h"
@@ -33,6 +37,7 @@ class UserInterface{
   std::map<std::string, std::list<std::string>> room_messages;
   std::mutex mtx;
   std::condition_variable cv;
+  bool interrupt_input_loop;
 public:
   UserInterface(int _bufferSize);
   std::string askAndGetPort();
@@ -49,6 +54,7 @@ private:
   void addNewRoom(std::string roomName);
   void pushRoomMessage(std::string chatName, std::string message);
   void onUserInputEvent(std::string input);
+  void onForceFinishEvent();
   void pushMessageToAllRooms(std::string message);
 };
 
