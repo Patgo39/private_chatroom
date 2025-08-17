@@ -1,20 +1,10 @@
 project('chatroom', 'cpp', version : '1.5.1',
 		    default_options : ['cpp_std=c++23'])
 
-incdir = include_directories('src/main')
+incdir = include_directories('src/chatroom/main')
 
 class_files = [
-      	'src/main/main.cpp',
-	'./src/main/server.cpp',
-	'./src/main/client.cpp',
-	'./src/main/user_status.cpp',
-	'./src/main/request_manager.cpp',
-	'./src/main/room.cpp',
-	'./src/main/request_response.cpp',
-	'./src/main/json_controller.cpp',
-	'./src/main/operation.cpp',
-	'./src/main/room_exception.cpp',
-	'./src/main/invalid_operation_exception.cpp']
+      	'src/chatroom/main/main.cpp']
 
 #Dependencies:
 #Jsoncpp
